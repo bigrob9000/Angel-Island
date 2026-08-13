@@ -1,0 +1,468 @@
+@import "tailwindcss";
+
+:root {
+  --background: #faf8f5;
+  /* Heaven-like: luminous top, soft sky, warm cream below */
+  --background-ethereal: linear-gradient(
+    180deg,
+    #e8f0fc 0%,
+    #dce8f4 12%,
+    #d4e2f0 24%,
+    #e8e6f0 40%,
+    #f0ebe8 58%,
+    #f5f0ea 75%,
+    #f8f4ef 90%,
+    #faf6f2 100%
+  );
+  --foreground: #2a2a2a;
+  --muted: #5c5c5c;
+  --accent: #5f7a6b;
+  --accent-soft: #8fa89a;
+  /* Brighter, warmer clouds — lit from above */
+  --cloud: rgba(255, 254, 252, 0.95);
+  --cloud-shadow: rgba(220, 225, 235, 0.2);
+  --cloud-glow: rgba(255, 248, 240, 0.15);
+  /* Logo badge — matches recolored asset mat + sage ring */
+  --logo-mat: #ebe4da;
+  --logo-ring: rgba(95, 122, 107, 0.45);
+  --logo-glow: rgba(212, 226, 240, 0.4);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-lora);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.font-serif {
+  font-family: var(--font-lora), Georgia, serif;
+}
+
+/* Angel Island brand name — distinctive display serif */
+.brand-font {
+  font-family: var(--font-brand), var(--font-lora), Georgia, serif;
+}
+
+/* Angel Island logo — badge artwork */
+.logo {
+  transition: opacity 0.2s ease;
+}
+.logo-image-link:hover {
+  opacity: 0.92;
+}
+.logo-static {
+  cursor: default;
+}
+.logo-image-link {
+  line-height: 0;
+}
+
+.logo-with-wordmark {
+  text-decoration: none;
+  color: var(--foreground);
+}
+
+.logo-wordmark {
+  font-family: var(--font-brand), var(--font-lora), Georgia, serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: var(--foreground);
+}
+
+@media (min-width: 640px) {
+  .logo-wordmark {
+    font-size: 1.25rem;
+  }
+}
+
+/* Ink-on-mat logo — sage ring for extra definition on sky backgrounds */
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  box-shadow:
+    0 0 0 1px var(--logo-ring),
+    0 4px 16px var(--logo-glow);
+}
+
+.logo-badge-nav {
+  box-shadow:
+    0 0 0 1px var(--logo-ring),
+    0 2px 8px rgba(212, 226, 240, 0.35);
+}
+
+.logo-badge-hero {
+  box-shadow:
+    0 0 0 1px var(--logo-ring),
+    0 0 0 4px rgba(250, 248, 245, 0.75),
+    0 6px 22px rgba(212, 226, 240, 0.5),
+    0 2px 8px rgba(95, 122, 107, 0.1);
+}
+
+.logo-badge-image {
+  position: relative;
+  display: block;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+/* Ethereal landing background */
+.bg-ethereal {
+  background: var(--background-ethereal);
+}
+
+/* Soft "light from above" — heaven glow at top of viewport */
+.heaven-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 120% 80% at 50% -20%,
+    rgba(255, 252, 248, 0.5) 0%,
+    rgba(255, 250, 242, 0.2) 35%,
+    transparent 65%
+  );
+  z-index: 1;
+}
+
+/* Cloud drift animation — slow, calm (disabled when user prefers reduced motion) */
+@keyframes cloud-drift-right {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(100vw);
+  }
+}
+
+@keyframes cloud-drift-left {
+  0% {
+    transform: translateX(100vw);
+  }
+  100% {
+    transform: translateX(-120%);
+  }
+}
+
+.cloud-drift-right {
+  animation: cloud-drift-right linear infinite;
+}
+
+.cloud-drift-left {
+  animation: cloud-drift-left linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cloud-drift-right,
+  .cloud-drift-left {
+    animation: none;
+  }
+}
+
+/* Realistic clouds — lumpy, irregular (multiple overlapping blobs) */
+.cloud-group {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Soft, puffy clouds — rounded blobs, heavy blur; subtle top glow for heaven feel */
+.cloud-blob {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--cloud);
+  box-shadow:
+    0 -2px 16px var(--cloud-glow),
+    0 2px 12px var(--cloud-shadow);
+  filter: blur(8px);
+}
+
+/* Button: actual cloud shape (multiple overlapping blobs like sky clouds) */
+.btn-cloud {
+  position: relative;
+  display: inline-block;
+  width: 220px;
+  height: 72px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.btn-cloud:hover {
+  transform: translateY(-2px);
+}
+
+.btn-cloud-blob {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--cloud);
+  box-shadow:
+    0 -2px 12px var(--cloud-glow),
+    0 3px 16px var(--cloud-shadow);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.btn-cloud-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  font-family: var(--font-brand), var(--font-lora), Georgia, serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  pointer-events: none;
+}
+
+/* Rooms: cloud grid — explicit height so % positions work */
+.rooms-web {
+  position: relative;
+  width: 100%;
+  height: 85vh;
+  min-height: 400px;
+}
+
+/* Each cloud is a fixed-size link centered at (left%, top%) */
+.room-cloud {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 260px;
+  height: 160px;
+  margin-left: -130px;
+  margin-top: -80px;
+  padding: 0;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.room-cloud:hover {
+  transform: scale(1.05);
+}
+
+/* Cloud shape: blob layer only */
+.room-cloud-shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 260px;
+  height: 160px;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.06)) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.04));
+}
+
+.room-cloud-blob {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--cloud);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 -2px 14px var(--cloud-glow),
+    0 2px 12px rgba(180, 185, 200, 0.35),
+    0 4px 20px rgba(160, 168, 190, 0.2);
+  filter: blur(5px);
+}
+
+/* Label wrapper: fills cloud so 50% = cloud center */
+.room-cloud-label {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+/* Span: centered, then nudged up and left to align with cloud */
+.room-cloud-label span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(calc(-50% - 18px), calc(-50% - 24px));
+  max-width: 100%;
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--foreground);
+  text-align: center;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+  text-shadow:
+    0 1px 2px rgba(255, 255, 255, 0.9),
+    0 1px 4px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Add button: below cloud */
+.room-cloud-add {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid rgba(42, 42, 42, 0.25);
+  border-radius: 9999px;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.room-cloud-add:hover:not(:disabled) {
+  color: var(--foreground);
+  border-color: rgba(42, 42, 42, 0.5);
+}
+
+.room-cloud-add:disabled {
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-cloud:hover {
+    transform: none;
+  }
+}
+
+/* Room entry — subtle fade when motion is allowed */
+@keyframes room-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.room-enter {
+  animation: room-enter 0.45s ease-out;
+}
+
+/* Calm Mode — softer palette, more whitespace, less visual noise */
+html.calm-mode {
+  --background: #f3f1ee;
+  --background-ethereal: linear-gradient(
+    180deg,
+    #eceff2 0%,
+    #e6eaee 20%,
+    #ebe8e6 50%,
+    #f0eeeb 80%,
+    #f3f1ee 100%
+  );
+  --foreground: #4a4a4a;
+  --muted: #6f6f6f;
+  --accent: #6b8578;
+  --accent-soft: #95a89c;
+  --cloud-shadow: rgba(220, 225, 235, 0.1);
+  --cloud-glow: rgba(255, 248, 240, 0.08);
+  --logo-glow: transparent;
+  --logo-ring: rgba(95, 122, 107, 0.25);
+}
+
+html.calm-mode body {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+html.calm-mode.easier-reading body,
+html.calm-mode.easier-reading .font-serif,
+html.calm-mode.easier-reading .brand-font {
+  font-family: Verdana, "Segoe UI", Arial, sans-serif;
+}
+
+html.calm-mode .heaven-glow,
+html.calm-mode .logo-badge,
+html.calm-mode .logo-badge-nav,
+html.calm-mode .logo-badge-hero {
+  box-shadow: none;
+}
+
+html.calm-mode .cloud-blob,
+html.calm-mode .room-cloud-blob,
+html.calm-mode .btn-cloud-blob {
+  filter: none;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+html.calm-mode .room-cloud-shape {
+  filter: none;
+}
+
+html.calm-mode .logo,
+html.calm-mode .btn-cloud,
+html.calm-mode .room-cloud,
+html.calm-mode .room-cloud-add {
+  transition: none;
+}
+
+html.calm-mode .logo-image-link:hover {
+  opacity: 1;
+}
+
+html.calm-mode .btn-cloud:hover,
+html.calm-mode .room-cloud:hover {
+  transform: none;
+}
+
+/* Reduce motion — calm mode, user setting, or OS preference */
+html.reduce-motion .cloud-drift-right,
+html.reduce-motion .cloud-drift-left {
+  animation: none;
+}
+
+html.reduce-motion .btn-cloud:hover,
+html.reduce-motion .room-cloud:hover {
+  transform: none;
+}
+
+html.reduce-motion .logo,
+html.reduce-motion .btn-cloud,
+html.reduce-motion .room-cloud,
+html.reduce-motion .room-cloud-add {
+  transition: none;
+}
+
+html.reduce-motion .room-enter {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cloud-drift-right,
+  .cloud-drift-left {
+    animation: none;
+  }
+
+  .btn-cloud:hover {
+    transform: none;
+  }
+
+  .room-enter {
+    animation: none;
+  }
+}
