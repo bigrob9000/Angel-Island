@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import type { Room, Post, Profile, PostIntent } from "@/lib/types";
 import { POST_INTENT_LABELS } from "@/lib/types";
@@ -21,6 +21,12 @@ import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { loadCommentsForPosts, type PostCommentWithAuthor } from "@/lib/post-comments";
 import { loadPostLoveState } from "@/lib/post-loves";
 import { loadBlockedUserIds } from "@/lib/blocks";
+import { RoomSearch } from "@/components/RoomSearch";
+import {
+  groupRoomSearchResults,
+  searchRoomPosts,
+  type RoomSearchGroup,
+} from "@/lib/room-search";
 
 const inputClass =
   "mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none";
@@ -68,9 +74,30 @@ export default function RoomPage() {
   const [loveCountByPost, setLoveCountByPost] = useState<Record<string, number>>({});
   const [lovesTableMissing, setLovesTableMissing] = useState(false);
   const [blockedUserIds, setBlockedUserIds] = useState<Set<string>>(new Set());
+  const [roomSearchQuery, setRoomSearchQuery] = useState("");
   const { motionReduced } = usePreferences();
 
   const myIntroPost = userId ? posts.find((p) => p.author_id === userId) : undefined;
+
+  const isSearching = roomSearchQuery.trim().length > 0;
+
+  const displayedPosts = useMemo(
+    () => searchRoomPosts(posts, profiles, roomSearchQuery, isIntroductions),
+    [posts, profiles, roomSearchQuery, isIntroductions]
+  );
+
+  const searchGroups = useMemo(
+    () =>
+      groupRoomSearchResults(displayedPosts, {
+        isIntroductions,
+        isListen,
+      }),
+    [displayedPosts, isIntroductions, isListen]
+  );
+
+  const postSections: RoomSearchGroup[] = isSearching
+    ? searchGroups
+    : [{ title: "", posts: displayedPosts }];
 
   useEffect(() => {
     if (isIntroductions || !composeFromUrl) return;
@@ -308,6 +335,77 @@ export default function RoomPage() {
     return POST_INTENT_LABELS[post.intent];
   }
 
+  function renderPost(post: Post) {
+    const author = profiles[post.author_id];
+    const isOwn = post.author_id === userId;
+    const time = new Date(post.created_at).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+
+    return (
+      <li id={`post-${post.id}`} key={post.id} className="rounded-lg border border-foreground/10 bg-white/40 p-4 scroll-mt-24">
+        <div className="flex flex-wrap items-baseline gap-2 text-xs text-muted">
+          <span className="rounded bg-foreground/10 px-1.5 py-0.5 font-medium text-foreground">
+            {postIntentLabel(post)}
+          </span>
+          <ProfileAttribution profile={author} />
+          <span>{time}</span>
+        </div>
+        {!isIntroductions && post.title && (
+          <p className="mt-2 font-medium text-foreground">{post.title}</p>
+        )}
+        {post.media_url && <MediaEmbed url={post.media_url} />}
+        {post.body && (
+          <p className="mt-2 text-muted whitespace-pre-wrap leading-relaxed">{post.body}</p>
+        )}
+        {isIntroductions && isOwn && (
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => startEditIntro(post)}
+              className="text-sm text-foreground underline hover:no-underline"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDeleteIntro(post.id)}
+              disabled={deletingId === post.id}
+              className="text-sm text-muted hover:text-foreground disabled:opacity-50"
+            >
+              {deletingId === post.id ? "Deleting…" : "Delete"}
+            </button>
+          </div>
+        )}
+        <PostLoveButton
+          postId={post.id}
+          postAuthorId={post.author_id}
+          userId={userId}
+          isOwn={isOwn}
+          loved={lovedPostIds.has(post.id)}
+          loveCount={loveCountByPost[post.id] ?? 0}
+          interactionBlocked={blockedUserIds.has(post.author_id)}
+          tableMissing={lovesTableMissing}
+          onLovedChange={handleLoveChange}
+        />
+        <PostCommentSection
+          postId={post.id}
+          postAuthorId={post.author_id}
+          userId={userId}
+          comments={commentsByPost[post.id] ?? []}
+          tableMissing={commentsTableMissing}
+          variant={isIntroductions ? "introductions" : "room"}
+          onCommentsChange={(postId, comments) =>
+            setCommentsByPost((prev) => ({ ...prev, [postId]: comments }))
+          }
+        />
+      </li>
+    );
+  }
+
   return (
     <div className={`space-y-8 ${motionReduced ? "" : "room-enter"}`}>
       <div>
@@ -323,6 +421,10 @@ export default function RoomPage() {
 
       {isIntroductions && <IntroductionsPinned />}
       {isListen && <ListenPinned />}
+
+      {posts.length > 0 && (
+        <RoomSearch value={roomSearchQuery} onChange={setRoomSearchQuery} />
+      )}
 
       {!showCompose ? (
         <div className="space-y-2">
@@ -496,7 +598,13 @@ export default function RoomPage() {
 
       <section>
         <h2 className="font-serif text-lg font-medium text-foreground">
-          {isIntroductions ? "Introductions" : isListen ? "Shared work" : "Posts"}
+          {isSearching
+            ? "Results"
+            : isIntroductions
+              ? "Introductions"
+              : isListen
+                ? "Shared work"
+                : "Posts"}
         </h2>
         {posts.length === 0 ? (
           <p className="mt-4 text-sm text-muted">
@@ -506,78 +614,22 @@ export default function RoomPage() {
                 ? "Nothing shared yet. You're welcome to listen first — posting is optional."
                 : "No posts yet. Start a conversation, ask a question, or invite collaborators."}
           </p>
+        ) : isSearching && displayedPosts.length === 0 ? (
+          <div className="mt-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-8 text-center text-sm text-muted">
+            <p>Nothing like that turned up in this room.</p>
+            <p className="mt-2">Try a different word — or clear the search to browse everything.</p>
+          </div>
         ) : (
-          <ul className="mt-4 space-y-6">
-            {posts.map((post) => {
-              const author = profiles[post.author_id];
-              const isOwn = post.author_id === userId;
-              const time = new Date(post.created_at).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              });
-              return (
-                <li id={`post-${post.id}`} key={post.id} className="rounded-lg border border-foreground/10 bg-white/40 p-4 scroll-mt-24">
-                  <div className="flex flex-wrap items-baseline gap-2 text-xs text-muted">
-                    <span className="rounded bg-foreground/10 px-1.5 py-0.5 font-medium text-foreground">
-                      {postIntentLabel(post)}
-                    </span>
-                    <ProfileAttribution profile={author} />
-                    <span>{time}</span>
-                  </div>
-                  {!isIntroductions && post.title && (
-                    <p className="mt-2 font-medium text-foreground">{post.title}</p>
-                  )}
-                  {post.media_url && <MediaEmbed url={post.media_url} />}
-                  {post.body && (
-                    <p className="mt-2 text-muted whitespace-pre-wrap leading-relaxed">{post.body}</p>
-                  )}
-                  {isIntroductions && isOwn && (
-                    <div className="mt-4 flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={() => startEditIntro(post)}
-                        className="text-sm text-foreground underline hover:no-underline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteIntro(post.id)}
-                        disabled={deletingId === post.id}
-                        className="text-sm text-muted hover:text-foreground disabled:opacity-50"
-                      >
-                        {deletingId === post.id ? "Deleting…" : "Delete"}
-                      </button>
-                    </div>
-                  )}
-                  <PostLoveButton
-                    postId={post.id}
-                    postAuthorId={post.author_id}
-                    userId={userId}
-                    isOwn={isOwn}
-                    loved={lovedPostIds.has(post.id)}
-                    loveCount={loveCountByPost[post.id] ?? 0}
-                    interactionBlocked={blockedUserIds.has(post.author_id)}
-                    tableMissing={lovesTableMissing}
-                    onLovedChange={handleLoveChange}
-                  />
-                  <PostCommentSection
-                    postId={post.id}
-                    postAuthorId={post.author_id}
-                    userId={userId}
-                    comments={commentsByPost[post.id] ?? []}
-                    tableMissing={commentsTableMissing}
-                    variant={isIntroductions ? "introductions" : "room"}
-                    onCommentsChange={(postId, comments) =>
-                      setCommentsByPost((prev) => ({ ...prev, [postId]: comments }))
-                    }
-                  />
-                </li>
-              );
-            })}
-          </ul>
+          <div className="mt-4 space-y-8">
+            {postSections.map((section) => (
+              <div key={section.title || "all"}>
+                {isSearching && section.title && (
+                  <h3 className="mb-3 text-sm font-medium text-foreground">{section.title}</h3>
+                )}
+                <ul className="space-y-6">{section.posts.map((post) => renderPost(post))}</ul>
+              </div>
+            ))}
+          </div>
         )}
       </section>
     </div>
