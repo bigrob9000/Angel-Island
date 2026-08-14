@@ -10,6 +10,7 @@ import { usePreferences } from "@/components/PreferencesProvider";
 import { isMessagingEnabled } from "@/lib/conversations";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
+import { subscribeToConversation, unsubscribeFromConversation } from "@/lib/message-realtime";
 
 type ModalKind = "pause" | "end" | null;
 
@@ -111,6 +112,27 @@ export default function ConversationPage() {
       ).finally(() => setLoading(false));
     });
   }, [inviteId, router]);
+
+  useEffect(() => {
+    if (!inviteId || !userId) return;
+
+    const channel = subscribeToConversation(inviteId, {
+      onMessage: (message) => {
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === message.id)) return prev;
+          return [...prev, message];
+        });
+      },
+      onInviteUpdate: (row) => {
+        const updated = normalizeInvite(row);
+        setInvite((prev) => (prev ? { ...prev, ...updated } : prev));
+      },
+    });
+
+    return () => {
+      void unsubscribeFromConversation(channel);
+    };
+  }, [inviteId, userId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({

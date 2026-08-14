@@ -139,6 +139,19 @@ Copy the full file into SQL Editor and run it. Creates `avatar_url` on `profiles
 
 **Try it:** Profile → Edit profile → Basics → **Add photo** (optional). Explore shows initials when no photo.
 
+### Realtime messages (live chat)
+
+**File:** `supabase/migrations/013_realtime_messages.sql`
+
+```sql
+alter publication supabase_realtime add table public.messages;
+alter publication supabase_realtime add table public.chat_invites;
+```
+
+If either line errors with **already member of publication**, that table is already enabled — skip it.
+
+**Try it:** Open the same conversation in two browsers. New messages appear without refresh. Pause/resume updates live too.
+
 ---
 
 ## Already run? (quick check)
@@ -156,5 +169,6 @@ Copy the full file into SQL Editor and run it. Creates `avatar_url` on `profiles
 | 010 | Block RLS fix (if Block does nothing) |
 | 011 | `here_for` column on `profiles` |
 | 012 | `avatar_url` on `profiles` + `avatars` storage bucket |
+| 013 | Realtime on `messages` + `chat_invites` (live chat) |
 
 After each migration, reload the app (no dev server restart needed).
