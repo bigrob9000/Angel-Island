@@ -30,6 +30,7 @@ export function profileToForm(profile: Profile): ProfileFormState {
     working_style: profile.working_style,
     open_to_questions: profile.open_to_questions,
     work_links: profile.work_links,
+    avatar_url: profile.avatar_url,
   };
 }
 
@@ -50,6 +51,7 @@ export function buildProfileRow(id: string, form: ProfileFormState) {
     working_style: form.working_style,
     open_to_questions: form.open_to_questions,
     work_links: form.work_links?.trim() || null,
+    avatar_url: form.avatar_url?.trim() || null,
     updated_at: new Date().toISOString(),
   };
 }

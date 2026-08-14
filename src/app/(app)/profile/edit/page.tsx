@@ -21,6 +21,7 @@ import {
 } from "@/lib/profile";
 import { ChipSelect } from "@/components/ChipSelect";
 import { TagInput } from "@/components/TagInput";
+import { ProfileAvatarUpload } from "@/components/ProfileAvatarUpload";
 
 const STEP_COUNT = 9;
 
@@ -136,6 +137,15 @@ export default function EditProfilePage() {
       {step === 0 && (
         <section className="space-y-4">
           <h2 className="font-medium text-foreground">Basics</h2>
+          {userId && (
+            <ProfileAvatarUpload
+              userId={userId}
+              first_name={form.first_name}
+              username={form.username}
+              avatar_url={form.avatar_url}
+              onAvatarChange={(avatar_url) => updateForm({ avatar_url })}
+            />
+          )}
           <label className="block">
             <span className="text-sm text-muted">First name</span>
             <input

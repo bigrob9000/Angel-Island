@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { Profile } from "@/lib/types";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 
-type ProfileLike = Pick<Profile, "first_name" | "username"> | null | undefined;
+type ProfileLike = Pick<Profile, "first_name" | "username" | "avatar_url"> | null | undefined;
 
 type Props = {
   profile: ProfileLike;
@@ -17,13 +18,16 @@ export function ProfileAttribution({ profile, className = "" }: Props) {
   }
 
   const label = (
-    <>
-      {first && <span>{first}</span>}
-      {first && user && <span className="text-muted"> · </span>}
-      {user && (
-        <span className={first ? "text-muted" : undefined}>@{user}</span>
-      )}
-    </>
+    <span className="inline-flex items-center gap-2">
+      <ProfileAvatar profile={profile ?? {}} size="sm" />
+      <span>
+        {first && <span>{first}</span>}
+        {first && user && <span className="text-muted"> · </span>}
+        {user && (
+          <span className={first ? "text-muted" : undefined}>@{user}</span>
+        )}
+      </span>
+    </span>
   );
 
   if (user) {

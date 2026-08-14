@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Profile } from "@/lib/types";
 import { openToQuestionsLabel } from "@/lib/profile-options";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 function ChipList({ items }: { items: string[] }) {
   if (items.length === 0) return null;
@@ -42,17 +43,20 @@ export function ProfileDisplay({ profile, showUsername = true }: Props) {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
-        <p className="font-medium text-foreground text-lg">
-          {name}
-          {profile.pronouns && (
-            <span className="ml-2 text-base font-normal text-muted">({profile.pronouns})</span>
+      <header className="flex items-start gap-4">
+        <ProfileAvatar profile={profile} size="lg" />
+        <div className="space-y-1 min-w-0">
+          <p className="font-medium text-foreground text-lg">
+            {name}
+            {profile.pronouns && (
+              <span className="ml-2 text-base font-normal text-muted">({profile.pronouns})</span>
+            )}
+          </p>
+          {showUsername && profile.username && (
+            <p className="text-sm text-muted">@{profile.username}</p>
           )}
-        </p>
-        {showUsername && profile.username && (
-          <p className="text-sm text-muted">@{profile.username}</p>
-        )}
-        {profile.location && <p className="text-sm text-muted">{profile.location}</p>}
+          {profile.location && <p className="text-sm text-muted">{profile.location}</p>}
+        </div>
       </header>
 
       {profile.here_for.length > 0 && (

@@ -131,6 +131,14 @@ update public.profiles set here_for = '{}'::text[] where here_for is null;
 
 **Try it:** Profile shows **Here for** chips. Edit profile → Basics to update.
 
+### Profile photos (optional avatars)
+
+**File:** `supabase/migrations/012_profile_avatars.sql`
+
+Copy the full file into SQL Editor and run it. Creates `avatar_url` on `profiles` and the public `avatars` storage bucket.
+
+**Try it:** Profile → Edit profile → Basics → **Add photo** (optional). Explore shows initials when no photo.
+
 ---
 
 ## Already run? (quick check)
@@ -147,5 +155,6 @@ update public.profiles set here_for = '{}'::text[] where here_for is null;
 | 009 | `user_blocks` and `reports` tables |
 | 010 | Block RLS fix (if Block does nothing) |
 | 011 | `here_for` column on `profiles` |
+| 012 | `avatar_url` on `profiles` + `avatars` storage bucket |
 
 After each migration, reload the app (no dev server restart needed).

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Profile } from "@/lib/types";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 type ProfileCardProps = {
   profile: Profile;
@@ -19,9 +20,14 @@ export function ProfileCard({ profile, reason }: ProfileCardProps) {
 
   const inner = (
     <>
-      <p className="font-medium text-foreground">{name}</p>
-      {profile.username && <p className="text-sm text-muted">@{profile.username}</p>}
-      {profile.location && <p className="mt-1 text-sm text-muted">{profile.location}</p>}
+      <div className="flex items-start gap-3">
+        <ProfileAvatar profile={profile} size="md" />
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-foreground">{name}</p>
+          {profile.username && <p className="text-sm text-muted">@{profile.username}</p>}
+          {profile.location && <p className="mt-1 text-sm text-muted">{profile.location}</p>}
+        </div>
+      </div>
       {hereForPreview && (
         <p className="mt-2 text-sm text-foreground/90">
           Here for: {hereForPreview}

@@ -54,6 +54,7 @@ export interface Profile {
   working_style: string[];
   open_to_questions: OpenToQuestions | null;
   work_links: string | null;
+  avatar_url: string | null;
   updated_at: string;
 }
 
@@ -74,6 +75,7 @@ export function normalizeProfile(row: Partial<Profile> & { id: string }): Profil
     working_style: row.working_style ?? [],
     open_to_questions: row.open_to_questions ?? null,
     work_links: row.work_links ?? null,
+    avatar_url: row.avatar_url ?? null,
     updated_at: row.updated_at ?? "",
   };
 }
