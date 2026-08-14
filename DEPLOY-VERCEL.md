@@ -11,6 +11,7 @@ Your Next.js app lives in this **`web`** folder. Vercel needs that as the projec
 2. **Environment variables** — you need the same values as `web/.env.local`:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SITE_URL` (optional — your custom domain, e.g. `https://angelisland.app`; see `CUSTOM-DOMAIN.md`)
 
    Copy from Supabase → **Project Settings → API**:
    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL` (must be `https://xxx.supabase.co` — **not** the `/rest/v1` REST endpoint)
@@ -53,6 +54,7 @@ git push -u origin main
 5. **Environment Variables** — add both:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SITE_URL` (optional — your custom domain, e.g. `https://angelisland.app`; see `CUSTOM-DOMAIN.md`)
 6. Click **Deploy**
 
 First deploy takes a few minutes. You’ll get a URL like `https://angel-island-xxxxx.vercel.app`.
@@ -127,4 +129,6 @@ If you use **Google sign-in**, add the same callback URL in Google Cloud Console
 
 ## Custom domain (optional)
 
-Vercel → Project → **Settings → Domains** → add your domain and follow DNS instructions.
+See **`CUSTOM-DOMAIN.md`** for DNS, `NEXT_PUBLIC_SITE_URL`, Supabase auth URLs, and testing link previews.
+
+Quick version: Vercel → Project → **Settings → Domains** → add your domain and follow DNS instructions.
