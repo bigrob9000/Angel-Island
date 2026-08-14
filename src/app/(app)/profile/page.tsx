@@ -8,10 +8,12 @@ import type { Profile } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
 import { emptyProfile } from "@/lib/profile";
 import { ProfileDisplay } from "@/components/ProfileDisplay";
+import { ProfileAvatarUpload } from "@/components/ProfileAvatarUpload";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,6 +23,7 @@ export default function ProfilePage() {
         router.replace("/sign-in");
         return;
       }
+      setUserId(user.id);
       void Promise.resolve(
         supabase
           .from("profiles")
@@ -49,6 +52,20 @@ export default function ProfilePage() {
   return (
     <div className="space-y-8">
       <h1 className="font-serif text-2xl font-medium text-foreground">Profile</h1>
+
+      {userId && (
+        <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">
+          <ProfileAvatarUpload
+            userId={userId}
+            first_name={profile.first_name}
+            username={profile.username}
+            avatar_url={profile.avatar_url}
+            onAvatarChange={(avatar_url) =>
+              setProfile((prev) => (prev ? { ...prev, avatar_url } : prev))
+            }
+          />
+        </div>
+      )}
 
       <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">
         <ProfileDisplay profile={profile} />
