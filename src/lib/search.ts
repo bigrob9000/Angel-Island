@@ -3,6 +3,7 @@ import type { Profile, Room, ConversationStatus } from "@/lib/types";
 import { normalizeProfile, normalizeConversationStatus } from "@/lib/types";
 import { conversationPreviewText } from "@/lib/conversations";
 import { loadBlockedUserIds } from "@/lib/blocks";
+import { isDiscoverableProfile } from "@/lib/profile";
 
 export type ConversationSearchResult = {
   id: string;
@@ -41,6 +42,7 @@ export async function searchAll(query: string, userId?: string) {
   const people = ((peopleRes.data ?? []) as Profile[])
     .map((row) => normalizeProfile(row))
     .filter((profile) => profile.id !== userId)
+    .filter((profile) => isDiscoverableProfile(profile))
     .filter((profile) => !blockedIds.has(profile.id))
     .filter((profile) =>
       matchesText([

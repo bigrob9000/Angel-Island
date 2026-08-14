@@ -7,7 +7,8 @@ type ProfileCardProps = {
 };
 
 export function ProfileCard({ profile, reason }: ProfileCardProps) {
-  const name = profile.first_name || profile.username || "Someone";
+  const name = profile.first_name || profile.username;
+  if (!name) return null;
   const excerpt =
     profile.about && profile.about.length > 120
       ? `${profile.about.slice(0, 120).trim()}…`

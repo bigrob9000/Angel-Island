@@ -5,6 +5,13 @@ export function emptyProfile(id: string): Profile {
   return normalizeProfile({ id });
 }
 
+/** Profiles need a first name and @username before showing in Explore, Search, or Home. */
+export function isDiscoverableProfile(
+  profile: Pick<Profile, "first_name" | "username">
+): boolean {
+  return Boolean(profile.first_name?.trim() && profile.username?.trim());
+}
+
 export type ProfileFormState = Omit<Profile, "id" | "updated_at">;
 
 export function profileToForm(profile: Profile): ProfileFormState {

@@ -133,7 +133,9 @@ export default function OnboardingPage() {
             <h1 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
               A few basics
             </h1>
-            <p className="mt-2 text-sm text-muted">First name and username are used on your profile.</p>
+            <p className="mt-2 text-sm text-muted">
+              First name and username are required before others can find you on Angel Island.
+            </p>
             <div className="mt-6 space-y-4">
               <label className="block">
                 <span className="text-sm text-muted">First name</span>
@@ -142,6 +144,7 @@ export default function OnboardingPage() {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="e.g. Alex"
+                  required
                   className="mt-1 block w-full rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
                 />
               </label>
@@ -152,6 +155,8 @@ export default function OnboardingPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))}
                   placeholder="e.g. angelisland"
+                  required
+                  minLength={2}
                   className="mt-1 block w-full rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
                 />
               </label>
@@ -181,14 +186,19 @@ export default function OnboardingPage() {
             </div>
             <button
               type="button"
+              disabled={!firstName.trim() || !username.trim()}
               onClick={async () => {
+                const trimmedName = firstName.trim();
+                const trimmedUsername = username.trim().toLowerCase();
+                if (!trimmedName || !trimmedUsername) return;
+
                 const supabase = createClient();
                 const { data: { user } } = await supabase.auth.getUser();
                 const loc = location === "other" ? locationCustom : location || undefined;
                 await supabase.auth.updateUser({
                   data: {
-                    first_name: firstName || undefined,
-                    username: username || undefined,
+                    first_name: trimmedName,
+                    username: trimmedUsername,
                     location: loc,
                     here_for: reasonChoices.length > 0 ? reasonChoices : undefined,
                   },
@@ -197,8 +207,8 @@ export default function OnboardingPage() {
                   await supabase.from("profiles").upsert(
                     {
                       id: user.id,
-                      first_name: firstName || null,
-                      username: username || null,
+                      first_name: trimmedName,
+                      username: trimmedUsername,
                       location: loc ?? null,
                       here_for: reasonChoices,
                       updated_at: new Date().toISOString(),
@@ -208,7 +218,7 @@ export default function OnboardingPage() {
                 }
                 setStep(3);
               }}
-              className="mt-8 w-full rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90"
+              className="mt-8 w-full rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
             >
               Continue
             </button>

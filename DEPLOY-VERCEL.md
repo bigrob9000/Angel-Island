@@ -12,7 +12,9 @@ Your Next.js app lives in this **`web`** folder. Vercel needs that as the projec
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-   Copy them from Supabase → **Project Settings → API** (Project URL + anon/public key).
+   Copy from Supabase → **Project Settings → API**:
+   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL` (must be `https://xxx.supabase.co` — **not** the `/rest/v1` REST endpoint)
+   - **anon public** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ---
 

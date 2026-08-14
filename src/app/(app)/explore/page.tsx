@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase";
 import { ProfileCard } from "@/components/ProfileCard";
 import type { Profile } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
+import { isDiscoverableProfile } from "@/lib/profile";
 import { loadBlockedUserIds } from "@/lib/blocks";
 
 export default function ExplorePage() {
@@ -30,6 +31,7 @@ export default function ExplorePage() {
           const { blockedIds } = await loadBlockedUserIds(user.id);
           const rows = (res.data ?? [])
             .map((row) => normalizeProfile(row as Profile))
+            .filter((p) => isDiscoverableProfile(p))
             .filter((p) => !blockedIds.has(p.id));
           setProfiles(rows);
           setLoading(false);

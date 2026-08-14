@@ -12,12 +12,16 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) return;
-      const done = typeof window !== "undefined" && window.localStorage.getItem(ONBOARDING_KEY) === "done";
-      router.replace(done ? "/home" : "/onboarding");
-    });
+    try {
+      const supabase = createClient();
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session) return;
+        const done = typeof window !== "undefined" && window.localStorage.getItem(ONBOARDING_KEY) === "done";
+        router.replace(done ? "/home" : "/onboarding");
+      });
+    } catch {
+      // Supabase env vars missing — landing page still renders.
+    }
   }, [router]);
 
   return (

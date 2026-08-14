@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import type { Profile, Room } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
+import { isDiscoverableProfile } from "@/lib/profile";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
@@ -36,7 +37,11 @@ export default function HomePage() {
         .order("updated_at", { ascending: false })
         .limit(5)
         .then((peopleRes) =>
-          setPeople((peopleRes.data ?? []).map((row) => normalizeProfile(row as Profile)))
+          setPeople(
+            (peopleRes.data ?? [])
+              .map((row) => normalizeProfile(row as Profile))
+              .filter(isDiscoverableProfile)
+          )
         );
 
       supabase
