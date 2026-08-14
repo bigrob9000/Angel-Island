@@ -180,6 +180,26 @@ export default function HomePage() {
         )}
       </section>
 
+      <section>
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-serif text-lg font-medium text-foreground">Collaborations</h2>
+          <Link href="/collaborations" className="text-sm text-muted hover:text-foreground shrink-0">
+            See all
+          </Link>
+        </div>
+        <p className="mt-2 text-sm text-muted">
+          Shared spaces for projects you&apos;re exploring with other people.
+        </p>
+        <div className="mt-4">
+          <Link
+            href="/collaborations"
+            className="inline-flex rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+          >
+            View collaborations
+          </Link>
+        </div>
+      </section>
+
       <section className="border-t border-foreground/10 pt-8">
         <p className="text-sm text-muted mb-4">Invitations only — no pressure.</p>
         <div className="flex flex-wrap gap-3">

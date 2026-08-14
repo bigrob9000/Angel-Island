@@ -8,6 +8,7 @@ import type { ChatInvite, Profile, CollabInvite } from "@/lib/types";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { useInbox } from "@/components/InboxProvider";
+import { createCollaborationWorkspace, findCollaborationIdByInvite } from "@/lib/collaborations";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 
@@ -19,7 +20,7 @@ export default function MessagesPage() {
   const [receivedInvites, setReceivedInvites] = useState<(ChatInvite & { sender?: Profile })[]>([]);
   const [sentInvites, setSentInvites] = useState<(ChatInvite & { receiver?: Profile })[]>([]);
   const [receivedCollabInvites, setReceivedCollabInvites] = useState<(CollabInvite & { sender?: Profile })[]>([]);
-  const [sentCollabInvites, setSentCollabInvites] = useState<(CollabInvite & { receiver?: Profile })[]>([]);
+  const [sentCollabInvites, setSentCollabInvites] = useState<(CollabInvite & { receiver?: Profile; workspaceId?: string | null })[]>([]);
   const [loading, setLoading] = useState(true);
   const [actingId, setActingId] = useState<string | null>(null);
 
@@ -101,10 +102,17 @@ export default function MessagesPage() {
           (c) => !blockedIds.has(c.receiver_id)
         );
         if (collabsSent.length > 0) {
-          supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", collabsSent.map((c) => c.receiver_id)).then((pRes) => {
+          supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", collabsSent.map((c) => c.receiver_id)).then(async (pRes) => {
             const byId: Record<string, Profile> = {};
             (pRes.data ?? []).forEach((row) => { byId[row.id] = row as Profile; });
-            setSentCollabInvites(collabsSent.map((c) => ({ ...c, receiver: byId[c.receiver_id] })));
+            const withWorkspace = await Promise.all(
+              collabsSent.map(async (c) => ({
+                ...c,
+                receiver: byId[c.receiver_id],
+                workspaceId: c.status === "interested" ? await findCollaborationIdByInvite(c.id) : null,
+              }))
+            );
+            setSentCollabInvites(withWorkspace);
           });
         } else setSentCollabInvites([]);
       }).finally(() => setLoading(false));
@@ -159,7 +167,13 @@ export default function MessagesPage() {
         })
         .select("id")
         .single();
-      if (newChat) router.push(`/messages/${newChat.id}`);
+
+      const workspace = await createCollaborationWorkspace(collabId, newChat?.id ?? null);
+      if (workspace.id) {
+        router.push(`/collaborations/${workspace.id}`);
+      } else if (newChat) {
+        router.push(`/messages/${newChat.id}`);
+      }
     }
   }
 
@@ -209,7 +223,7 @@ export default function MessagesPage() {
       {receivedCollabInvites.length > 0 && (
         <section>
           <h2 className="font-serif text-lg font-medium text-foreground">Collab invites you received</h2>
-          <p className="mt-1 text-sm text-muted">Respond below. If you&apos;re interested, you&apos;ll open a conversation to talk it through.</p>
+          <p className="mt-1 text-sm text-muted">Respond below. If you&apos;re interested, you&apos;ll open a shared collaboration space.</p>
           <ul className="mt-4 space-y-3">
             {receivedCollabInvites.map((c) => (
               <li key={c.id} className="rounded-lg border border-foreground/10 bg-white/50 p-4">
@@ -269,7 +283,16 @@ export default function MessagesPage() {
                 {c.message && <p className="text-sm text-muted">{c.message}</p>}
                 {c.role && <p className="text-sm text-muted">Your role: {c.role}</p>}
                 {c.pace && <p className="text-sm text-muted">Pace: {PACE_LABELS[c.pace]}</p>}
-                <p className="mt-2 text-xs text-muted italic">Waiting for their response</p>
+                {c.status === "interested" && c.workspaceId ? (
+                  <Link
+                    href={`/collaborations/${c.workspaceId}`}
+                    className="mt-2 inline-block text-sm text-foreground underline hover:no-underline"
+                  >
+                    Open collaboration space
+                  </Link>
+                ) : (
+                  <p className="mt-2 text-xs text-muted italic">Waiting for their response</p>
+                )}
               </li>
             ))}
           </ul>

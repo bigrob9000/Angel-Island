@@ -13,6 +13,7 @@ const nav = [
   { href: "/search", label: "Search" },
   { href: "/rooms", label: "Rooms" },
   { href: "/messages", label: "Messages" },
+  { href: "/collaborations", label: "Collabs" },
   { href: "/profile", label: "Profile" },
 ] as const;
 

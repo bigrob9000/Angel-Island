@@ -123,6 +123,39 @@ export interface Message {
 export type CollabPace = "low-pressure" | "structured" | "flexible";
 export type CollabInviteStatus = "pending" | "interested" | "maybe" | "not_fit";
 
+export type CollaborationStatus = "active" | "paused" | "ended";
+export type CollaborationEntryType = "note" | "reference" | "step";
+
+export interface Collaboration {
+  id: string;
+  collab_invite_id: string;
+  chat_invite_id: string | null;
+  status: CollaborationStatus;
+  paused_at: string | null;
+  paused_by: string | null;
+  ended_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CollaborationEntry {
+  id: string;
+  collaboration_id: string;
+  author_id: string;
+  entry_type: CollaborationEntryType;
+  body: string | null;
+  url: string | null;
+  is_done: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export const COLLAB_PACE_LABELS: Record<CollabPace, string> = {
+  "low-pressure": "Low-pressure",
+  structured: "Structured",
+  flexible: "Flexible",
+};
+
 export interface CollabInvite {
   id: string;
   sender_id: string;

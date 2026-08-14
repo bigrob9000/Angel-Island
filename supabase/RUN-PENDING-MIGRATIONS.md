@@ -159,6 +159,14 @@ Run the full file. Adds **Send love** on room posts — only the person who wrot
 
 **Try it:** Send love on someone else's share. They see "1 person sent love · only you see this." Others see nothing.
 
+### Collaboration workspaces
+
+**File:** `supabase/migrations/016_collaborations.sql`
+
+Run the full file. Creates shared collaboration spaces when a collab invite is marked **interested** — notes, reference links, and next steps.
+
+**Try it:** Respond **Interested** to a collab invite → opens **Collabs** workspace. Nav → **Collabs**.
+
 ### Realtime messages (live chat)
 
 **File:** `supabase/migrations/013_realtime_messages.sql`
@@ -192,6 +200,7 @@ If either line errors with **already member of publication**, that table is alre
 | 013 | Realtime on `messages` + `chat_invites` (live chat) |
 | 014 | `share_work` post type + `media_url` on posts (Listen room) |
 | 015 | Private post love (creator-only counts) |
+| 016 | Collaboration workspaces (notes, links, next steps) |
 
 ---
 
