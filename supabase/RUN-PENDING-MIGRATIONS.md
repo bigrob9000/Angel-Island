@@ -151,7 +151,15 @@ Adds a **Share work** post type and a **media link** field on posts. Updates the
 
 **Try it:** Rooms → **Listen & Share** → share a YouTube or SoundCloud link.
 
----
+### Private post love
+
+**File:** `supabase/migrations/015_post_loves.sql`
+
+Run the full file. Adds **Send love** on room posts — only the person who wrote the post sees the count.
+
+**Try it:** Send love on someone else's share. They see "1 person sent love · only you see this." Others see nothing.
+
+### Realtime messages (live chat)
 
 **File:** `supabase/migrations/013_realtime_messages.sql`
 
@@ -183,5 +191,8 @@ If either line errors with **already member of publication**, that table is alre
 | 012 | `avatar_url` on `profiles` + `avatars` storage bucket |
 | 013 | Realtime on `messages` + `chat_invites` (live chat) |
 | 014 | `share_work` post type + `media_url` on posts (Listen room) |
+| 015 | Private post love (creator-only counts) |
+
+---
 
 After each migration, reload the app (no dev server restart needed).

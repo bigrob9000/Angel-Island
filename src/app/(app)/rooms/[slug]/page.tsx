@@ -16,8 +16,11 @@ import { ListenPinned } from "@/components/ListenPinned";
 import { MediaEmbed } from "@/components/MediaEmbed";
 import { normalizeMediaUrl } from "@/lib/media-embed";
 import { PostCommentSection } from "@/components/PostCommentSection";
+import { PostLoveButton } from "@/components/PostLoveButton";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { loadCommentsForPosts, type PostCommentWithAuthor } from "@/lib/post-comments";
+import { loadPostLoveState } from "@/lib/post-loves";
+import { loadBlockedUserIds } from "@/lib/blocks";
 
 const inputClass =
   "mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none";
@@ -61,6 +64,10 @@ export default function RoomPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [commentsByPost, setCommentsByPost] = useState<Record<string, PostCommentWithAuthor[]>>({});
   const [commentsTableMissing, setCommentsTableMissing] = useState(false);
+  const [lovedPostIds, setLovedPostIds] = useState<Set<string>>(new Set());
+  const [loveCountByPost, setLoveCountByPost] = useState<Record<string, number>>({});
+  const [lovesTableMissing, setLovesTableMissing] = useState(false);
+  const [blockedUserIds, setBlockedUserIds] = useState<Set<string>>(new Set());
   const { motionReduced } = usePreferences();
 
   const myIntroPost = userId ? posts.find((p) => p.author_id === userId) : undefined;
@@ -74,9 +81,6 @@ export default function RoomPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUserId(user?.id ?? null);
-    });
 
     supabase
       .from("rooms")
@@ -97,6 +101,11 @@ export default function RoomPage() {
           .eq("room_id", res.data.id)
           .order("created_at", { ascending: false })
           .then(async (postsRes) => {
+            const {
+              data: { user },
+            } = await supabase.auth.getUser();
+            setUserId(user?.id ?? null);
+
             const postList = (postsRes.data ?? []) as Post[];
             setPosts(postList);
 
@@ -114,11 +123,20 @@ export default function RoomPage() {
             }
 
             if (postList.length > 0) {
-              const { byPost, tableMissing } = await loadCommentsForPosts(
-                postList.map((p) => p.id)
-              );
+              const [{ byPost, tableMissing }, loveState] = await Promise.all([
+                loadCommentsForPosts(postList.map((p) => p.id)),
+                loadPostLoveState(postList, user?.id ?? null),
+              ]);
               setCommentsByPost(byPost);
               setCommentsTableMissing(tableMissing);
+              setLovedPostIds(loveState.lovedPostIds);
+              setLoveCountByPost(loveState.loveCountByPost);
+              setLovesTableMissing(loveState.tableMissing);
+            }
+
+            if (user?.id) {
+              const { blockedIds } = await loadBlockedUserIds(user.id);
+              setBlockedUserIds(blockedIds);
             }
 
             setLoading(false);
@@ -242,6 +260,16 @@ export default function RoomPage() {
     if (error) return;
     setPosts((prev) => prev.filter((p) => p.id !== postId));
     if (editingPost?.id === postId) resetCompose();
+  }
+
+  function handleLoveChange(postId: string, loved: boolean, loveCount: number) {
+    setLovedPostIds((prev) => {
+      const next = new Set(prev);
+      if (loved) next.add(postId);
+      else next.delete(postId);
+      return next;
+    });
+    setLoveCountByPost((prev) => ({ ...prev, [postId]: loveCount }));
   }
 
   if (loading) {
@@ -516,6 +544,17 @@ export default function RoomPage() {
                       </button>
                     </div>
                   )}
+                  <PostLoveButton
+                    postId={post.id}
+                    postAuthorId={post.author_id}
+                    userId={userId}
+                    isOwn={isOwn}
+                    loved={lovedPostIds.has(post.id)}
+                    loveCount={loveCountByPost[post.id] ?? 0}
+                    interactionBlocked={blockedUserIds.has(post.author_id)}
+                    tableMissing={lovesTableMissing}
+                    onLovedChange={handleLoveChange}
+                  />
                   <PostCommentSection
                     postId={post.id}
                     postAuthorId={post.author_id}
