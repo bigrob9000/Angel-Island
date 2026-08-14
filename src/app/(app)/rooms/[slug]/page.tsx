@@ -10,7 +10,11 @@ import { normalizeProfile } from "@/lib/types";
 import { usePreferences } from "@/components/PreferencesProvider";
 import { emptyProfile, PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 import { isIntroductionsRoom } from "@/lib/introductions";
+import { isListenRoom, LISTEN_COMPOSE_INTENTS } from "@/lib/listen";
 import { IntroductionsPinned } from "@/components/IntroductionsPinned";
+import { ListenPinned } from "@/components/ListenPinned";
+import { MediaEmbed } from "@/components/MediaEmbed";
+import { normalizeMediaUrl } from "@/lib/media-embed";
 import { PostCommentSection } from "@/components/PostCommentSection";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { loadCommentsForPosts, type PostCommentWithAuthor } from "@/lib/post-comments";
@@ -18,7 +22,13 @@ import { loadCommentsForPosts, type PostCommentWithAuthor } from "@/lib/post-com
 const inputClass =
   "mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none";
 
-const COMPOSE_INTENTS: PostIntent[] = ["conversation", "question", "collab_invite", "idea"];
+const COMPOSE_INTENTS: PostIntent[] = [
+  "conversation",
+  "question",
+  "collab_invite",
+  "idea",
+  "share_work",
+];
 
 function parseComposeIntent(value: string | null): PostIntent | null {
   if (!value) return null;
@@ -30,6 +40,7 @@ export default function RoomPage() {
   const searchParams = useSearchParams();
   const slug = params.slug as string;
   const isIntroductions = isIntroductionsRoom(slug);
+  const isListen = isListenRoom(slug);
   const composeFromUrl = parseComposeIntent(searchParams.get("compose"));
 
   const [room, setRoom] = useState<Room | null>(null);
@@ -44,6 +55,7 @@ export default function RoomPage() {
   );
   const [composeTitle, setComposeTitle] = useState("");
   const [composeBody, setComposeBody] = useState("");
+  const [composeMediaUrl, setComposeMediaUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [composeError, setComposeError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -55,9 +67,10 @@ export default function RoomPage() {
 
   useEffect(() => {
     if (isIntroductions || !composeFromUrl) return;
+    if (composeFromUrl === "share_work" && !isListen) return;
     setComposeIntent(composeFromUrl);
     setShowCompose(true);
-  }, [isIntroductions, composeFromUrl]);
+  }, [isIntroductions, isListen, composeFromUrl]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -119,6 +132,7 @@ export default function RoomPage() {
     setComposeIntent(isIntroductions ? "conversation" : null);
     setComposeTitle("");
     setComposeBody("");
+    setComposeMediaUrl("");
     setComposeError(null);
   }
 
@@ -133,7 +147,24 @@ export default function RoomPage() {
 
   async function handleSubmitPost(e: React.FormEvent) {
     e.preventDefault();
-    if (!room || !composeIntent || !composeBody.trim()) return;
+    if (!room || !composeIntent) return;
+
+    const isShareWork = composeIntent === "share_work";
+    let mediaUrl: string | null = null;
+
+    if (isShareWork) {
+      if (!composeMediaUrl.trim()) {
+        setComposeError("Add a link to your audio or video.");
+        return;
+      }
+      mediaUrl = normalizeMediaUrl(composeMediaUrl);
+      if (!mediaUrl) {
+        setComposeError("That link doesn't look valid. Try a full https:// URL.");
+        return;
+      }
+    } else if (!composeBody.trim()) {
+      return;
+    }
 
     if (isIntroductions && !editingPost && myIntroPost) {
       setComposeError("You already have an introduction here. Edit or delete it to change.");
@@ -180,6 +211,7 @@ export default function RoomPage() {
         intent: composeIntent,
         title,
         body,
+        media_url: mediaUrl,
       })
       .select("*")
       .single();
@@ -231,7 +263,9 @@ export default function RoomPage() {
     );
   }
 
-  const intentOptions: PostIntent[] = ["conversation", "question", "collab_invite", "idea"];
+  const intentOptions: PostIntent[] = isListen
+    ? [...LISTEN_COMPOSE_INTENTS]
+    : ["conversation", "question", "collab_invite", "idea"];
 
   function postIntentLabel(post: Post): string {
     if (isIntroductions) return "Introduction";
@@ -252,6 +286,7 @@ export default function RoomPage() {
       </div>
 
       {isIntroductions && <IntroductionsPinned />}
+      {isListen && <ListenPinned />}
 
       {!showCompose ? (
         <div className="space-y-2">
@@ -272,6 +307,17 @@ export default function RoomPage() {
                 Share your introduction (optional)
               </button>
             )
+          ) : isListen ? (
+            <button
+              type="button"
+              onClick={() => {
+                setComposeIntent("share_work");
+                setShowCompose(true);
+              }}
+              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+            >
+              Share something you&apos;re working on (optional)
+            </button>
           ) : (
             <button
               type="button"
@@ -323,25 +369,48 @@ export default function RoomPage() {
                     type="text"
                     value={composeTitle}
                     onChange={(e) => setComposeTitle(e.target.value)}
-                    placeholder="Short title"
+                    placeholder={
+                      composeIntent === "share_work" ? "e.g. Acoustic cover — learning this one" : "Short title"
+                    }
+                    className={inputClass}
+                  />
+                </label>
+              )}
+              {composeIntent === "share_work" && (
+                <label className="block">
+                  <span className="text-sm text-muted">Link to audio or video</span>
+                  <input
+                    type="url"
+                    value={composeMediaUrl}
+                    onChange={(e) => setComposeMediaUrl(e.target.value)}
+                    required
+                    placeholder="https://youtube.com/… or SoundCloud, TikTok, etc."
                     className={inputClass}
                   />
                 </label>
               )}
               <label className="block">
                 <span className="text-sm text-muted">
-                  {isIntroductions ? "Introduce yourself" : "What do you want to say?"}
+                  {isIntroductions
+                    ? "Introduce yourself"
+                    : composeIntent === "share_work"
+                      ? "Note (optional)"
+                      : "What do you want to say?"}
                 </span>
                 <textarea
                   value={composeBody}
                   onChange={(e) => setComposeBody(e.target.value)}
-                  required
-                  rows={5}
+                  required={
+                    composeIntent !== "share_work" && !isIntroductions
+                  }
+                  rows={composeIntent === "share_work" ? 3 : 5}
                   className={inputClass}
                   placeholder={
                     isIntroductions
                       ? "A few honest sentences is enough. No pressure to impress."
-                      : "Write your post…"
+                      : composeIntent === "share_work"
+                        ? "What is this? What are you open to? (optional)"
+                        : "Write your post…"
                   }
                 />
               </label>
@@ -358,7 +427,9 @@ export default function RoomPage() {
                       ? editingPost
                         ? "Save changes"
                         : "Post introduction"
-                      : "Post"}
+                      : composeIntent === "share_work"
+                        ? "Share"
+                        : "Post"}
                 </button>
                 {!isIntroductions && (
                   <button
@@ -367,6 +438,7 @@ export default function RoomPage() {
                       setComposeIntent(null);
                       setComposeTitle("");
                       setComposeBody("");
+                      setComposeMediaUrl("");
                     }}
                     className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
                   >
@@ -388,13 +460,15 @@ export default function RoomPage() {
 
       <section>
         <h2 className="font-serif text-lg font-medium text-foreground">
-          {isIntroductions ? "Introductions" : "Posts"}
+          {isIntroductions ? "Introductions" : isListen ? "Shared work" : "Posts"}
         </h2>
         {posts.length === 0 ? (
           <p className="mt-4 text-sm text-muted">
             {isIntroductions
               ? "No introductions yet. You're welcome to listen first — posting is optional."
-              : "No posts yet. Start a conversation, ask a question, or invite collaborators."}
+              : isListen
+                ? "Nothing shared yet. You're welcome to listen first — posting is optional."
+                : "No posts yet. Start a conversation, ask a question, or invite collaborators."}
           </p>
         ) : (
           <ul className="mt-4 space-y-6">
@@ -419,7 +493,10 @@ export default function RoomPage() {
                   {!isIntroductions && post.title && (
                     <p className="mt-2 font-medium text-foreground">{post.title}</p>
                   )}
-                  <p className="mt-2 text-muted whitespace-pre-wrap leading-relaxed">{post.body}</p>
+                  {post.media_url && <MediaEmbed url={post.media_url} />}
+                  {post.body && (
+                    <p className="mt-2 text-muted whitespace-pre-wrap leading-relaxed">{post.body}</p>
+                  )}
                   {isIntroductions && isOwn && (
                     <div className="mt-4 flex flex-wrap gap-3">
                       <button

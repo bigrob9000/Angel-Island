@@ -101,5 +101,5 @@ insert into public.rooms (slug, name, description, purpose_norms, best_for) valu
   ('jam', 'Jam', 'Find people to play with. Share what you play and what you''re looking for.', 'Be clear about level and style. No pressure.', array['jam', 'collaborate']),
   ('learn', 'Learn', 'Questions and advice. Instruments, production, theory, practice.', 'Ask real questions. Share what worked for you.', array['learn']),
   ('collaborate', 'Collaborate', 'Find co-writers, producers, and project partners.', 'State your role and what you''re open to.', array['collaborate']),
-  ('listen', 'Listen', 'Share what you''re working on. Feedback by invitation only.', 'Share links or descriptions. Ask for ears when you want them.', array['discover', 'collaborate'])
+  ('listen', 'Listen & Share', 'Share clips, demos, and works-in-progress. A place to be heard — not ranked.', 'Post a link to audio or video (YouTube, SoundCloud, TikTok, and more). Feedback only if someone asks. Listening counts — you don''t have to comment.', array['showcase', 'discover', 'collaborate'])
 on conflict (slug) do nothing;

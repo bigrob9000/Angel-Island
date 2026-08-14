@@ -1,4 +1,4 @@
-export type PostIntent = "conversation" | "question" | "collab_invite" | "idea";
+export type PostIntent = "conversation" | "question" | "collab_invite" | "idea" | "share_work";
 
 export interface Room {
   id: string;
@@ -24,6 +24,7 @@ export interface Post {
   intent: PostIntent;
   title: string | null;
   body: string;
+  media_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -85,6 +86,7 @@ export const POST_INTENT_LABELS: Record<PostIntent, string> = {
   question: "Question",
   collab_invite: "Collab invite",
   idea: "Idea",
+  share_work: "Share work",
 };
 
 export type ChatInviteStatus = "pending" | "accepted" | "declined" | "cancelled";

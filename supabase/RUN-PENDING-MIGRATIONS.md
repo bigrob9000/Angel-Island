@@ -139,7 +139,19 @@ Copy the full file into SQL Editor and run it. Creates `avatar_url` on `profiles
 
 **Try it:** Profile → Edit profile → Basics → **Add photo** (optional). Explore shows initials when no photo.
 
-### Realtime messages (live chat)
+### Listen & Share (showcase room)
+
+**File:** `supabase/migrations/014_listen_share_work.sql`
+
+Adds a **Share work** post type and a **media link** field on posts. Updates the Listen room name and norms.
+
+```sql
+-- Run the full file from supabase/migrations/014_listen_share_work.sql
+```
+
+**Try it:** Rooms → **Listen & Share** → share a YouTube or SoundCloud link.
+
+---
 
 **File:** `supabase/migrations/013_realtime_messages.sql`
 
@@ -170,5 +182,6 @@ If either line errors with **already member of publication**, that table is alre
 | 011 | `here_for` column on `profiles` |
 | 012 | `avatar_url` on `profiles` + `avatars` storage bucket |
 | 013 | Realtime on `messages` + `chat_invites` (live chat) |
+| 014 | `share_work` post type + `media_url` on posts (Listen room) |
 
 After each migration, reload the app (no dev server restart needed).

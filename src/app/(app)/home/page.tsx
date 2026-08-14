@@ -193,7 +193,7 @@ export default function HomePage() {
             Ask a question
           </Link>
           <Link
-            href="/rooms/listen?compose=conversation"
+            href="/rooms/listen?compose=share_work"
             className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
           >
             Share what you&apos;re working on
