@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase";
 import type { PostComment, Profile } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
-import { emptyProfile } from "@/lib/profile";
+import { emptyProfile, PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 
 export type PostCommentWithAuthor = PostComment & { author?: Profile };
 
@@ -32,7 +32,7 @@ export async function loadCommentsForPosts(postIds: string[]): Promise<CommentsL
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username, first_name")
+    .select(PROFILE_ATTRIBUTION_FIELDS)
     .in("id", authorIds);
 
   const profilesById: Record<string, Profile> = {};
@@ -80,7 +80,7 @@ export async function addPostComment(
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, username, first_name")
+    .select(PROFILE_ATTRIBUTION_FIELDS)
     .eq("id", authorId)
     .single();
 

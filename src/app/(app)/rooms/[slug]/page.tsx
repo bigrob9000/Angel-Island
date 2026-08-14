@@ -8,7 +8,7 @@ import type { Room, Post, Profile, PostIntent } from "@/lib/types";
 import { POST_INTENT_LABELS } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
 import { usePreferences } from "@/components/PreferencesProvider";
-import { emptyProfile } from "@/lib/profile";
+import { emptyProfile, PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 import { isIntroductionsRoom } from "@/lib/introductions";
 import { IntroductionsPinned } from "@/components/IntroductionsPinned";
 import { PostCommentSection } from "@/components/PostCommentSection";
@@ -91,7 +91,7 @@ export default function RoomPage() {
             if (authorIds.length > 0) {
               const profRes = await supabase
                 .from("profiles")
-                .select("id, username, first_name")
+                .select(PROFILE_ATTRIBUTION_FIELDS)
                 .in("id", authorIds);
               const byId: Record<string, Profile> = {};
               (profRes.data ?? []).forEach((p) => {

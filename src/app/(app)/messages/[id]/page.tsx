@@ -9,6 +9,7 @@ import { normalizeConversationStatus } from "@/lib/types";
 import { usePreferences } from "@/components/PreferencesProvider";
 import { isMessagingEnabled } from "@/lib/conversations";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
+import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 
 type ModalKind = "pause" | "end" | null;
 
@@ -93,7 +94,7 @@ export default function ConversationPage() {
             const otherId = inv.sender_id === user.id ? inv.receiver_id : inv.sender_id;
             supabase
               .from("profiles")
-              .select("id, first_name, username")
+              .select(PROFILE_ATTRIBUTION_FIELDS)
               .eq("id", otherId)
               .single()
               .then((pRes) => {

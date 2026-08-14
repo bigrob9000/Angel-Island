@@ -3,7 +3,7 @@ import type { Profile, Room, ConversationStatus } from "@/lib/types";
 import { normalizeProfile, normalizeConversationStatus } from "@/lib/types";
 import { conversationPreviewText } from "@/lib/conversations";
 import { loadBlockedUserIds } from "@/lib/blocks";
-import { isDiscoverableProfile } from "@/lib/profile";
+import { isDiscoverableProfile, PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 
 export type ConversationSearchResult = {
   id: string;
@@ -101,7 +101,7 @@ async function searchConversations(
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, first_name, username")
+    .select(PROFILE_ATTRIBUTION_FIELDS)
     .in("id", otherIds);
 
   const profilesById: Record<string, { first_name: string | null; username: string | null }> = {};

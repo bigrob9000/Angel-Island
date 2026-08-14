@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase";
 import type { ChatInvite, ConversationStatus, Profile } from "@/lib/types";
 import { normalizeConversationStatus } from "@/lib/types";
 import { loadBlockedUserIds } from "@/lib/blocks";
+import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 
 export type ConversationPreview = ChatInvite & {
   other?: Profile;
@@ -87,7 +88,7 @@ export async function loadConversationPreviews(
   ];
 
   const [{ data: profiles }, latestByInvite] = await Promise.all([
-    supabase.from("profiles").select("id, first_name, username").in("id", otherIds),
+    supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", otherIds),
     latestMessagesByInvite(convs.map((c) => c.id)),
   ]);
 

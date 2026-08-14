@@ -9,6 +9,7 @@ import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { loadConversationPreviews, type ConversationPreview } from "@/lib/conversations";
 import { loadBlockedUserIds } from "@/lib/blocks";
+import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 
 const PACE_LABELS: Record<string, string> = { "low-pressure": "Low-pressure", "structured": "Structured", "flexible": "Flexible" };
 
@@ -78,7 +79,7 @@ export default function MessagesPage() {
             setter(list.map((i) => ({ ...i })));
             return;
           }
-          supabase.from("profiles").select("id, first_name, username").in("id", ids).then((pRes) => {
+          supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", ids).then((pRes) => {
             const byId: Record<string, Profile> = {};
             (pRes.data ?? []).forEach((row) => { byId[row.id] = row as Profile; });
             setter(list.map((i) => ({ ...i, [key]: byId[idPicker(i)] })));
@@ -93,7 +94,7 @@ export default function MessagesPage() {
           (c) => !blockedIds.has(c.sender_id)
         );
         if (collabsReceived.length > 0) {
-          supabase.from("profiles").select("id, first_name, username").in("id", collabsReceived.map((c) => c.sender_id)).then((pRes) => {
+          supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", collabsReceived.map((c) => c.sender_id)).then((pRes) => {
             const byId: Record<string, Profile> = {};
             (pRes.data ?? []).forEach((row) => { byId[row.id] = row as Profile; });
             setReceivedCollabInvites(collabsReceived.map((c) => ({ ...c, sender: byId[c.sender_id] })));
@@ -104,7 +105,7 @@ export default function MessagesPage() {
           (c) => !blockedIds.has(c.receiver_id)
         );
         if (collabsSent.length > 0) {
-          supabase.from("profiles").select("id, first_name, username").in("id", collabsSent.map((c) => c.receiver_id)).then((pRes) => {
+          supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", collabsSent.map((c) => c.receiver_id)).then((pRes) => {
             const byId: Record<string, Profile> = {};
             (pRes.data ?? []).forEach((row) => { byId[row.id] = row as Profile; });
             setSentCollabInvites(collabsSent.map((c) => ({ ...c, receiver: byId[c.receiver_id] })));

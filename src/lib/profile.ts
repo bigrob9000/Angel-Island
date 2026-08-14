@@ -5,6 +5,9 @@ export function emptyProfile(id: string): Profile {
   return normalizeProfile({ id });
 }
 
+/** Fields for name + avatar in posts, comments, and messages. */
+export const PROFILE_ATTRIBUTION_FIELDS = "id, username, first_name, avatar_url";
+
 /** Profiles need a first name and @username before showing in Explore, Search, or Home. */
 export function isDiscoverableProfile(
   profile: Pick<Profile, "first_name" | "username">
