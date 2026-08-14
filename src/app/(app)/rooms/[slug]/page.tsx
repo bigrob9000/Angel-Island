@@ -144,6 +144,14 @@ export default function RoomPage() {
       });
   }, [slug]);
 
+  useEffect(() => {
+    if (loading || posts.length === 0) return;
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    if (!hash.startsWith("#post-")) return;
+    const el = document.querySelector(hash);
+    el?.scrollIntoView({ behavior: motionReduced ? "auto" : "smooth", block: "center" });
+  }, [loading, posts, motionReduced]);
+
   function resetCompose() {
     setShowCompose(false);
     setEditingPost(null);
@@ -510,7 +518,7 @@ export default function RoomPage() {
                 minute: "2-digit",
               });
               return (
-                <li key={post.id} className="rounded-lg border border-foreground/10 bg-white/40 p-4">
+                <li id={`post-${post.id}`} key={post.id} className="rounded-lg border border-foreground/10 bg-white/40 p-4 scroll-mt-24">
                   <div className="flex flex-wrap items-baseline gap-2 text-xs text-muted">
                     <span className="rounded bg-foreground/10 px-1.5 py-0.5 font-medium text-foreground">
                       {postIntentLabel(post)}

@@ -8,7 +8,9 @@ import type { Profile } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
 import type { CollabPace } from "@/lib/types";
 import { ProfileDisplay } from "@/components/ProfileDisplay";
+import { ProfileListenShares } from "@/components/ProfileListenShares";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
+import { loadRecentListenShares, type ProfileListenShare } from "@/lib/profile-shares";
 import { checkBlockBetween, unblockUser } from "@/lib/blocks";
 
 const MAX_PENDING = 5;
@@ -48,6 +50,7 @@ export default function PublicProfilePage() {
   const [blockedByMe, setBlockedByMe] = useState(false);
   const [blockedByThem, setBlockedByThem] = useState(false);
   const [safetyDialog, setSafetyDialog] = useState<SafetyDialog>(null);
+  const [listenShares, setListenShares] = useState<ProfileListenShare[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -64,6 +67,7 @@ export default function PublicProfilePage() {
       setProfile(p);
       setIsOwn(userRes.data.user?.id === p.id);
       setCurrentUserId(userRes.data.user?.id ?? null);
+      void loadRecentListenShares(p.id).then(setListenShares);
       setLoading(false);
 
       if (userRes.data.user && p.id !== userRes.data.user.id) {
@@ -271,6 +275,8 @@ export default function PublicProfilePage() {
       <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">
         <ProfileDisplay profile={profile} />
       </div>
+
+      <ProfileListenShares shares={listenShares} />
 
       <p className="text-sm text-muted">No cold DMs. Start with an invite.</p>
       <div className="flex flex-wrap gap-3">

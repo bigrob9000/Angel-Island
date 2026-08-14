@@ -5,23 +5,25 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import type { Profile, Room } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
+import { useInbox } from "@/components/InboxProvider";
+import { loadBlockedUserIds } from "@/lib/blocks";
 import { isDiscoverableProfile } from "@/lib/profile";
+import { rankProfilesForViewer } from "@/lib/discovery";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
-import { useInbox } from "@/components/InboxProvider";
 
 export default function HomePage() {
   const [dismissedBanner, setDismissedBanner] = useState(false);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [myRooms, setMyRooms] = useState<Room[]>([]);
-  const [people, setPeople] = useState<Profile[]>([]);
+  const [people, setPeople] = useState<ReturnType<typeof rankProfilesForViewer>>([]);
   const { conversations, loading: conversationsLoading } = useInbox();
   const recentConversations = conversations.slice(0, 5);
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       const name = user?.user_metadata?.first_name ?? user?.email?.split("@")[0] ?? null;
       setFirstName(name ?? null);
 
@@ -29,19 +31,19 @@ export default function HomePage() {
         return;
       }
 
-      supabase
-        .from("profiles")
-        .select("*")
-        .neq("id", user.id)
-        .order("updated_at", { ascending: false })
-        .limit(5)
-        .then((peopleRes) =>
-          setPeople(
-            (peopleRes.data ?? [])
-              .map((row) => normalizeProfile(row as Profile))
-              .filter(isDiscoverableProfile)
-          )
-        );
+      const [peopleRes, viewerRes, { blockedIds }] = await Promise.all([
+        supabase.from("profiles").select("*").neq("id", user.id),
+        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+        loadBlockedUserIds(user.id),
+      ]);
+
+      const viewer = viewerRes.data ? normalizeProfile(viewerRes.data as Profile) : null;
+      const candidates = (peopleRes.data ?? [])
+        .map((row) => normalizeProfile(row as Profile))
+        .filter(isDiscoverableProfile)
+        .filter((profile) => !blockedIds.has(profile.id));
+
+      setPeople(rankProfilesForViewer(viewer, candidates).slice(0, 5));
 
       supabase
         .from("room_members")
@@ -122,7 +124,8 @@ export default function HomePage() {
           </Link>
         </div>
         <p className="mt-2 text-sm text-muted">
-          People on Angel Island — no ranking by popularity.
+          People you might want to spend time with — shared genres, roles, and interests when we
+          can see them.
         </p>
         {people.length === 0 ? (
           <div className="mt-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-6 text-center text-sm text-muted">
@@ -138,7 +141,7 @@ export default function HomePage() {
           <ul className="mt-4 space-y-3">
             {people.map((profile) => (
               <li key={profile.id}>
-                <ProfileCard profile={profile} />
+                <ProfileCard profile={profile} reason={profile.reason ?? undefined} />
               </li>
             ))}
           </ul>

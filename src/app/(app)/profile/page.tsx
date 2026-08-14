@@ -9,12 +9,15 @@ import { normalizeProfile } from "@/lib/types";
 import { emptyProfile } from "@/lib/profile";
 import { ProfileDisplay } from "@/components/ProfileDisplay";
 import { ProfileAvatarUpload } from "@/components/ProfileAvatarUpload";
+import { ProfileListenShares } from "@/components/ProfileListenShares";
+import { loadRecentListenShares, type ProfileListenShare } from "@/lib/profile-shares";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [listenShares, setListenShares] = useState<ProfileListenShare[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -41,6 +44,7 @@ export default function ProfilePage() {
               p.here_for = metaHereFor.filter((x): x is string => typeof x === "string");
             }
             setProfile(p);
+            void loadRecentListenShares(user.id).then(setListenShares);
           })
       ).finally(() => setLoading(false));
     });
@@ -70,6 +74,8 @@ export default function ProfilePage() {
       <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">
         <ProfileDisplay profile={profile} />
       </div>
+
+      <ProfileListenShares shares={listenShares} isOwn showPrompt />
 
       <div className="flex flex-wrap gap-3">
         <Link
