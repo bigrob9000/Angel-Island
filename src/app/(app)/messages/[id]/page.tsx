@@ -11,6 +11,7 @@ import { isMessagingEnabled } from "@/lib/conversations";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 import { subscribeToConversation, unsubscribeFromConversation } from "@/lib/message-realtime";
+import { useInbox } from "@/components/InboxProvider";
 
 type ModalKind = "pause" | "end" | null;
 
@@ -67,6 +68,7 @@ export default function ConversationPage() {
   const [resumeMessage, setResumeMessage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { motionReduced } = usePreferences();
+  const { markRead } = useInbox();
 
   const canMessage = invite ? isMessagingEnabled(invite.conversation_status) : false;
 
@@ -139,6 +141,12 @@ export default function ConversationPage() {
       behavior: motionReduced ? "auto" : "smooth",
     });
   }, [messages, motionReduced]);
+
+  useEffect(() => {
+    if (!inviteId || loading) return;
+    const latest = messages[messages.length - 1];
+    markRead(inviteId, latest?.created_at ?? new Date().toISOString());
+  }, [inviteId, loading, messages, markRead]);
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
@@ -420,19 +428,31 @@ export default function ConversationPage() {
         {messages.length === 0 && canMessage && (
           <p className="text-sm text-muted">Say hello, share a thought, or take your time.</p>
         )}
-        {messages.map((msg) => (
-          <div key={msg.id} className={msg.sender_id === userId ? "text-right" : ""}>
-            <p className="text-sm text-foreground whitespace-pre-wrap inline-block rounded-lg bg-white/60 px-3 py-2 max-w-[85%] text-left">
-              {msg.body}
-            </p>
-            <p className="text-xs text-muted mt-0.5">
-              {new Date(msg.created_at).toLocaleTimeString(undefined, {
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-            </p>
-          </div>
-        ))}
+        {messages.map((msg) => {
+          const isMine = msg.sender_id === userId;
+          return (
+            <div
+              key={msg.id}
+              className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}
+            >
+              <p
+                className={`text-sm whitespace-pre-wrap inline-block rounded-lg px-3 py-2 max-w-[85%] text-left ${
+                  isMine
+                    ? "bg-foreground/90 text-background"
+                    : "border border-foreground/10 bg-white/70 text-foreground"
+                }`}
+              >
+                {msg.body}
+              </p>
+              <p className="text-xs text-muted mt-0.5">
+                {new Date(msg.created_at).toLocaleTimeString(undefined, {
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+          );
+        })}
         {pacingCue && (
           <p className="text-sm text-muted italic pt-2">This space is quiet right now.</p>
         )}

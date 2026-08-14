@@ -1,4 +1,6 @@
+import { isConversationUnread } from "@/lib/conversation-reads";
 import { createClient } from "@/lib/supabase";
+import type { Message } from "@/lib/types";
 import type { ChatInvite, ConversationStatus, Profile } from "@/lib/types";
 import { normalizeConversationStatus } from "@/lib/types";
 import { loadBlockedUserIds } from "@/lib/blocks";
@@ -8,10 +10,12 @@ export type ConversationPreview = ChatInvite & {
   other?: Profile;
   preview: string;
   lastActivityAt: string;
+  lastMessageSenderId?: string | null;
+  unread?: boolean;
 };
 
 type InviteWithMessages = ChatInvite & {
-  messages?: Array<{ body: string; created_at: string }>;
+  messages?: Array<{ body: string; created_at: string; sender_id: string }>;
 };
 
 export function conversationStatusLabel(status: ConversationStatus): string | null {
@@ -37,20 +41,24 @@ export function conversationPreviewText(
 
 async function latestMessagesByInvite(
   inviteIds: string[]
-): Promise<Record<string, { body: string; created_at: string }>> {
+): Promise<Record<string, { body: string; created_at: string; sender_id: string }>> {
   if (inviteIds.length === 0) return {};
 
   const supabase = createClient();
   const { data } = await supabase
     .from("messages")
-    .select("invite_id, body, created_at")
+    .select("invite_id, body, created_at, sender_id")
     .in("invite_id", inviteIds)
     .order("created_at", { ascending: false });
 
-  const latest: Record<string, { body: string; created_at: string }> = {};
+  const latest: Record<string, { body: string; created_at: string; sender_id: string }> = {};
   (data ?? []).forEach((msg) => {
     if (!latest[msg.invite_id]) {
-      latest[msg.invite_id] = { body: msg.body, created_at: msg.created_at };
+      latest[msg.invite_id] = {
+        body: msg.body,
+        created_at: msg.created_at,
+        sender_id: msg.sender_id,
+      };
     }
   });
   return latest;
@@ -70,7 +78,8 @@ export async function loadConversationPreviews(
       *,
       messages (
         body,
-        created_at
+        created_at,
+        sender_id
       )
     `
     )
@@ -119,6 +128,7 @@ export async function loadConversationPreviews(
       other: profilesById[otherId],
       preview: conversationPreviewText(latest?.body, inv.optional_message),
       lastActivityAt: latest?.created_at ?? inv.created_at,
+      lastMessageSenderId: latest?.sender_id ?? null,
     };
   });
 
@@ -127,4 +137,60 @@ export async function loadConversationPreviews(
   );
 
   return limit ? previews.slice(0, limit) : previews;
+}
+
+export function withUnreadState(
+  previews: ConversationPreview[],
+  userId: string,
+  openInviteId?: string | null
+): ConversationPreview[] {
+  return previews.map((preview) => ({
+    ...preview,
+    unread: isConversationUnread(userId, preview, openInviteId),
+  }));
+}
+
+export function applyInboxMessage(
+  previews: ConversationPreview[],
+  message: Message,
+  userId: string,
+  openInviteId?: string | null
+): ConversationPreview[] {
+  const index = previews.findIndex((p) => p.id === message.invite_id);
+  if (index === -1) return previews;
+
+  const current = previews[index];
+  const updated: ConversationPreview = {
+    ...current,
+    preview: message.body.trim() || current.preview,
+    lastActivityAt: message.created_at,
+    lastMessageSenderId: message.sender_id,
+  };
+
+  const next = [...previews];
+  next.splice(index, 1);
+  next.unshift(updated);
+
+  return withUnreadState(next, userId, openInviteId);
+}
+
+export function applyInboxInviteUpdate(
+  previews: ConversationPreview[],
+  invite: ChatInvite,
+  userId: string,
+  openInviteId?: string | null
+): ConversationPreview[] {
+  const index = previews.findIndex((p) => p.id === invite.id);
+  if (index === -1) return previews;
+
+  const next = [...previews];
+  next[index] = {
+    ...next[index],
+    conversation_status: invite.conversation_status,
+    paused_at: invite.paused_at ?? null,
+    paused_by: invite.paused_by ?? null,
+    ended_at: invite.ended_at ?? null,
+  };
+
+  return withUnreadState(next, userId, openInviteId);
 }

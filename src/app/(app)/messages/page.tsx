@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase";
 import type { ChatInvite, Profile, CollabInvite } from "@/lib/types";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
-import { loadConversationPreviews, type ConversationPreview } from "@/lib/conversations";
+import { useInbox } from "@/components/InboxProvider";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 
@@ -15,52 +15,49 @@ const PACE_LABELS: Record<string, string> = { "low-pressure": "Low-pressure", "s
 
 export default function MessagesPage() {
   const router = useRouter();
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId, conversations, loading: inboxLoading } = useInbox();
   const [receivedInvites, setReceivedInvites] = useState<(ChatInvite & { sender?: Profile })[]>([]);
   const [sentInvites, setSentInvites] = useState<(ChatInvite & { receiver?: Profile })[]>([]);
-  const [conversations, setConversations] = useState<ConversationPreview[]>([]);
   const [receivedCollabInvites, setReceivedCollabInvites] = useState<(CollabInvite & { sender?: Profile })[]>([]);
   const [sentCollabInvites, setSentCollabInvites] = useState<(CollabInvite & { receiver?: Profile })[]>([]);
   const [loading, setLoading] = useState(true);
   const [actingId, setActingId] = useState<string | null>(null);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
-        router.replace("/sign-in");
-        return;
-      }
-      setUserId(user.id);
+    if (!userId) {
+      if (!inboxLoading) router.replace("/sign-in");
+      return;
+    }
 
-      Promise.all([
+    const supabase = createClient();
+
+    Promise.all([
         supabase
           .from("chat_invites")
           .select("*")
-          .eq("receiver_id", user.id)
+          .eq("receiver_id", userId)
           .eq("status", "pending")
           .order("created_at", { ascending: false }),
         supabase
           .from("chat_invites")
           .select("*")
-          .eq("sender_id", user.id)
-          .eq("status", "pending")
-          .order("created_at", { ascending: false }),
-        loadConversationPreviews(user.id),
-        supabase
-          .from("collab_invites")
-          .select("*")
-          .eq("receiver_id", user.id)
+          .eq("sender_id", userId)
           .eq("status", "pending")
           .order("created_at", { ascending: false }),
         supabase
           .from("collab_invites")
           .select("*")
-          .eq("sender_id", user.id)
+          .eq("receiver_id", userId)
           .eq("status", "pending")
           .order("created_at", { ascending: false }),
-      ]).then(async ([recvRes, sentRes, convPreviews, collabRecvRes, collabSentRes]) => {
-        const { blockedIds } = await loadBlockedUserIds(user.id);
+        supabase
+          .from("collab_invites")
+          .select("*")
+          .eq("sender_id", userId)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false }),
+      ]).then(async ([recvRes, sentRes, collabRecvRes, collabSentRes]) => {
+        const { blockedIds } = await loadBlockedUserIds(userId);
         const recv = ((recvRes.data ?? []) as ChatInvite[]).filter(
           (inv) => !blockedIds.has(inv.sender_id)
         );
@@ -88,7 +85,6 @@ export default function MessagesPage() {
 
         loadProfiles(recv.map((i) => i.sender_id), setReceivedInvites as (a: (ChatInvite & { sender?: Profile })[]) => void, recv, "sender", (i) => i.sender_id);
         loadProfiles(sent.map((i) => i.receiver_id), setSentInvites as (a: (ChatInvite & { receiver?: Profile })[]) => void, sent, "receiver", (i) => i.receiver_id);
-        setConversations(convPreviews);
 
         const collabsReceived = ((collabRecvRes.data ?? []) as CollabInvite[]).filter(
           (c) => !blockedIds.has(c.sender_id)
@@ -112,8 +108,7 @@ export default function MessagesPage() {
           });
         } else setSentCollabInvites([]);
       }).finally(() => setLoading(false));
-    });
-  }, [router]);
+  }, [router, userId, inboxLoading]);
 
   async function acceptInvite(inviteId: string) {
     const supabase = createClient();
@@ -168,7 +163,7 @@ export default function MessagesPage() {
     }
   }
 
-  if (loading) return <p className="text-muted">Loading…</p>;
+  if (loading || inboxLoading) return <p className="text-muted">Loading…</p>;
 
   const hasSentInvites = sentInvites.length > 0 || sentCollabInvites.length > 0;
 

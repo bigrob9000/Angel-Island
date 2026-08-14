@@ -15,16 +15,37 @@ export function ConversationPreviewLink({ conversation, className = "" }: Props)
   return (
     <Link
       href={`/messages/${conversation.id}`}
-      className={`block rounded-lg border border-foreground/10 bg-white/40 px-4 py-3 text-foreground hover:bg-white/60 ${className}`.trim()}
+      className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-foreground hover:bg-white/60 ${
+        conversation.unread
+          ? "border-foreground/20 bg-white/60"
+          : "border-foreground/10 bg-white/40"
+      } ${className}`.trim()}
     >
-      <span className="block font-medium text-foreground">
-        {name}
-        {statusLabel && (
-          <span className="ml-2 text-xs font-normal text-muted">· {statusLabel}</span>
-        )}
-      </span>
-      <span className="mt-1 block text-sm leading-snug text-muted truncate">
-        {conversation.preview}
+      {conversation.unread ? (
+        <span
+          className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-foreground/80"
+          aria-hidden
+        />
+      ) : (
+        <span className="mt-1.5 h-2 w-2 shrink-0" aria-hidden />
+      )}
+      <span className="min-w-0 flex-1">
+        <span className="block font-medium text-foreground">
+          {name}
+          {conversation.unread && (
+            <span className="sr-only">, unread</span>
+          )}
+          {statusLabel && (
+            <span className="ml-2 text-xs font-normal text-muted">· {statusLabel}</span>
+          )}
+        </span>
+        <span
+          className={`mt-1 block text-sm leading-snug truncate ${
+            conversation.unread ? "font-medium text-foreground" : "text-muted"
+          }`}
+        >
+          {conversation.preview}
+        </span>
       </span>
     </Link>
   );

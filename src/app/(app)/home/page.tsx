@@ -9,15 +9,15 @@ import { isDiscoverableProfile } from "@/lib/profile";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
-import { loadConversationPreviews, type ConversationPreview } from "@/lib/conversations";
+import { useInbox } from "@/components/InboxProvider";
 
 export default function HomePage() {
   const [dismissedBanner, setDismissedBanner] = useState(false);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [myRooms, setMyRooms] = useState<Room[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
-  const [conversations, setConversations] = useState<ConversationPreview[]>([]);
-  const [conversationsLoading, setConversationsLoading] = useState(true);
+  const { conversations, loading: conversationsLoading } = useInbox();
+  const recentConversations = conversations.slice(0, 5);
 
   useEffect(() => {
     const supabase = createClient();
@@ -26,7 +26,6 @@ export default function HomePage() {
       setFirstName(name ?? null);
 
       if (!user) {
-        setConversationsLoading(false);
         return;
       }
 
@@ -61,11 +60,6 @@ export default function HomePage() {
             .order("name")
             .then((roomsRes) => setMyRooms(roomsRes.data ?? []));
         });
-
-      loadConversationPreviews(user.id, 5)
-        .then(setConversations)
-        .catch(() => setConversations([]))
-        .finally(() => setConversationsLoading(false));
     });
   }, []);
 
@@ -154,7 +148,7 @@ export default function HomePage() {
       <section>
         <div className="flex items-baseline justify-between gap-4">
           <h2 className="font-serif text-lg font-medium text-foreground">Conversations</h2>
-          {conversations.length > 0 && (
+          {recentConversations.length > 0 && (
             <Link href="/messages" className="text-sm text-muted hover:text-foreground shrink-0">
               See all
             </Link>
@@ -165,7 +159,7 @@ export default function HomePage() {
         </p>
         {conversationsLoading ? (
           <p className="mt-4 text-sm text-muted">Loading…</p>
-        ) : conversations.length === 0 ? (
+        ) : recentConversations.length === 0 ? (
           <div className="mt-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-6 text-center text-sm text-muted">
             No conversations yet.{" "}
             <Link href="/messages" className="text-foreground underline hover:no-underline">
@@ -174,7 +168,7 @@ export default function HomePage() {
           </div>
         ) : (
           <ul className="mt-4 space-y-2">
-            {conversations.map((conv) => (
+            {recentConversations.map((conv) => (
               <li key={conv.id}>
                 <ConversationPreviewLink conversation={conv} />
               </li>
