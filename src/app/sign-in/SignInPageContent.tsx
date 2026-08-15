@@ -81,8 +81,12 @@ export default function SignInPageContent() {
     } catch (err: unknown) {
       let msg = err instanceof Error ? err.message : "Something went wrong.";
       if (msg === "Failed to fetch") {
-        msg =
-          "Could not reach Supabase. Check your internet connection, restart the dev server (from the web folder), and confirm your Supabase project is active in the dashboard.";
+        const onProduction =
+          typeof window !== "undefined" &&
+          !window.location.hostname.includes("localhost");
+        msg = onProduction
+          ? "Could not reach Supabase. In Vercel → Settings → Environment Variables, set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY for Production (use your real https://xxx.supabase.co project URL, not the placeholder), then Redeploy."
+          : "Could not reach Supabase. Check your internet connection, restart the dev server (from the web folder), and confirm your Supabase project is active in the dashboard.";
       }
       setMessage({ type: "error", text: msg });
     } finally {
