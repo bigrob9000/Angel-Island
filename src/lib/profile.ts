@@ -15,7 +15,10 @@ export function isDiscoverableProfile(
   return Boolean(profile.first_name?.trim() && profile.username?.trim());
 }
 
-export type ProfileFormState = Omit<Profile, "id" | "updated_at">;
+export type ProfileFormState = Omit<
+  Profile,
+  "id" | "updated_at" | "notify_email_messages" | "notify_email_collab"
+>;
 
 export function profileToForm(profile: Profile): ProfileFormState {
   return {

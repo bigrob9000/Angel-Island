@@ -9,6 +9,7 @@ import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { useInbox } from "@/components/InboxProvider";
 import { createCollaborationWorkspace, findCollaborationIdByInvite } from "@/lib/collaborations";
+import { notifyCollabResponse } from "@/lib/notifications/client";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 
@@ -154,6 +155,7 @@ export default function MessagesPage() {
 
     setReceivedCollabInvites((prev) => prev.filter((c) => c.id !== collabId));
     setActingId(null);
+    notifyCollabResponse(collabId);
 
     if (response === "interested" && collab) {
       const context = `Collab: ${collab.about}${collab.role ? `. Role: ${collab.role}` : ""}${collab.pace ? `. Pace: ${PACE_LABELS[collab.pace]}` : ""}`;

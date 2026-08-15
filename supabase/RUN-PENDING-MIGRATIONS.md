@@ -201,6 +201,15 @@ If either line errors with **already member of publication**, that table is alre
 | 014 | `share_work` post type + `media_url` on posts (Listen room) |
 | 015 | Private post love (creator-only counts) |
 | 016 | Collaboration workspaces (notes, links, next steps) |
+| 017 | Email notification prefs + send log |
+
+---
+
+## 017 — Email notifications
+
+Run the full file. Adds email preference columns on `profiles` and a debounce log for message emails.
+
+Then follow **`NOTIFICATIONS-SETUP.md`** for Resend + Vercel env vars.
 
 ---
 

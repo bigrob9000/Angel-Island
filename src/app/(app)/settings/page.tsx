@@ -21,6 +21,10 @@ export default function SettingsPage() {
   const [unblockingId, setUnblockingId] = useState<string | null>(null);
   const [blocksMessage, setBlocksMessage] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [notifyMessages, setNotifyMessages] = useState(true);
+  const [notifyCollab, setNotifyCollab] = useState(true);
+  const [notifySaving, setNotifySaving] = useState<string | null>(null);
+  const [notifyMessage, setNotifyMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -31,6 +35,17 @@ export default function SettingsPage() {
         setBlocksLoading(false);
         return;
       }
+      supabase
+        .from("profiles")
+        .select("notify_email_messages, notify_email_collab")
+        .eq("id", user.id)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (!error && data) {
+            setNotifyMessages(data.notify_email_messages ?? true);
+            setNotifyCollab(data.notify_email_collab ?? true);
+          }
+        });
       loadBlockedUsers(user.id).then((result) => {
         setBlockedUsers(result.blocks);
         setBlocksTableMissing(result.tableMissing);
@@ -78,6 +93,34 @@ export default function SettingsPage() {
       return;
     }
     setBlockedUsers((prev) => prev.filter((b) => b.blocked_id !== blockedId));
+  }
+
+  async function updateNotifyPref(
+    field: "notify_email_messages" | "notify_email_collab",
+    checked: boolean,
+  ) {
+    if (!userId) return;
+    setNotifyMessage(null);
+    setNotifySaving(field);
+    if (field === "notify_email_messages") setNotifyMessages(checked);
+    else setNotifyCollab(checked);
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("profiles")
+      .update({ [field]: checked, updated_at: new Date().toISOString() })
+      .eq("id", userId);
+
+    setNotifySaving(null);
+    if (error) {
+      setNotifyMessage(
+        error.message.includes("notify_email")
+          ? "Email settings aren't set up yet. Run migration 017_email_notifications.sql in Supabase."
+          : error.message,
+      );
+      if (field === "notify_email_messages") setNotifyMessages(!checked);
+      else setNotifyCollab(!checked);
+    }
   }
 
   return (
@@ -165,6 +208,39 @@ export default function SettingsPage() {
             checked={preferences.easierReadingFont}
             onChange={(checked) => setPreference("easierReadingFont", checked)}
           />
+        )}
+      </section>
+
+      <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-6">
+        <div>
+          <h2 className="font-medium text-foreground">Email updates</h2>
+          <p className="mt-1 text-sm text-muted">
+            Gentle emails when someone reaches out — no nudges, no guilt. Turn off anytime.
+          </p>
+        </div>
+
+        <SettingsToggle
+          id="notify-messages"
+          label="New messages"
+          description="Email when someone sends you a message (at most once every 30 minutes per conversation)."
+          checked={notifyMessages}
+          disabled={notifySaving === "notify_email_messages"}
+          onChange={(checked) => updateNotifyPref("notify_email_messages", checked)}
+        />
+
+        <SettingsToggle
+          id="notify-collab"
+          label="Collab responses"
+          description="Email when someone responds to a collab invite you sent."
+          checked={notifyCollab}
+          disabled={notifySaving === "notify_email_collab"}
+          onChange={(checked) => updateNotifyPref("notify_email_collab", checked)}
+        />
+
+        {notifyMessage && (
+          <p className="text-sm text-red-600" role="alert">
+            {notifyMessage}
+          </p>
         )}
       </section>
 

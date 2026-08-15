@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import { notifyNewMessage } from "@/lib/notifications/client";
 import { createClient } from "@/lib/supabase";
 import type { ChatInvite, Message, Profile } from "@/lib/types";
 import { normalizeConversationStatus } from "@/lib/types";
@@ -169,7 +170,10 @@ export default function ConversationPage() {
       return;
     }
     setActionError(null);
-    if (inserted) setMessages((prev) => [...prev, inserted as Message]);
+    if (inserted) {
+      setMessages((prev) => [...prev, inserted as Message]);
+      notifyNewMessage(inserted.id);
+    }
   }
 
   async function updateConversationStatus(

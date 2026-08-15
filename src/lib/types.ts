@@ -56,6 +56,8 @@ export interface Profile {
   open_to_questions: OpenToQuestions | null;
   work_links: string | null;
   avatar_url: string | null;
+  notify_email_messages: boolean;
+  notify_email_collab: boolean;
   updated_at: string;
 }
 
@@ -77,6 +79,8 @@ export function normalizeProfile(row: Partial<Profile> & { id: string }): Profil
     open_to_questions: row.open_to_questions ?? null,
     work_links: row.work_links ?? null,
     avatar_url: row.avatar_url ?? null,
+    notify_email_messages: row.notify_email_messages ?? true,
+    notify_email_collab: row.notify_email_collab ?? true,
     updated_at: row.updated_at ?? "",
   };
 }
