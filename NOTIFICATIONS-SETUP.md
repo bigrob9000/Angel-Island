@@ -24,7 +24,7 @@ SQL Editor → paste all of `supabase/migrations/017_email_notifications.sql` �
 
 ## 3. Sender address
 
-**Testing (fastest):** Resend lets you send from `onboarding@resend.dev` to **your own verified email** only.
+**Testing (fastest):** Resend lets you send from `onboarding@resend.dev` — but **only to email addresses you verified in Resend** (usually just the email you signed up with). Sending to friends/invites **will not work** until you verify **angelislandconnect.com** in Resend.
 
 **Production:** Add domain **angelislandconnect.com** in Resend → **Domains**, add the DNS records they give you, then use:
 

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { usePreferences } from "@/components/PreferencesProvider";
+import { sendTestNotificationEmail } from "@/lib/notifications/client";
 import { loadBlockedUsers, unblockUser } from "@/lib/blocks";
 import type { BlockedUser } from "@/lib/blocks";
 
@@ -25,6 +26,8 @@ export default function SettingsPage() {
   const [notifyCollab, setNotifyCollab] = useState(true);
   const [notifySaving, setNotifySaving] = useState<string | null>(null);
   const [notifyMessage, setNotifyMessage] = useState<string | null>(null);
+  const [testEmailLoading, setTestEmailLoading] = useState(false);
+  const [testEmailResult, setTestEmailResult] = useState<{ type: "ok" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -120,6 +123,21 @@ export default function SettingsPage() {
       );
       if (field === "notify_email_messages") setNotifyMessages(!checked);
       else setNotifyCollab(!checked);
+    }
+  }
+
+  async function handleTestEmail() {
+    setTestEmailResult(null);
+    setTestEmailLoading(true);
+    const result = await sendTestNotificationEmail();
+    setTestEmailLoading(false);
+    if (result.ok) {
+      setTestEmailResult({ type: "ok", text: result.message ?? "Test email sent." });
+    } else {
+      setTestEmailResult({
+        type: "error",
+        text: result.error ?? "Could not send test email.",
+      });
     }
   }
 
@@ -242,6 +260,28 @@ export default function SettingsPage() {
             {notifyMessage}
           </p>
         )}
+
+        <div className="border-t border-foreground/10 pt-5">
+          <button
+            type="button"
+            onClick={handleTestEmail}
+            disabled={testEmailLoading}
+            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5 disabled:opacity-50"
+          >
+            {testEmailLoading ? "Sending…" : "Send test email to me"}
+          </button>
+          <p className="mt-2 text-xs text-muted">
+            Uses your account email ({email ?? "—"}). With Resend testing, only verified addresses receive mail until your domain is set up.
+          </p>
+          {testEmailResult && (
+            <p
+              className={`mt-2 text-sm ${testEmailResult.type === "ok" ? "text-accent" : "text-red-600"}`}
+              role="status"
+            >
+              {testEmailResult.text}
+            </p>
+          )}
+        </div>
       </section>
 
       <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-5">
