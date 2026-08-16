@@ -6,6 +6,12 @@ import { createClient } from "@/lib/supabase";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { usePreferences } from "@/components/PreferencesProvider";
 import { fetchNotificationStatus, sendTestNotificationEmail } from "@/lib/notifications/client";
+import {
+  fetchPushStatus,
+  isBrowserPushSupported,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "@/lib/push/client";
 import { loadBlockedUsers, unblockUser } from "@/lib/blocks";
 import type { BlockedUser } from "@/lib/blocks";
 
@@ -24,6 +30,15 @@ export default function SettingsPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [notifyMessages, setNotifyMessages] = useState(true);
   const [notifyCollab, setNotifyCollab] = useState(true);
+  const [notifyPush, setNotifyPush] = useState(false);
+  const [pushSaving, setPushSaving] = useState(false);
+  const [pushMessage, setPushMessage] = useState<string | null>(null);
+  const [pushStatus, setPushStatus] = useState<{
+    supported: boolean;
+    configured: boolean;
+    publicKey: string | null;
+    permission: NotificationPermission | "unsupported";
+  } | null>(null);
   const [notifySaving, setNotifySaving] = useState<string | null>(null);
   const [notifyMessage, setNotifyMessage] = useState<string | null>(null);
   const [testEmailLoading, setTestEmailLoading] = useState(false);
@@ -38,6 +53,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchNotificationStatus().then(setNotifyStatus);
+    fetchPushStatus().then(setPushStatus);
   }, []);
 
   useEffect(() => {
@@ -51,13 +67,14 @@ export default function SettingsPage() {
       }
       supabase
         .from("profiles")
-        .select("notify_email_messages, notify_email_collab")
+        .select("notify_email_messages, notify_email_collab, notify_push_messages")
         .eq("id", user.id)
         .maybeSingle()
         .then(({ data, error }) => {
           if (!error && data) {
             setNotifyMessages(data.notify_email_messages ?? true);
             setNotifyCollab(data.notify_email_collab ?? true);
+            setNotifyPush(data.notify_push_messages ?? false);
           }
         });
       loadBlockedUsers(user.id).then((result) => {
@@ -134,6 +151,55 @@ export default function SettingsPage() {
       );
       if (field === "notify_email_messages") setNotifyMessages(!checked);
       else setNotifyCollab(!checked);
+    }
+  }
+
+  async function handlePushToggle(checked: boolean) {
+    if (!userId) return;
+    setPushMessage(null);
+    setPushSaving(true);
+    setNotifyPush(checked);
+
+    if (checked) {
+      const status = pushStatus ?? (await fetchPushStatus());
+      if (!status.supported) {
+        setNotifyPush(false);
+        setPushSaving(false);
+        setPushMessage("This browser doesn't support push notifications.");
+        return;
+      }
+      if (!status.configured || !status.publicKey) {
+        setNotifyPush(false);
+        setPushSaving(false);
+        setPushMessage("Push isn't set up on the server yet. Add VAPID keys in Vercel and redeploy.");
+        return;
+      }
+
+      const subscribeResult = await subscribeToPush(status.publicKey);
+      if (!subscribeResult.ok) {
+        setNotifyPush(false);
+        setPushSaving(false);
+        setPushMessage(subscribeResult.error ?? "Could not enable browser notifications.");
+        return;
+      }
+    } else {
+      await unsubscribeFromPush();
+    }
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("profiles")
+      .update({ notify_push_messages: checked, updated_at: new Date().toISOString() })
+      .eq("id", userId);
+
+    setPushSaving(false);
+    if (error) {
+      setPushMessage(
+        error.message.includes("notify_push")
+          ? "Browser notification settings aren't set up yet. Run migration 018_browser_push.sql in Supabase."
+          : error.message,
+      );
+      setNotifyPush(!checked);
     }
   }
 
@@ -307,6 +373,58 @@ export default function SettingsPage() {
             </p>
           )}
         </div>
+      </section>
+
+      <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-6">
+        <div>
+          <h2 className="font-medium text-foreground">Browser notifications</h2>
+          <p className="mt-1 text-sm text-muted">
+            Optional alerts when someone messages you — even if Angel Island isn&apos;t open. Off by default.
+          </p>
+          {pushStatus && (
+            <ul className="mt-3 space-y-1 text-xs text-muted">
+              <li>{pushStatus.supported ? "✓" : "✗"} Browser supports push</li>
+              <li>{pushStatus.configured ? "✓" : "✗"} VAPID keys (Vercel)</li>
+              <li>
+                {pushStatus.permission === "granted"
+                  ? "✓"
+                  : pushStatus.permission === "denied"
+                    ? "✗"
+                    : "—"}{" "}
+                Notification permission
+                {pushStatus.permission === "denied" ? " (blocked in browser settings)" : ""}
+              </li>
+            </ul>
+          )}
+          {pushStatus &&
+            pushStatus.supported &&
+            pushStatus.configured &&
+            pushStatus.permission === "denied" && (
+              <p className="mt-2 text-sm text-red-600">
+                Notifications are blocked for this site. Allow them in your browser&apos;s site settings, then try again.
+              </p>
+            )}
+        </div>
+
+        <SettingsToggle
+          id="notify-push"
+          label="New messages"
+          description="Browser alert when someone sends you a message (at most once every 30 minutes per conversation)."
+          checked={notifyPush}
+          disabled={
+            pushSaving ||
+            !isBrowserPushSupported() ||
+            pushStatus?.permission === "denied" ||
+            !pushStatus?.configured
+          }
+          onChange={handlePushToggle}
+        />
+
+        {pushMessage && (
+          <p className="text-sm text-red-600" role="alert">
+            {pushMessage}
+          </p>
+        )}
       </section>
 
       <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-5">

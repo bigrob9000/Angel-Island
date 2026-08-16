@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
 import { InboxProvider, useInbox } from "@/components/InboxProvider";
 import { InboxMessageNotice } from "@/components/InboxMessageNotice";
+import { PushRegistration } from "@/components/PushRegistration";
 
 const nav = [
   { href: "/home", label: "Home" },
@@ -86,6 +87,7 @@ export default function AppLayout({
   return (
     <InboxProvider>
       <div className="min-h-screen bg-ethereal text-foreground">
+        <PushRegistration />
         <AppNav />
         <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">{children}</main>
         <InboxMessageNotice />

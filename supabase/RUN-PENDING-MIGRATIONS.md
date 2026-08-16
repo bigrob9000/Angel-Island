@@ -202,6 +202,7 @@ If either line errors with **already member of publication**, that table is alre
 | 015 | Private post love (creator-only counts) |
 | 016 | Collaboration workspaces (notes, links, next steps) |
 | 017 | Email notification prefs + send log |
+| 018 | Browser push prefs + push subscriptions |
 
 ---
 
@@ -210,6 +211,16 @@ If either line errors with **already member of publication**, that table is alre
 Run the full file. Adds email preference columns on `profiles` and a debounce log for message emails.
 
 Then follow **`NOTIFICATIONS-SETUP.md`** for Resend + Vercel env vars.
+
+---
+
+## 018 — Browser push notifications
+
+Run the full file: `supabase/migrations/018_browser_push.sql`
+
+Then follow **`PUSH-SETUP.md`** for VAPID keys + Vercel env vars.
+
+**Try it:** Settings → **Browser notifications** → turn on → another account sends you a DM → browser alert (HTTPS required in production).
 
 ---
 

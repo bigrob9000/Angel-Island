@@ -7,6 +7,8 @@ Angel Island can send **calm email updates** when:
 
 Users can turn these off in **Settings → Email updates**.
 
+For optional **browser push** (tab closed), see **`PUSH-SETUP.md`**.
+
 ---
 
 ## 1. Run migration 017 in Supabase

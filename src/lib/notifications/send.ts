@@ -1,4 +1,6 @@
 import { getSiteUrl } from "@/lib/site";
+import { sendPushToUser } from "@/lib/push/send";
+import { isPushConfigured } from "@/lib/push/vapid";
 import { createAdminClient, isNotificationEmailConfigured } from "@/lib/supabase/admin";
 import {
   escapeHtml,
@@ -71,9 +73,11 @@ async function logSend(
 export async function sendMessageNotification(
   messageId: string,
   senderUserId: string,
-): Promise<{ ok: boolean; skipped?: string }> {
-  if (!isNotificationEmailConfigured()) {
-    return { ok: false, skipped: "email_not_configured" };
+): Promise<{ ok: boolean; skipped?: string; email?: boolean; push?: boolean }> {
+  const emailConfigured = isNotificationEmailConfigured();
+  const pushConfigured = isPushConfigured();
+  if (!emailConfigured && !pushConfigured) {
+    return { ok: false, skipped: "notifications_not_configured" };
   }
 
   const admin = createAdminClient();
@@ -111,11 +115,17 @@ export async function sendMessageNotification(
 
   const { data: recipientProfile } = await admin
     .from("profiles")
-    .select("notify_email_messages")
+    .select("notify_email_messages, notify_push_messages")
     .eq("id", recipientId)
     .maybeSingle();
 
-  if (recipientProfile?.notify_email_messages === false) {
+  const wantsEmail = recipientProfile?.notify_email_messages !== false;
+  const wantsPush = recipientProfile?.notify_push_messages === true;
+
+  if (
+    (!wantsEmail || !emailConfigured) &&
+    (!wantsPush || !pushConfigured)
+  ) {
     return { ok: false, skipped: "opted_out" };
   }
 
@@ -129,32 +139,46 @@ export async function sendMessageNotification(
     .eq("id", senderUserId)
     .maybeSingle();
 
-  const recipientEmail = await getUserEmail(recipientId);
-  if (!recipientEmail) {
-    return { ok: false, skipped: "no_email" };
-  }
-
   const senderName = profileLabel(senderProfile ?? {});
   const preview = messagePreview(message.body);
   const siteUrl = getSiteUrl();
   const link = `${siteUrl}/messages/${invite.id}`;
 
-  const subject = `${senderName} sent you a message`;
-  const text = `${senderName} sent you a message on Angel Island:\n\n"${preview}"\n\nRead when you're ready: ${link}\n\nTurn off these emails in Settings on Angel Island.`;
-  const html = `
-    <p><strong>${escapeHtml(senderName)}</strong> sent you a message on Angel Island:</p>
-    <p style="color:#5f7a6b;margin:16px 0;">"${escapeHtml(preview)}"</p>
-    <p><a href="${link}">Open the conversation</a></p>
-    <p style="color:#888;font-size:13px;margin-top:24px;">No rush — read when it suits you. Turn off email updates in Settings on Angel Island.</p>
-  `;
+  let emailSent = false;
+  let pushSent = false;
 
-  const sent = await sendNotificationEmail({ to: recipientEmail, subject, html, text });
-  if (!sent.ok) {
-    return { ok: false, skipped: sent.error };
+  if (wantsEmail && emailConfigured) {
+    const recipientEmail = await getUserEmail(recipientId);
+    if (recipientEmail) {
+      const subject = `${senderName} sent you a message`;
+      const text = `${senderName} sent you a message on Angel Island:\n\n"${preview}"\n\nRead when you're ready: ${link}\n\nTurn off these emails in Settings on Angel Island.`;
+      const html = `
+        <p><strong>${escapeHtml(senderName)}</strong> sent you a message on Angel Island:</p>
+        <p style="color:#5f7a6b;margin:16px 0;">"${escapeHtml(preview)}"</p>
+        <p><a href="${link}">Open the conversation</a></p>
+        <p style="color:#888;font-size:13px;margin-top:24px;">No rush — read when it suits you. Turn off email updates in Settings on Angel Island.</p>
+      `;
+
+      const sent = await sendNotificationEmail({ to: recipientEmail, subject, html, text });
+      emailSent = sent.ok;
+    }
+  }
+
+  if (wantsPush && pushConfigured) {
+    const pushResult = await sendPushToUser(recipientId, {
+      title: `${senderName} sent you a message`,
+      body: preview,
+      url: link,
+    });
+    pushSent = pushResult.ok;
+  }
+
+  if (!emailSent && !pushSent) {
+    return { ok: false, skipped: "delivery_failed" };
   }
 
   await logSend(recipientId, "message", invite.id);
-  return { ok: true };
+  return { ok: true, email: emailSent, push: pushSent };
 }
 
 export async function sendCollabResponseNotification(
