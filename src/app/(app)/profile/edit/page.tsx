@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import type { OpenToQuestions } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
@@ -29,7 +29,16 @@ const inputClass =
   "mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none";
 
 export default function EditProfilePage() {
+  return (
+    <Suspense fallback={<p className="text-muted">Loading…</p>}>
+      <EditProfilePageContent />
+    </Suspense>
+  );
+}
+
+function EditProfilePageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [userId, setUserId] = useState<string | null>(null);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<ProfileFormState | null>(null);
@@ -67,6 +76,15 @@ export default function EditProfilePage() {
       ).finally(() => setLoading(false));
     });
   }, [router]);
+
+  useEffect(() => {
+    const stepParam = searchParams.get("step");
+    if (!stepParam) return;
+    const parsed = Number.parseInt(stepParam, 10);
+    if (!Number.isNaN(parsed) && parsed >= 0 && parsed < STEP_COUNT) {
+      setStep(parsed);
+    }
+  }, [searchParams]);
 
   function updateForm(patch: Partial<ProfileFormState>) {
     setForm((prev) => (prev ? { ...prev, ...patch } : prev));

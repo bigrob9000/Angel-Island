@@ -46,7 +46,7 @@ export function GettingStartedGuide({ show }: Props) {
         <li className="flex gap-3">
           <span className="font-medium text-muted">1</span>
           <span>
-            <Link href="/profile/edit" className="text-foreground underline hover:no-underline">
+            <Link href="/profile/edit?step=0" className="text-foreground underline hover:no-underline">
               Finish your profile
             </Link>
             <span className="text-muted"> — so people know who you are.</span>

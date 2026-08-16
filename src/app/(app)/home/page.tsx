@@ -8,7 +8,7 @@ import { normalizeProfile } from "@/lib/types";
 import { useInbox } from "@/components/InboxProvider";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { isDiscoverableProfile } from "@/lib/profile";
-import { getProfileCompleteness } from "@/lib/profile-completeness";
+import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
 import { rankProfilesForViewer } from "@/lib/discovery";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
@@ -72,7 +72,9 @@ export default function HomePage() {
   }, []);
 
   const welcomeName = firstName ? `, ${firstName}` : "";
-  const profileComplete = viewerProfile ? getProfileCompleteness(viewerProfile).isComplete : true;
+  const profileComplete = viewerProfile
+    ? getOptionalProfileCompleteness(viewerProfile).isComplete
+    : true;
   const showGettingStarted =
     Boolean(viewerProfile) &&
     !profileComplete &&
