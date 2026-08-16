@@ -12,6 +12,7 @@ import {
   loadCollaborationPreviews,
   type CollaborationPreview,
 } from "@/lib/collaborations";
+import { EmptyState } from "@/components/EmptyState";
 
 type Filter = "active" | "paused" | "past";
 
@@ -76,21 +77,27 @@ export default function CollaborationsPage() {
       {loading ? (
         <p className="text-muted">Loading…</p>
       ) : previews.length === 0 ? (
-        <div className="rounded-lg border border-foreground/10 bg-white/40 px-4 py-8 text-center text-sm text-muted">
-          {filter === "active" ? (
-            <>
-              <p>No active collaborations yet.</p>
-              <p className="mt-2">
-                When someone accepts a collab invite as interested, a shared workspace opens here.{" "}
-                <Link href="/messages" className="text-foreground underline hover:no-underline">
-                  Check Messages
-                </Link>
-              </p>
-            </>
-          ) : (
-            <p>Nothing here right now.</p>
-          )}
-        </div>
+        filter === "active" ? (
+          <EmptyState
+            title="No active collaborations yet."
+            description="When someone responds interested to a collab invite, a shared workspace opens here for notes, links, and next steps."
+          >
+            <Link
+              href="/messages"
+              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+            >
+              Check Messages
+            </Link>
+            <Link
+              href="/explore"
+              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+            >
+              Explore people
+            </Link>
+          </EmptyState>
+        ) : (
+          <EmptyState title="Nothing here right now." />
+        )
       ) : (
         <ul className="space-y-3">
           {previews.map((preview) => {

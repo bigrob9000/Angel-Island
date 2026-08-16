@@ -10,6 +10,7 @@ import { emptyProfile } from "@/lib/profile";
 import { ProfileDisplay } from "@/components/ProfileDisplay";
 import { ProfileAvatarUpload } from "@/components/ProfileAvatarUpload";
 import { ProfileListenShares } from "@/components/ProfileListenShares";
+import { ProfileCompletenessNudge } from "@/components/ProfileCompletenessNudge";
 import { loadRecentListenShares, type ProfileListenShare } from "@/lib/profile-shares";
 
 export default function ProfilePage() {
@@ -56,6 +57,8 @@ export default function ProfilePage() {
   return (
     <div className="space-y-8">
       <h1 className="font-serif text-2xl font-medium text-foreground">Profile</h1>
+
+      <ProfileCompletenessNudge profile={profile} />
 
       {userId && (
         <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">

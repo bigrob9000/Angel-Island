@@ -149,6 +149,17 @@ export default function Home() {
             A place for musicians and creatives who care about music. No clout.
             No pressure. Just connection, collaboration, and conversation.
           </p>
+          <p className="mt-4 text-sm text-muted">
+            Someone invited you?{" "}
+            <Link href="/sign-in?invite=1" className="text-foreground underline underline-offset-2 hover:no-underline">
+              Sign in
+            </Link>
+            {" "}or{" "}
+            <Link href="/sign-in?invite=1&mode=sign-up" className="text-foreground underline underline-offset-2 hover:no-underline">
+              create an account
+            </Link>
+            . No rush.
+          </p>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-6">
             <Link href="/sign-in" className="btn-cloud">
               <span className="btn-cloud-blob" style={{ width: 56, height: 48, top: 14, left: 0 }} />

@@ -19,7 +19,11 @@ export default function SignInPageContent() {
   useEffect(() => {
     const err = searchParams.get("error");
     if (err) setMessage({ type: "error", text: err });
+    const modeParam = searchParams.get("mode");
+    if (modeParam === "sign-up") setMode("sign-up");
   }, [searchParams]);
+
+  const invited = searchParams.get("invite") === "1";
 
   useEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
@@ -127,9 +131,11 @@ export default function SignInPageContent() {
           {mode === "sign-in" ? "Sign in" : "Create an account"}
         </h1>
         <p className="text-muted mt-2 text-sm">
-          {mode === "sign-in"
-            ? "Sign in with Google, or use email and password."
-            : "Create an account with Google, or use email and password."}
+          {invited
+            ? "Welcome — sign in to join Angel Island. Take your time getting settled."
+            : mode === "sign-in"
+              ? "Sign in with Google, or use email and password."
+              : "Create an account with Google, or use email and password."}
         </p>
 
         <button

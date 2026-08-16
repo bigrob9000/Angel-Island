@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase";
 import type { ChatInvite, Profile, CollabInvite } from "@/lib/types";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
+import { EmptyState } from "@/components/EmptyState";
 import { useInbox } from "@/components/InboxProvider";
 import { createCollaborationWorkspace, findCollaborationIdByInvite } from "@/lib/collaborations";
 import { notifyCollabResponse } from "@/lib/notifications/client";
@@ -182,16 +183,46 @@ export default function MessagesPage() {
   if (loading || inboxLoading) return <p className="text-muted">Loading…</p>;
 
   const hasSentInvites = sentInvites.length > 0 || sentCollabInvites.length > 0;
+  const isEmptyInbox =
+    receivedInvites.length === 0 &&
+    receivedCollabInvites.length === 0 &&
+    !hasSentInvites &&
+    conversations.length === 0;
 
   return (
     <div className="space-y-10">
-      <h1 className="font-serif text-2xl font-medium text-foreground">Messages</h1>
+      <div>
+        <h1 className="font-serif text-2xl font-medium text-foreground">Messages</h1>
+        <p className="mt-2 text-sm text-muted">
+          Invites and conversations — all by choice, no pressure to reply.
+        </p>
+      </div>
+
+      {isEmptyInbox && (
+        <EmptyState
+          title="Nothing here yet."
+          description="When someone invites you to chat, it shows up here. You can also reach out from Explore when you're ready."
+        >
+          <Link
+            href="/explore"
+            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+          >
+            Explore people
+          </Link>
+          <Link
+            href="/rooms"
+            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+          >
+            Visit a room
+          </Link>
+        </EmptyState>
+      )}
 
       <section>
         <h2 className="font-serif text-lg font-medium text-foreground">Invites you received</h2>
         <p className="mt-1 text-sm text-muted">Accept to start a conversation. No obligation.</p>
         {receivedInvites.length === 0 ? (
-          <p className="mt-4 text-sm text-muted">No pending invites.</p>
+          <p className="mt-4 text-sm text-muted">No pending chat invites.</p>
         ) : (
           <ul className="mt-4 space-y-3">
             {receivedInvites.map((inv) => (

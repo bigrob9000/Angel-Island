@@ -8,14 +8,18 @@ import { normalizeProfile } from "@/lib/types";
 import { useInbox } from "@/components/InboxProvider";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { isDiscoverableProfile } from "@/lib/profile";
+import { getProfileCompleteness } from "@/lib/profile-completeness";
 import { rankProfilesForViewer } from "@/lib/discovery";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
+import { EmptyState } from "@/components/EmptyState";
+import { GettingStartedGuide } from "@/components/GettingStartedGuide";
+import { ProfileCompletenessNudge } from "@/components/ProfileCompletenessNudge";
 
 export default function HomePage() {
-  const [dismissedBanner, setDismissedBanner] = useState(false);
   const [firstName, setFirstName] = useState<string | null>(null);
+  const [viewerProfile, setViewerProfile] = useState<Profile | null>(null);
   const [myRooms, setMyRooms] = useState<Room[]>([]);
   const [people, setPeople] = useState<ReturnType<typeof rankProfilesForViewer>>([]);
   const { conversations, loading: conversationsLoading } = useInbox();
@@ -38,6 +42,8 @@ export default function HomePage() {
       ]);
 
       const viewer = viewerRes.data ? normalizeProfile(viewerRes.data as Profile) : null;
+      setViewerProfile(viewer);
+
       const candidates = (peopleRes.data ?? [])
         .map((row) => normalizeProfile(row as Profile))
         .filter(isDiscoverableProfile)
@@ -66,29 +72,24 @@ export default function HomePage() {
   }, []);
 
   const welcomeName = firstName ? `, ${firstName}` : "";
+  const profileComplete = viewerProfile ? getProfileCompleteness(viewerProfile).isComplete : true;
+  const showGettingStarted =
+    Boolean(viewerProfile) &&
+    !profileComplete &&
+    myRooms.length === 0 &&
+    conversations.length === 0;
 
   return (
     <div className="space-y-10">
-      {!dismissedBanner && (
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-foreground/10 bg-white/60 px-4 py-3">
-          <p className="text-sm text-muted">
-            Start anywhere. Or just look around.
-          </p>
-          <button
-            type="button"
-            onClick={() => setDismissedBanner(true)}
-            className="text-sm text-muted hover:text-foreground shrink-0"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-
       <SearchBar />
 
       <p className="font-serif text-xl text-foreground sm:text-2xl">
         Welcome back{welcomeName}. Where would you like to spend your time today?
       </p>
+
+      <GettingStartedGuide show={showGettingStarted} />
+
+      {viewerProfile && <ProfileCompletenessNudge profile={viewerProfile} />}
 
       <section>
         <h2 className="font-serif text-lg font-medium text-foreground">Your Spaces</h2>
@@ -96,9 +97,18 @@ export default function HomePage() {
           Rooms you&apos;ve added. No obligation to post — just a place to return to.
         </p>
         {myRooms.length === 0 ? (
-          <div className="mt-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-8 text-center text-sm text-muted">
-            No spaces yet. <Link href="/rooms" className="text-foreground underline hover:no-underline">Explore rooms</Link> to add some.
-          </div>
+          <EmptyState
+            className="mt-4"
+            title="No spaces yet."
+            description="Rooms are calm corners for listening, learning, and collab posts. Add one when something catches your eye."
+          >
+            <Link
+              href="/rooms"
+              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+            >
+              Explore rooms
+            </Link>
+          </EmptyState>
         ) : (
           <ul className="mt-4 space-y-2">
             {myRooms.map((room) => (
@@ -128,15 +138,18 @@ export default function HomePage() {
           can see them.
         </p>
         {people.length === 0 ? (
-          <div className="mt-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-6 text-center text-sm text-muted">
-            <p>Nothing here right now besides you.</p>
-            <p className="mt-2">
-              <Link href="/explore" className="text-foreground underline hover:no-underline">
-                Explore people
-              </Link>
-              {" "}when others join.
-            </p>
-          </div>
+          <EmptyState
+            className="mt-4"
+            title="You're the first one here — or almost."
+            description="As others join, they'll show up here. You can browse Explore anytime."
+          >
+            <Link
+              href="/explore"
+              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+            >
+              Explore people
+            </Link>
+          </EmptyState>
         ) : (
           <ul className="mt-4 space-y-3">
             {people.map((profile) => (
@@ -163,12 +176,24 @@ export default function HomePage() {
         {conversationsLoading ? (
           <p className="mt-4 text-sm text-muted">Loading…</p>
         ) : recentConversations.length === 0 ? (
-          <div className="mt-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-6 text-center text-sm text-muted">
-            No conversations yet.{" "}
-            <Link href="/messages" className="text-foreground underline hover:no-underline">
-              Messages
+          <EmptyState
+            className="mt-4"
+            title="No conversations yet."
+            description="Messages start with an invite — send one from someone's profile, or wait for one to arrive."
+          >
+            <Link
+              href="/explore"
+              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+            >
+              Explore people
             </Link>
-          </div>
+            <Link
+              href="/messages"
+              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+            >
+              Open Messages
+            </Link>
+          </EmptyState>
         ) : (
           <ul className="mt-4 space-y-2">
             {recentConversations.map((conv) => (
