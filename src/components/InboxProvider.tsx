@@ -18,16 +18,25 @@ import {
   loadConversationPreviews,
   withUnreadState,
   type ConversationPreview,
+  conversationPreviewText,
 } from "@/lib/conversations";
 import { subscribeToInbox, unsubscribeFromInbox } from "@/lib/message-realtime";
 import type { ChatInvite } from "@/lib/types";
 import { normalizeConversationStatus } from "@/lib/types";
+
+export type MessageNotice = {
+  inviteId: string;
+  senderName: string;
+  preview: string;
+};
 
 type InboxContextValue = {
   userId: string | null;
   conversations: ConversationPreview[];
   loading: boolean;
   unreadCount: number;
+  messageNotice: MessageNotice | null;
+  dismissMessageNotice: () => void;
   refresh: () => Promise<void>;
   markRead: (inviteId: string, at?: string) => void;
 };
@@ -46,6 +55,31 @@ export function InboxProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationPreview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [messageNotice, setMessageNotice] = useState<MessageNotice | null>(null);
+
+  const dismissMessageNotice = useCallback(() => {
+    setMessageNotice(null);
+  }, []);
+
+  const showMessageNotice = useCallback(
+    (message: { invite_id: string; sender_id: string; body: string }, previews: ConversationPreview[]) => {
+      if (!userId || message.sender_id === userId) return;
+      if (openInviteId === message.invite_id) return;
+
+      const conversation = previews.find((p) => p.id === message.invite_id);
+      const senderName =
+        conversation?.other?.first_name ??
+        conversation?.other?.username ??
+        "Someone";
+
+      setMessageNotice({
+        inviteId: message.invite_id,
+        senderName,
+        preview: conversationPreviewText(message.body, conversation?.optional_message),
+      });
+    },
+    [userId, openInviteId]
+  );
 
   const refresh = useCallback(async () => {
     const supabase = createClient();
@@ -86,6 +120,9 @@ export function InboxProvider({ children }: { children: ReactNode }) {
             return prev;
           }
           const next = applyInboxMessage(prev, message, userId, openInviteId);
+          if (openInviteId !== message.invite_id) {
+            showMessageNotice(message, next);
+          }
           if (openInviteId === message.invite_id) {
             markConversationRead(userId, message.invite_id, message.created_at);
             return withUnreadState(next, userId, openInviteId);
@@ -108,7 +145,7 @@ export function InboxProvider({ children }: { children: ReactNode }) {
     return () => {
       void unsubscribeFromInbox(channel);
     };
-  }, [userId, openInviteId, refresh]);
+  }, [userId, openInviteId, refresh, showMessageNotice]);
 
   const markRead = useCallback(
     (inviteId: string, at?: string) => {
@@ -130,10 +167,12 @@ export function InboxProvider({ children }: { children: ReactNode }) {
       conversations,
       loading,
       unreadCount,
+      messageNotice,
+      dismissMessageNotice,
       refresh,
       markRead,
     }),
-    [userId, conversations, loading, unreadCount, refresh, markRead]
+    [userId, conversations, loading, unreadCount, messageNotice, dismissMessageNotice, refresh, markRead]
   );
 
   return <InboxContext.Provider value={value}>{children}</InboxContext.Provider>;

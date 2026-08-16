@@ -452,6 +452,21 @@ html.reduce-motion .room-enter {
   animation: none;
 }
 
+@keyframes inbox-notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-inbox-notice {
+  animation: inbox-notice-in 0.35s ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cloud-drift-right,
   .cloud-drift-left {
@@ -463,6 +478,10 @@ html.reduce-motion .room-enter {
   }
 
   .room-enter {
+    animation: none;
+  }
+
+  .animate-inbox-notice {
     animation: none;
   }
 }
