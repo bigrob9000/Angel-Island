@@ -24,6 +24,7 @@ import {
   subscribeToCollaboration,
   unsubscribeFromCollaboration,
 } from "@/lib/collaboration-realtime";
+import { notifyCollabActivity } from "@/lib/notifications/client";
 
 type Tab = CollaborationEntryType;
 
@@ -187,6 +188,7 @@ export default function CollaborationWorkspacePage() {
       setRefUrl("");
     }
     if (tab === "step") setStepBody("");
+    if (result.entry) notifyCollabActivity(result.entry.id);
     await refreshDetail();
   }
 
@@ -251,7 +253,7 @@ export default function CollaborationWorkspacePage() {
   const otherId = detail.invite.sender_id === userId ? detail.invite.receiver_id : detail.invite.sender_id;
   const paceLabel = detail.invite.pace ? COLLAB_PACE_LABELS[detail.invite.pace] : null;
   const quietLine =
-    detail.status === "active" ? collaborationQuietLine(detail.lastActivityAt) : null;
+    detail.status !== "ended" ? collaborationQuietLine(detail.lastActivityAt) : null;
   const isNewWorkspace = detail.status === "active" && detail.entries.length === 0;
 
   return (
@@ -376,12 +378,45 @@ export default function CollaborationWorkspacePage() {
       )}
 
       {quietLine && (
-        <p className="text-sm text-muted italic">{quietLine}</p>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-foreground/10 bg-white/40 px-4 py-3">
+          <p className="text-sm text-muted italic">{quietLine}</p>
+          <div className="flex flex-wrap gap-2">
+            {detail.status === "paused" && (
+              <button
+                type="button"
+                onClick={() => handleStatusChange("active")}
+                disabled={acting}
+                className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+              >
+                Resume
+              </button>
+            )}
+            {detail.status === "active" && (
+              <button
+                type="button"
+                onClick={() => setModal("pause")}
+                className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm text-muted hover:text-foreground"
+              >
+                Pause
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       {detail.status === "paused" && (
         <div className="rounded-lg border border-foreground/10 bg-white/50 px-4 py-3 text-sm text-muted">
-          This collaboration is paused. Notes and chat are on hold until someone resumes it.
+          <p>This collaboration is paused. Notes and chat are on hold until someone resumes it.</p>
+          {!quietLine && (
+            <button
+              type="button"
+              onClick={() => handleStatusChange("active")}
+              disabled={acting}
+              className="mt-3 rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+            >
+              Resume
+            </button>
+          )}
         </div>
       )}
 

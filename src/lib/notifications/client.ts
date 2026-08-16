@@ -17,6 +17,15 @@ export function notifyCollabResponse(collabInviteId: string): void {
   }).catch(() => {});
 }
 
+export function notifyCollabActivity(entryId: string): void {
+  void fetch("/api/notifications/collab-activity", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ entryId }),
+  }).catch(() => {});
+}
+
 export async function sendTestNotificationEmail(): Promise<{
   ok: boolean;
   message?: string;

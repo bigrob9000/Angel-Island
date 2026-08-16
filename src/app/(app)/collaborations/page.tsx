@@ -24,6 +24,7 @@ export default function CollaborationsPage() {
   const [previews, setPreviews] = useState<CollaborationPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableMissing, setTableMissing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -38,7 +39,7 @@ export default function CollaborationsPage() {
       setTableMissing(result.tableMissing);
       setLoading(false);
     });
-  }, [filter]);
+  }, [filter, refreshKey]);
 
   return (
     <div className="space-y-8">
@@ -99,7 +100,11 @@ export default function CollaborationsPage() {
         <ul className="space-y-3">
           {previews.map((preview) => (
             <li key={preview.id}>
-              <CollaborationPreviewLink preview={preview} />
+              <CollaborationPreviewLink
+                preview={preview}
+                showActions={filter !== "past"}
+                onUpdated={() => setRefreshKey((key) => key + 1)}
+              />
             </li>
           ))}
         </ul>

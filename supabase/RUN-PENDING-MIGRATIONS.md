@@ -204,6 +204,17 @@ If either line errors with **already member of publication**, that table is alre
 | 017 | Email notification prefs + send log |
 | 018 | Browser push prefs + push subscriptions |
 | 019 | Realtime on collaboration workspaces (live notes/steps) |
+| 020 | Collab workspace activity in notification log |
+
+---
+
+## 020 — Collab activity emails
+
+Run the full file: `supabase/migrations/020_collab_activity_notifications.sql`
+
+Allows email when someone adds a note, link, or next step to a shared collab workspace (debounced, uses the Collab updates setting).
+
+**Try it:** Two accounts in a collab → one adds a note → the other gets email (if Resend is configured and the toggle is on).
 
 ---
 

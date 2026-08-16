@@ -259,7 +259,7 @@ export default function HomePage() {
           <ul className="mt-4 space-y-3">
             {activeCollabs.map((preview) => (
               <li key={preview.id}>
-                <CollaborationPreviewLink preview={preview} />
+                <CollaborationPreviewLink preview={preview} showActions />
               </li>
             ))}
           </ul>

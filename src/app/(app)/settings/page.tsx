@@ -342,8 +342,8 @@ export default function SettingsPage() {
 
         <SettingsToggle
           id="notify-collab"
-          label="Collab responses"
-          description="Email when someone responds to a collab invite you sent."
+          label="Collab updates"
+          description="Email when someone responds to a collab invite or adds something to a shared workspace (at most once every 30 minutes per collaboration)."
           checked={notifyCollab}
           disabled={notifySaving === "notify_email_collab"}
           onChange={(checked) => updateNotifyPref("notify_email_collab", checked)}

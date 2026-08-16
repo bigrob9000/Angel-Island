@@ -10,6 +10,7 @@ import {
 } from "@/lib/notifications/email";
 
 const MESSAGE_DEBOUNCE_MINUTES = 30;
+const COLLAB_ACTIVITY_DEBOUNCE_MINUTES = 30;
 
 const COLLAB_RESPONSE_LABELS: Record<string, string> = {
   interested: "Interested — let's talk",
@@ -39,7 +40,7 @@ async function isBlocked(userA: string, userB: string): Promise<boolean> {
 
 async function recentlySent(
   userId: string,
-  kind: "message" | "collab_response",
+  kind: "message" | "collab_response" | "collab_activity",
   referenceId: string,
   withinMinutes: number,
 ): Promise<boolean> {
@@ -59,7 +60,7 @@ async function recentlySent(
 
 async function logSend(
   userId: string,
-  kind: "message" | "collab_response",
+  kind: "message" | "collab_response" | "collab_activity",
   referenceId: string,
 ): Promise<void> {
   const admin = createAdminClient();
@@ -251,5 +252,125 @@ export async function sendCollabResponseNotification(
   }
 
   await logSend(senderId, "collab_response", collab.id);
+  return { ok: true };
+}
+
+function collabActivitySummary(entryType: string, body: string | null, url: string | null): string {
+  if (entryType === "reference") {
+    return body?.trim() || url?.trim() || "Shared a link";
+  }
+  if (entryType === "step") {
+    return body?.trim() || "Added a next step";
+  }
+  return messagePreview(body ?? "");
+}
+
+export async function sendCollabActivityNotification(
+  entryId: string,
+  authorUserId: string,
+): Promise<{ ok: boolean; skipped?: string }> {
+  if (!isNotificationEmailConfigured()) {
+    return { ok: false, skipped: "email_not_configured" };
+  }
+
+  const admin = createAdminClient();
+  const { data: entry } = await admin
+    .from("collaboration_entries")
+    .select("id, collaboration_id, author_id, entry_type, body, url")
+    .eq("id", entryId)
+    .maybeSingle();
+
+  if (!entry || entry.author_id !== authorUserId) {
+    return { ok: false, skipped: "invalid_entry" };
+  }
+
+  const { data: collaboration } = await admin
+    .from("collaborations")
+    .select("id, collab_invite_id, status")
+    .eq("id", entry.collaboration_id)
+    .maybeSingle();
+
+  if (!collaboration || collaboration.status !== "active") {
+    return { ok: false, skipped: "collaboration_not_active" };
+  }
+
+  const { data: collabInvite } = await admin
+    .from("collab_invites")
+    .select("id, sender_id, receiver_id, about, status")
+    .eq("id", collaboration.collab_invite_id)
+    .maybeSingle();
+
+  if (!collabInvite || collabInvite.status !== "interested") {
+    return { ok: false, skipped: "invalid_collab" };
+  }
+
+  const recipientId =
+    collabInvite.sender_id === authorUserId
+      ? collabInvite.receiver_id
+      : collabInvite.sender_id;
+
+  if (await isBlocked(authorUserId, recipientId)) {
+    return { ok: false, skipped: "blocked" };
+  }
+
+  const { data: recipientProfile } = await admin
+    .from("profiles")
+    .select("notify_email_collab")
+    .eq("id", recipientId)
+    .maybeSingle();
+
+  if (recipientProfile?.notify_email_collab === false) {
+    return { ok: false, skipped: "opted_out" };
+  }
+
+  if (
+    await recentlySent(
+      recipientId,
+      "collab_activity",
+      collaboration.id,
+      COLLAB_ACTIVITY_DEBOUNCE_MINUTES,
+    )
+  ) {
+    return { ok: false, skipped: "debounced" };
+  }
+
+  const { data: authorProfile } = await admin
+    .from("profiles")
+    .select("first_name, username")
+    .eq("id", authorUserId)
+    .maybeSingle();
+
+  const recipientEmail = await getUserEmail(recipientId);
+  if (!recipientEmail) {
+    return { ok: false, skipped: "no_email" };
+  }
+
+  const authorName = profileLabel(authorProfile ?? {});
+  const summary = collabActivitySummary(entry.entry_type, entry.body, entry.url);
+  const siteUrl = getSiteUrl();
+  const link = `${siteUrl}/collaborations/${collaboration.id}`;
+
+  const actionLabel =
+    entry.entry_type === "reference"
+      ? "shared a link in your collaboration"
+      : entry.entry_type === "step"
+        ? "added a next step to your collaboration"
+        : "added a note to your collaboration";
+
+  const subject = `${authorName} ${actionLabel}`;
+  const text = `${authorName} ${actionLabel} about "${collabInvite.about}":\n\n${summary}\n\nOpen when you're ready: ${link}\n\nTurn off these emails in Settings on Angel Island.`;
+  const html = `
+    <p><strong>${escapeHtml(authorName)}</strong> ${escapeHtml(actionLabel)} about <em>${escapeHtml(collabInvite.about)}</em>:</p>
+    <p style="color:#5f7a6b;margin:16px 0;">${escapeHtml(summary)}</p>
+    <p><a href="${link}">Open the collaboration space</a></p>
+    <p style="color:#888;font-size:13px;margin-top:24px;">No rush — read when it suits you. Turn off collab email updates in Settings on Angel Island.</p>
+  `;
+
+  const sent = await sendNotificationEmail({ to: recipientEmail, subject, html, text });
+  if (!sent.ok) {
+    return { ok: false, skipped: sent.error };
+  }
+
+  await logSend(recipientId, "collab_activity", collaboration.id);
   return { ok: true };
 }
