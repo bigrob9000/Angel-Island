@@ -24,7 +24,8 @@ import {
   subscribeToCollaboration,
   unsubscribeFromCollaboration,
 } from "@/lib/collaboration-realtime";
-import { notifyCollabActivity } from "@/lib/notifications/client";
+import { markCollaborationRead } from "@/lib/collaboration-reads";
+import { useCollab } from "@/components/CollabProvider";
 
 type Tab = CollaborationEntryType;
 
@@ -41,6 +42,7 @@ export default function CollaborationWorkspacePage() {
   const params = useParams();
   const router = useRouter();
   const collaborationId = params.id as string;
+  const { markRead: markCollabRead, refresh: refreshCollabInbox } = useCollab();
 
   const [detail, setDetail] = useState<CollaborationDetail | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -84,10 +86,12 @@ export default function CollaborationWorkspacePage() {
         setDetail((prev) => {
           if (!prev || prev.entries.some((existing) => existing.id === entry.id)) return prev;
           const activityAt = entry.updated_at ?? entry.created_at;
+          markCollabRead(collaborationId, activityAt);
           return {
             ...prev,
             entries: [...prev.entries, entry],
             lastActivityAt: activityAt,
+            lastEntryAuthorId: entry.author_id,
           };
         });
       },
@@ -122,6 +126,11 @@ export default function CollaborationWorkspacePage() {
       void unsubscribeFromCollaboration(channel);
     };
   }, [collaborationId, userId, loading]);
+
+  useEffect(() => {
+    if (!detail || !userId) return;
+    markCollabRead(detail.id, detail.lastActivityAt);
+  }, [detail?.id, detail?.lastActivityAt, userId, markCollabRead]);
 
   const tabEntries = useMemo(() => {
     if (!detail) return [];
@@ -188,8 +197,8 @@ export default function CollaborationWorkspacePage() {
       setRefUrl("");
     }
     if (tab === "step") setStepBody("");
-    if (result.entry) notifyCollabActivity(result.entry.id);
     await refreshDetail();
+    void refreshCollabInbox();
   }
 
   async function handleToggleStep(entry: CollaborationEntry) {

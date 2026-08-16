@@ -15,6 +15,8 @@ export type CollaborationPreview = Collaboration & {
   invite: CollabInvite;
   other?: Profile;
   lastActivityAt: string;
+  lastEntryAuthorId?: string | null;
+  unread?: boolean;
 };
 
 export type CollaborationDetail = CollaborationPreview & {
@@ -185,20 +187,22 @@ export async function loadCollaborationPreviews(
   const { data: entryRows } = collabIds.length
     ? await supabase
         .from("collaboration_entries")
-        .select("collaboration_id, created_at, updated_at")
+        .select("collaboration_id, author_id, created_at, updated_at")
         .in("collaboration_id", collabIds)
         .order("updated_at", { ascending: false })
     : { data: [] };
 
   const lastActivity: Record<string, string> = {};
+  const lastEntryAuthor: Record<string, string | null> = {};
   filtered.forEach((collab) => {
     lastActivity[collab.id] = collab.updated_at ?? collab.created_at;
+    lastEntryAuthor[collab.id] = null;
   });
   (entryRows ?? []).forEach((row) => {
+    if (lastEntryAuthor[row.collaboration_id] != null) return;
     const at = row.updated_at ?? row.created_at;
-    if (!lastActivity[row.collaboration_id] || at > lastActivity[row.collaboration_id]) {
-      lastActivity[row.collaboration_id] = at;
-    }
+    lastActivity[row.collaboration_id] = at;
+    lastEntryAuthor[row.collaboration_id] = row.author_id;
   });
 
   const previews: CollaborationPreview[] = filtered.map((collab) => {
@@ -209,6 +213,7 @@ export async function loadCollaborationPreviews(
       invite,
       other: profilesById[otherId],
       lastActivityAt: lastActivity[collab.id] ?? collab.created_at,
+      lastEntryAuthorId: lastEntryAuthor[collab.id] ?? null,
     };
   });
 
@@ -336,32 +341,36 @@ export async function addCollaborationEntry(input: {
   body?: string | null;
   url?: string | null;
 }): Promise<{ entry?: CollaborationEntry; error?: string; tableMissing?: boolean }> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("collaboration_entries")
-    .insert({
-      collaboration_id: input.collaborationId,
-      author_id: input.userId,
-      entry_type: input.entryType,
-      body: input.body?.trim() || null,
-      url: input.url?.trim() || null,
-    })
-    .select("*")
-    .single();
+  try {
+    const response = await fetch("/api/collaborations/entries", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        collaborationId: input.collaborationId,
+        entryType: input.entryType,
+        body: input.body,
+        url: input.url,
+      }),
+    });
 
-  if (error) {
-    if (isCollabWorkspaceMissing(error.message, error.code)) {
-      return { tableMissing: true, error: collaborationsSetupError() };
+    const payload = (await response.json()) as {
+      entry?: CollaborationEntry;
+      error?: string;
+      tableMissing?: boolean;
+    };
+
+    if (!response.ok) {
+      if (payload.tableMissing) {
+        return { tableMissing: true, error: collaborationsSetupError() };
+      }
+      return { error: payload.error ?? "Could not add to collaboration." };
     }
-    return { error: error.message };
+
+    return { entry: payload.entry };
+  } catch {
+    return { error: "Could not add to collaboration." };
   }
-
-  await supabase
-    .from("collaborations")
-    .update({ updated_at: new Date().toISOString() })
-    .eq("id", input.collaborationId);
-
-  return { entry: data as CollaborationEntry };
 }
 
 export async function toggleCollaborationStep(

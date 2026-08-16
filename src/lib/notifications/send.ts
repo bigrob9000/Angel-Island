@@ -63,12 +63,19 @@ async function logSend(
   kind: "message" | "collab_response" | "collab_activity",
   referenceId: string,
 ): Promise<void> {
-  const admin = createAdminClient();
-  await admin.from("notification_sends").insert({
-    user_id: userId,
-    kind,
-    reference_id: referenceId,
-  });
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin.from("notification_sends").insert({
+      user_id: userId,
+      kind,
+      reference_id: referenceId,
+    });
+    if (error) {
+      console.error("notification_sends insert failed:", error.message);
+    }
+  } catch (err) {
+    console.error("notification_sends insert failed:", err);
+  }
 }
 
 export async function sendMessageNotification(

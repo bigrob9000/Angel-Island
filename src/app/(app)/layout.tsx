@@ -6,7 +6,9 @@ import { useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
 import { InboxProvider, useInbox } from "@/components/InboxProvider";
+import { CollabProvider, useCollab } from "@/components/CollabProvider";
 import { InboxMessageNotice } from "@/components/InboxMessageNotice";
+import { InboxCollabNotice } from "@/components/InboxCollabNotice";
 import { PushRegistration } from "@/components/PushRegistration";
 
 const nav = [
@@ -23,6 +25,7 @@ function AppNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { unreadCount } = useInbox();
+  const { unreadCount: collabUnreadCount } = useCollab();
 
   useEffect(() => {
     const supabase = createClient();
@@ -42,7 +45,9 @@ function AppNav() {
           >
             {nav.map(({ href, label }) => {
               const isMessages = href === "/messages";
+              const isCollabs = href === "/collaborations";
               const active = pathname === href || pathname.startsWith(`${href}/`);
+              const badgeCount = isMessages ? unreadCount : isCollabs ? collabUnreadCount : 0;
               return (
                 <Link
                   key={href}
@@ -52,10 +57,10 @@ function AppNav() {
                   }`}
                 >
                   {label}
-                  {isMessages && unreadCount > 0 && (
+                  {badgeCount > 0 && (
                     <span
                       className="absolute -right-2 top-0 h-2 w-2 rounded-full bg-foreground/80"
-                      aria-label={`${unreadCount} unread conversation${unreadCount === 1 ? "" : "s"}`}
+                      aria-label={`${badgeCount} unread ${isCollabs ? "collaboration" : "conversation"}${badgeCount === 1 ? "" : "s"}`}
                     />
                   )}
                 </Link>
@@ -86,12 +91,15 @@ export default function AppLayout({
 }) {
   return (
     <InboxProvider>
-      <div className="min-h-screen bg-ethereal text-foreground">
-        <PushRegistration />
-        <AppNav />
-        <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">{children}</main>
-        <InboxMessageNotice />
-      </div>
+      <CollabProvider>
+        <div className="min-h-screen bg-ethereal text-foreground">
+          <PushRegistration />
+          <AppNav />
+          <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">{children}</main>
+          <InboxMessageNotice />
+          <InboxCollabNotice />
+        </div>
+      </CollabProvider>
     </InboxProvider>
   );
 }

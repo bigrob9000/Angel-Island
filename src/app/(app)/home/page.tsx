@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import type { Profile, Room } from "@/lib/types";
@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { GettingStartedGuide } from "@/components/GettingStartedGuide";
 import { ProfileCompletenessNudge } from "@/components/ProfileCompletenessNudge";
 import { CollaborationPreviewLink } from "@/components/CollaborationPreviewLink";
+import { useCollab } from "@/components/CollabProvider";
 import { loadCollaborationPreviews, type CollaborationPreview } from "@/lib/collaborations";
 
 export default function HomePage() {
@@ -28,7 +29,16 @@ export default function HomePage() {
   const [people, setPeople] = useState<ReturnType<typeof rankProfilesForViewer>>([]);
   const [activeCollabs, setActiveCollabs] = useState<CollaborationPreview[]>([]);
   const { conversations, loading: conversationsLoading } = useInbox();
+  const { collaborations: trackedCollabs } = useCollab();
   const recentConversations = conversations.slice(0, 5);
+
+  const collabUnreadById = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    trackedCollabs.forEach((collab) => {
+      if (collab.unread) map[collab.id] = true;
+    });
+    return map;
+  }, [trackedCollabs]);
 
   useEffect(() => {
     setOnboardingDone(isOnboardingComplete());
@@ -259,7 +269,11 @@ export default function HomePage() {
           <ul className="mt-4 space-y-3">
             {activeCollabs.map((preview) => (
               <li key={preview.id}>
-                <CollaborationPreviewLink preview={preview} showActions />
+                <CollaborationPreviewLink
+                  preview={preview}
+                  showActions
+                  unread={Boolean(collabUnreadById[preview.id])}
+                />
               </li>
             ))}
           </ul>

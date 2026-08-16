@@ -84,3 +84,30 @@ export async function unsubscribeFromCollaboration(channel: RealtimeChannel) {
   const supabase = createClient();
   await supabase.removeChannel(channel);
 }
+
+export function subscribeToCollabInbox(handlers: {
+  onEntryInsert: (entry: CollaborationEntry) => void;
+}): RealtimeChannel {
+  const supabase = createClient();
+  const channel = supabase.channel("collab-inbox");
+
+  channel.on(
+    "postgres_changes",
+    {
+      event: "INSERT",
+      schema: "public",
+      table: "collaboration_entries",
+    },
+    (payload) => {
+      handlers.onEntryInsert(payload.new as CollaborationEntry);
+    },
+  );
+
+  channel.subscribe();
+  return channel;
+}
+
+export async function unsubscribeFromCollabInbox(channel: RealtimeChannel) {
+  const supabase = createClient();
+  await supabase.removeChannel(channel);
+}

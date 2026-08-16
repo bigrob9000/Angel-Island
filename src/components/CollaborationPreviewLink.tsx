@@ -19,6 +19,7 @@ type Props = {
   className?: string;
   showQuiet?: boolean;
   showActions?: boolean;
+  unread?: boolean;
   onUpdated?: () => void;
 };
 
@@ -27,6 +28,7 @@ export function CollaborationPreviewLink({
   className = "",
   showQuiet = true,
   showActions = false,
+  unread = false,
   onUpdated,
 }: Props) {
   const router = useRouter();
@@ -78,13 +80,22 @@ export function CollaborationPreviewLink({
     >
       <Link
         href={`/collaborations/${preview.id}`}
-        className="block px-4 py-3 transition-colors hover:bg-white/70 rounded-lg"
+        className={`block px-4 py-3 transition-colors hover:bg-white/70 rounded-lg ${
+          unread ? "bg-white/70" : ""
+        }`}
       >
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <ProfileAttribution profile={preview.other} className="font-medium" />
-          <span className="text-xs text-muted">{collaborationStatusLabel(preview.status)}</span>
+          <div className="flex items-center gap-2">
+            {unread && (
+              <span className="h-2 w-2 rounded-full bg-foreground/80" aria-hidden />
+            )}
+            <span className="text-xs text-muted">{collaborationStatusLabel(preview.status)}</span>
+          </div>
         </div>
-        <p className="mt-2 text-sm text-foreground">{collaborationFocusLine(preview.invite)}</p>
+        <p className={`mt-2 text-sm ${unread ? "font-medium text-foreground" : "text-foreground"}`}>
+          {collaborationFocusLine(preview.invite)}
+        </p>
         {tone && <p className="mt-1 text-sm text-muted">{tone}</p>}
         {quietLine && <p className="mt-2 text-xs text-muted italic">{quietLine}</p>}
         <p className="mt-2 text-xs text-muted">

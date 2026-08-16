@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import {
   collaborationsSetupError,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/collaborations";
 import { EmptyState } from "@/components/EmptyState";
 import { CollaborationPreviewLink } from "@/components/CollaborationPreviewLink";
+import { useCollab } from "@/components/CollabProvider";
 
 type Filter = "active" | "paused" | "past";
 
@@ -25,6 +26,15 @@ export default function CollaborationsPage() {
   const [loading, setLoading] = useState(true);
   const [tableMissing, setTableMissing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const { collaborations: trackedCollabs, refresh: refreshCollabInbox } = useCollab();
+
+  const unreadById = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    trackedCollabs.forEach((collab) => {
+      if (collab.unread) map[collab.id] = true;
+    });
+    return map;
+  }, [trackedCollabs]);
 
   useEffect(() => {
     setLoading(true);
@@ -103,7 +113,11 @@ export default function CollaborationsPage() {
               <CollaborationPreviewLink
                 preview={preview}
                 showActions={filter !== "past"}
-                onUpdated={() => setRefreshKey((key) => key + 1)}
+                unread={Boolean(unreadById[preview.id])}
+                onUpdated={() => {
+                  setRefreshKey((key) => key + 1);
+                  void refreshCollabInbox();
+                }}
               />
             </li>
           ))}
