@@ -3,6 +3,8 @@ import type { Profile } from "@/lib/types";
 export type ProfileCompletenessItem = {
   id: string;
   label: string;
+  /** Shorter text for nudges and checklists. */
+  shortLabel: string;
   href: string;
   done: boolean;
 };
@@ -27,37 +29,43 @@ export function getProfileCompleteness(profile: ProfileCompletenessProfile): {
   const items: ProfileCompletenessItem[] = [
     {
       id: "basics",
-      label: "First name and username",
+      label: "Add your name and username",
+      shortLabel: "Name and username",
       href: "/profile/edit?step=0",
       done: isDiscoverableProfileComplete(profile),
     },
     {
       id: "here_for",
-      label: "Share what you're here for",
+      label: "Say what you're here for",
+      shortLabel: "What you're here for",
       href: "/profile/edit?step=0",
       done: profile.here_for.length > 0,
     },
     {
       id: "photo",
-      label: "Add a photo",
+      label: "Add a profile photo",
+      shortLabel: "Profile photo",
       href: "/profile/edit?step=0",
       done: Boolean(profile.avatar_url?.trim()),
     },
     {
       id: "about",
-      label: "Write a short about",
+      label: "Write a short bio",
+      shortLabel: "Short bio",
       href: "/profile/edit?step=2",
       done: Boolean(profile.about?.trim()),
     },
     {
       id: "roles",
-      label: "Add your roles",
+      label: "List your roles",
+      shortLabel: "Roles",
       href: "/profile/edit?step=3",
       done: profile.roles.length > 0,
     },
     {
       id: "genres",
-      label: "Share what you make",
+      label: "Add genres you make",
+      shortLabel: "Genres you make",
       href: "/profile/edit?step=5",
       done: profile.genres_make.length > 0,
     },
@@ -71,6 +79,10 @@ export function getProfileCompleteness(profile: ProfileCompletenessProfile): {
     isComplete,
     percent: Math.round((completeCount / items.length) * 100),
   };
+}
+
+export function isFullProfileComplete(profile: ProfileCompletenessProfile): boolean {
+  return getProfileCompleteness(profile).isComplete;
 }
 
 /** Optional polish items — excludes required basics. */

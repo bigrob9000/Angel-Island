@@ -9,12 +9,11 @@ import { HERE_FOR_OPTIONS, ROLE_OPTIONS } from "@/lib/profile-options";
 import { ChipSelect } from "@/components/ChipSelect";
 import { TagInput } from "@/components/TagInput";
 import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
+import { ONBOARDING_KEY } from "@/lib/onboarding";
 
 const REASONS = [...HERE_FOR_OPTIONS];
 
 const LOCATIONS = ["Remote", "Prefer not to say"];
-
-const ONBOARDING_KEY = "angel_island_onboarding";
 
 const STEP_LABELS = ["Welcome", "Here for", "Basics", "Your music", "How it works"];
 

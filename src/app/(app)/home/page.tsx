@@ -9,6 +9,7 @@ import { useInbox } from "@/components/InboxProvider";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { isDiscoverableProfile } from "@/lib/profile";
 import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
+import { isOnboardingComplete } from "@/lib/onboarding";
 import { rankProfilesForViewer } from "@/lib/discovery";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
@@ -21,9 +22,14 @@ export default function HomePage() {
   const [firstName, setFirstName] = useState<string | null>(null);
   const [viewerProfile, setViewerProfile] = useState<Profile | null>(null);
   const [myRooms, setMyRooms] = useState<Room[]>([]);
+  const [onboardingDone, setOnboardingDone] = useState(false);
   const [people, setPeople] = useState<ReturnType<typeof rankProfilesForViewer>>([]);
   const { conversations, loading: conversationsLoading } = useInbox();
   const recentConversations = conversations.slice(0, 5);
+
+  useEffect(() => {
+    setOnboardingDone(isOnboardingComplete());
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -72,13 +78,13 @@ export default function HomePage() {
   }, []);
 
   const welcomeName = firstName ? `, ${firstName}` : "";
-  const profileComplete = viewerProfile
+  const optionalComplete = viewerProfile
     ? getOptionalProfileCompleteness(viewerProfile).isComplete
     : true;
   const showGettingStarted =
+    onboardingDone &&
     Boolean(viewerProfile) &&
-    !profileComplete &&
-    myRooms.length === 0 &&
+    (!optionalComplete || myRooms.length === 0) &&
     conversations.length === 0;
 
   return (
@@ -89,7 +95,11 @@ export default function HomePage() {
         Welcome back{welcomeName}. Where would you like to spend your time today?
       </p>
 
-      <GettingStartedGuide show={showGettingStarted} />
+      <GettingStartedGuide
+        show={showGettingStarted}
+        profile={viewerProfile}
+        hasRooms={myRooms.length > 0}
+      />
 
       {viewerProfile && <ProfileCompletenessNudge profile={viewerProfile} />}
 

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
 
-const ONBOARDING_KEY = "angel_island_onboarding";
+import { ONBOARDING_KEY } from "@/lib/onboarding";
 
 export default function Home() {
   const router = useRouter();

@@ -1,15 +1,19 @@
 import Link from "next/link";
 import type { Profile } from "@/lib/types";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { isFullProfileComplete } from "@/lib/profile-completeness";
 
 type ProfileCardProps = {
   profile: Profile;
   reason?: string;
+  /** Show a subtle badge when the profile has all completeness fields filled. */
+  showCompletenessBadge?: boolean;
 };
 
-export function ProfileCard({ profile, reason }: ProfileCardProps) {
+export function ProfileCard({ profile, reason, showCompletenessBadge = true }: ProfileCardProps) {
   const name = profile.first_name || profile.username;
   if (!name) return null;
+  const fullProfile = showCompletenessBadge && isFullProfileComplete(profile);
   const excerpt =
     profile.about && profile.about.length > 120
       ? `${profile.about.slice(0, 120).trim()}…`
@@ -25,7 +29,14 @@ export function ProfileCard({ profile, reason }: ProfileCardProps) {
       <div className="flex items-start gap-3">
         <ProfileAvatar profile={profile} size="md" />
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-foreground">{name}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-medium text-foreground">{name}</p>
+            {fullProfile && (
+              <span className="rounded-full border border-foreground/15 bg-foreground/5 px-2 py-0.5 text-xs text-muted">
+                Complete profile
+              </span>
+            )}
+          </div>
           {profile.username && <p className="text-sm text-muted">@{profile.username}</p>}
           {profile.location && <p className="mt-1 text-sm text-muted">{profile.location}</p>}
         </div>

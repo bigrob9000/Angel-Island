@@ -37,27 +37,31 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
   if (missingBasics) {
     return (
       <section className="rounded-lg border border-foreground/10 bg-white/60 p-5">
-        <h2 className="font-medium text-foreground">Finish the basics</h2>
+        <h2 className="font-medium text-foreground">One more thing</h2>
         <p className="mt-1 text-sm text-muted">
-          Add your first name and username so others can find you in Explore and rooms.
+          Add your name and username so you show up in Explore and people can find your profile.
         </p>
         <Link
           href="/profile/edit?step=0"
           className="mt-3 inline-block text-sm text-foreground underline underline-offset-2 hover:no-underline"
         >
-          Complete basics
+          Add name and username
         </Link>
       </section>
     );
   }
 
+  const remaining = optional.items.length - optional.completeCount;
+
   return (
     <section className="rounded-lg border border-foreground/10 bg-white/60 p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="font-medium text-foreground">Your profile</h2>
+          <h2 className="font-medium text-foreground">Help people find you</h2>
           <p className="mt-1 text-sm text-muted">
-            Optional details help people find you — only what feels comfortable.
+            {remaining === 1
+              ? "One optional detail left — only if you want to share it."
+              : `${remaining} optional details left — add what feels comfortable.`}
           </p>
           <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-foreground/10">
             <div
@@ -66,7 +70,7 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
             />
           </div>
           <p className="mt-2 text-xs text-muted">
-            {optional.completeCount} of {optional.items.length} optional steps · {optional.percent}%
+            {optional.completeCount} of {optional.items.length} done
           </p>
         </div>
         <button
