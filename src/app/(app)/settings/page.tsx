@@ -38,6 +38,9 @@ export default function SettingsPage() {
     configured: boolean;
     publicKey: string | null;
     permission: NotificationPermission | "unsupported";
+    platform: "ios" | "android" | "desktop" | "unknown";
+    isStandalone: boolean;
+    mobileHint: string | null;
   } | null>(null);
   const [notifySaving, setNotifySaving] = useState<string | null>(null);
   const [notifyMessage, setNotifyMessage] = useState<string | null>(null);
@@ -404,6 +407,9 @@ export default function SettingsPage() {
                 Notifications are blocked for this site. Allow them in your browser&apos;s site settings, then try again.
               </p>
             )}
+          {pushStatus && !pushStatus.supported && pushStatus.mobileHint && (
+            <p className="mt-2 text-sm text-muted">{pushStatus.mobileHint}</p>
+          )}
         </div>
 
         <SettingsToggle

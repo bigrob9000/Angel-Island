@@ -54,6 +54,20 @@ You should already have `SUPABASE_SERVICE_ROLE_KEY` (push delivery uses the serv
 
 ---
 
+## Mobile notes
+
+| Device / browser | Works? |
+|------------------|--------|
+| **Desktop** Chrome, Edge, Firefox | Yes |
+| **Android** Chrome | Yes |
+| **iPhone/iPad Safari** (normal tab) | No — Apple requires **Add to Home Screen** first |
+| **iPhone Chrome** | Same as Safari (uses WebKit) — Add to Home Screen |
+| **In-app browsers** (Instagram, Facebook, etc.) | No — open the site in Safari or Chrome |
+
+**iPhone setup:** Safari → Share → **Add to Home Screen** → open Angel Island from the home screen icon → Settings → turn on browser notifications.
+
+---
+
 ## Troubleshooting
 
 | Problem | Fix |

@@ -49,6 +49,10 @@ export const metadata: Metadata = {
     icon: "/angel-island-mark-light.png",
     apple: "/apple-icon",
   },
+  appleWebApp: {
+    capable: true,
+    title: SITE_NAME,
+  },
 };
 
 export default function RootLayout({
