@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { usePreferences } from "@/components/PreferencesProvider";
-import { sendTestNotificationEmail } from "@/lib/notifications/client";
+import { fetchNotificationStatus, sendTestNotificationEmail } from "@/lib/notifications/client";
 import { loadBlockedUsers, unblockUser } from "@/lib/blocks";
 import type { BlockedUser } from "@/lib/blocks";
 
@@ -28,6 +28,17 @@ export default function SettingsPage() {
   const [notifyMessage, setNotifyMessage] = useState<string | null>(null);
   const [testEmailLoading, setTestEmailLoading] = useState(false);
   const [testEmailResult, setTestEmailResult] = useState<{ type: "ok" | "error"; text: string } | null>(null);
+  const [notifyStatus, setNotifyStatus] = useState<{
+    resendKey: boolean;
+    resendFrom: boolean;
+    serviceRole: boolean;
+    siteUrl: string;
+    yourEmail: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    fetchNotificationStatus().then(setNotifyStatus);
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -235,6 +246,20 @@ export default function SettingsPage() {
           <p className="mt-1 text-sm text-muted">
             Gentle emails when someone reaches out — no nudges, no guilt. Turn off anytime.
           </p>
+          {notifyStatus && (
+            <ul className="mt-3 space-y-1 text-xs text-muted">
+              <li>{notifyStatus.resendKey ? "✓" : "✗"} Resend API key (Vercel)</li>
+              <li>{notifyStatus.resendFrom ? "✓" : "✗"} Sender address (RESEND_FROM)</li>
+              <li>{notifyStatus.serviceRole ? "✓" : "✗"} Supabase service role key</li>
+            </ul>
+          )}
+          {notifyStatus &&
+            (!notifyStatus.resendKey || !notifyStatus.resendFrom || !notifyStatus.serviceRole) && (
+              <p className="mt-2 text-sm text-red-600">
+                Email can&apos;t send until all three checks above are ✓. Add missing vars in Vercel →
+                redeploy.
+              </p>
+            )}
         </div>
 
         <SettingsToggle

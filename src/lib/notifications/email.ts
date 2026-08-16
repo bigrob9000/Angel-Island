@@ -30,6 +30,12 @@ export async function sendNotificationEmail(input: SendEmailInput): Promise<{ ok
 
   if (!response.ok) {
     const body = await response.text().catch(() => "");
+    try {
+      const json = JSON.parse(body) as { message?: string };
+      if (json.message) return { ok: false, error: json.message };
+    } catch {
+      // use raw body
+    }
     return { ok: false, error: body || `Resend error ${response.status}` };
   }
 

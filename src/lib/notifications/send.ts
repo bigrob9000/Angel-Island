@@ -93,7 +93,12 @@ export async function sendMessageNotification(
     .eq("id", message.invite_id)
     .maybeSingle();
 
-  if (!invite || invite.status !== "accepted" || invite.conversation_status !== "active") {
+  if (!invite || invite.status !== "accepted") {
+    return { ok: false, skipped: "conversation_not_active" };
+  }
+
+  const conversationStatus = invite.conversation_status ?? "active";
+  if (conversationStatus !== "active") {
     return { ok: false, skipped: "conversation_not_active" };
   }
 
