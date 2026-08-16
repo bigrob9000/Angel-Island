@@ -205,6 +205,17 @@ If either line errors with **already member of publication**, that table is alre
 | 018 | Browser push prefs + push subscriptions |
 | 019 | Realtime on collaboration workspaces (live notes/steps) |
 | 020 | Collab workspace activity in notification log |
+| 021 | Browser push preference for collab workspace activity |
+
+---
+
+## 021 — Collab workspace push
+
+Run the full file: `supabase/migrations/021_notify_push_collab.sql`
+
+Adds `notify_push_collab` on profiles. Enable under Settings → Browser notifications → **Collab workspace activity**.
+
+**Try it:** Turn on the toggle → another account adds a note in your shared collab → browser alert (HTTPS required).
 
 ---
 

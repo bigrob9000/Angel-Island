@@ -31,7 +31,9 @@ export default function SettingsPage() {
   const [notifyMessages, setNotifyMessages] = useState(true);
   const [notifyCollab, setNotifyCollab] = useState(true);
   const [notifyPush, setNotifyPush] = useState(false);
+  const [notifyPushCollab, setNotifyPushCollab] = useState(false);
   const [pushSaving, setPushSaving] = useState(false);
+  const [pushCollabSaving, setPushCollabSaving] = useState(false);
   const [pushMessage, setPushMessage] = useState<string | null>(null);
   const [pushStatus, setPushStatus] = useState<{
     supported: boolean;
@@ -70,7 +72,7 @@ export default function SettingsPage() {
       }
       supabase
         .from("profiles")
-        .select("notify_email_messages, notify_email_collab, notify_push_messages")
+        .select("notify_email_messages, notify_email_collab, notify_push_messages, notify_push_collab")
         .eq("id", user.id)
         .maybeSingle()
         .then(({ data, error }) => {
@@ -78,6 +80,7 @@ export default function SettingsPage() {
             setNotifyMessages(data.notify_email_messages ?? true);
             setNotifyCollab(data.notify_email_collab ?? true);
             setNotifyPush(data.notify_push_messages ?? false);
+            setNotifyPushCollab(data.notify_push_collab ?? false);
           }
         });
       loadBlockedUsers(user.id).then((result) => {
@@ -157,6 +160,26 @@ export default function SettingsPage() {
     }
   }
 
+  async function enableBrowserPush(): Promise<boolean> {
+    const status = pushStatus ?? (await fetchPushStatus());
+    if (!status.supported) {
+      setPushMessage("This browser doesn't support push notifications.");
+      return false;
+    }
+    if (!status.configured || !status.publicKey) {
+      setPushMessage("Push isn't set up on the server yet. Add VAPID keys in Vercel and redeploy.");
+      return false;
+    }
+
+    const subscribeResult = await subscribeToPush(status.publicKey);
+    if (!subscribeResult.ok) {
+      setPushMessage(subscribeResult.error ?? "Could not enable browser notifications.");
+      return false;
+    }
+
+    return true;
+  }
+
   async function handlePushToggle(checked: boolean) {
     if (!userId) return;
     setPushMessage(null);
@@ -164,28 +187,13 @@ export default function SettingsPage() {
     setNotifyPush(checked);
 
     if (checked) {
-      const status = pushStatus ?? (await fetchPushStatus());
-      if (!status.supported) {
+      const enabled = await enableBrowserPush();
+      if (!enabled) {
         setNotifyPush(false);
         setPushSaving(false);
-        setPushMessage("This browser doesn't support push notifications.");
         return;
       }
-      if (!status.configured || !status.publicKey) {
-        setNotifyPush(false);
-        setPushSaving(false);
-        setPushMessage("Push isn't set up on the server yet. Add VAPID keys in Vercel and redeploy.");
-        return;
-      }
-
-      const subscribeResult = await subscribeToPush(status.publicKey);
-      if (!subscribeResult.ok) {
-        setNotifyPush(false);
-        setPushSaving(false);
-        setPushMessage(subscribeResult.error ?? "Could not enable browser notifications.");
-        return;
-      }
-    } else {
+    } else if (!notifyPushCollab) {
       await unsubscribeFromPush();
     }
 
@@ -203,6 +211,40 @@ export default function SettingsPage() {
           : error.message,
       );
       setNotifyPush(!checked);
+    }
+  }
+
+  async function handlePushCollabToggle(checked: boolean) {
+    if (!userId) return;
+    setPushMessage(null);
+    setPushCollabSaving(true);
+    setNotifyPushCollab(checked);
+
+    if (checked) {
+      const enabled = await enableBrowserPush();
+      if (!enabled) {
+        setNotifyPushCollab(false);
+        setPushCollabSaving(false);
+        return;
+      }
+    } else if (!notifyPush) {
+      await unsubscribeFromPush();
+    }
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("profiles")
+      .update({ notify_push_collab: checked, updated_at: new Date().toISOString() })
+      .eq("id", userId);
+
+    setPushCollabSaving(false);
+    if (error) {
+      setPushMessage(
+        error.message.includes("notify_push_collab")
+          ? "Collab push settings aren't set up yet. Run migration 021_notify_push_collab.sql in Supabase."
+          : error.message,
+      );
+      setNotifyPushCollab(!checked);
     }
   }
 
@@ -382,7 +424,8 @@ export default function SettingsPage() {
         <div>
           <h2 className="font-medium text-foreground">Browser notifications</h2>
           <p className="mt-1 text-sm text-muted">
-            Optional alerts when someone messages you — even if Angel Island isn&apos;t open. Off by default.
+            Optional alerts for messages and collab workspace activity — even if Angel Island isn&apos;t
+            open. Off by default.
           </p>
           {pushStatus && (
             <ul className="mt-3 space-y-1 text-xs text-muted">
@@ -424,6 +467,20 @@ export default function SettingsPage() {
             !pushStatus?.configured
           }
           onChange={handlePushToggle}
+        />
+
+        <SettingsToggle
+          id="notify-push-collab"
+          label="Collab workspace activity"
+          description="Browser alert when someone adds a note, link, or next step to a shared collaboration (at most once every 30 minutes per collaboration)."
+          checked={notifyPushCollab}
+          disabled={
+            pushCollabSaving ||
+            !isBrowserPushSupported() ||
+            pushStatus?.permission === "denied" ||
+            !pushStatus?.configured
+          }
+          onChange={handlePushCollabToggle}
         />
 
         {pushMessage && (

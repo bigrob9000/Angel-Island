@@ -22,11 +22,14 @@ export function PushRegistration() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("notify_push_messages")
+        .select("notify_push_messages, notify_push_collab")
         .eq("id", user.id)
         .maybeSingle();
 
-      if (profile?.notify_push_messages === true) {
+      if (
+        profile?.notify_push_messages === true ||
+        profile?.notify_push_collab === true
+      ) {
         await ensurePushSubscription(status.publicKey);
       }
     }

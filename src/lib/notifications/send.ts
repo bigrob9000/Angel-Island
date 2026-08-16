@@ -268,9 +268,11 @@ function collabActivitySummary(entryType: string, body: string | null, url: stri
 export async function sendCollabActivityNotification(
   entryId: string,
   authorUserId: string,
-): Promise<{ ok: boolean; skipped?: string }> {
-  if (!isNotificationEmailConfigured()) {
-    return { ok: false, skipped: "email_not_configured" };
+): Promise<{ ok: boolean; skipped?: string; email?: boolean; push?: boolean }> {
+  const emailConfigured = isNotificationEmailConfigured();
+  const pushConfigured = isPushConfigured();
+  if (!emailConfigured && !pushConfigured) {
+    return { ok: false, skipped: "notifications_not_configured" };
   }
 
   const admin = createAdminClient();
@@ -315,11 +317,17 @@ export async function sendCollabActivityNotification(
 
   const { data: recipientProfile } = await admin
     .from("profiles")
-    .select("notify_email_collab")
+    .select("notify_email_collab, notify_push_collab")
     .eq("id", recipientId)
     .maybeSingle();
 
-  if (recipientProfile?.notify_email_collab === false) {
+  const wantsEmail = recipientProfile?.notify_email_collab !== false;
+  const wantsPush = recipientProfile?.notify_push_collab === true;
+
+  if (
+    (!wantsEmail || !emailConfigured) &&
+    (!wantsPush || !pushConfigured)
+  ) {
     return { ok: false, skipped: "opted_out" };
   }
 
@@ -340,11 +348,6 @@ export async function sendCollabActivityNotification(
     .eq("id", authorUserId)
     .maybeSingle();
 
-  const recipientEmail = await getUserEmail(recipientId);
-  if (!recipientEmail) {
-    return { ok: false, skipped: "no_email" };
-  }
-
   const authorName = profileLabel(authorProfile ?? {});
   const summary = collabActivitySummary(entry.entry_type, entry.body, entry.url);
   const siteUrl = getSiteUrl();
@@ -357,20 +360,46 @@ export async function sendCollabActivityNotification(
         ? "added a next step to your collaboration"
         : "added a note to your collaboration";
 
-  const subject = `${authorName} ${actionLabel}`;
-  const text = `${authorName} ${actionLabel} about "${collabInvite.about}":\n\n${summary}\n\nOpen when you're ready: ${link}\n\nTurn off these emails in Settings on Angel Island.`;
-  const html = `
-    <p><strong>${escapeHtml(authorName)}</strong> ${escapeHtml(actionLabel)} about <em>${escapeHtml(collabInvite.about)}</em>:</p>
-    <p style="color:#5f7a6b;margin:16px 0;">${escapeHtml(summary)}</p>
-    <p><a href="${link}">Open the collaboration space</a></p>
-    <p style="color:#888;font-size:13px;margin-top:24px;">No rush — read when it suits you. Turn off collab email updates in Settings on Angel Island.</p>
-  `;
+  const pushTitle =
+    entry.entry_type === "reference"
+      ? `${authorName} shared a link`
+      : entry.entry_type === "step"
+        ? `${authorName} added a next step`
+        : `${authorName} added a note`;
 
-  const sent = await sendNotificationEmail({ to: recipientEmail, subject, html, text });
-  if (!sent.ok) {
-    return { ok: false, skipped: sent.error };
+  let emailSent = false;
+  let pushSent = false;
+
+  if (wantsEmail && emailConfigured) {
+    const recipientEmail = await getUserEmail(recipientId);
+    if (recipientEmail) {
+      const subject = `${authorName} ${actionLabel}`;
+      const text = `${authorName} ${actionLabel} about "${collabInvite.about}":\n\n${summary}\n\nOpen when you're ready: ${link}\n\nTurn off these emails in Settings on Angel Island.`;
+      const html = `
+        <p><strong>${escapeHtml(authorName)}</strong> ${escapeHtml(actionLabel)} about <em>${escapeHtml(collabInvite.about)}</em>:</p>
+        <p style="color:#5f7a6b;margin:16px 0;">${escapeHtml(summary)}</p>
+        <p><a href="${link}">Open the collaboration space</a></p>
+        <p style="color:#888;font-size:13px;margin-top:24px;">No rush — read when it suits you. Turn off collab email updates in Settings on Angel Island.</p>
+      `;
+
+      const sent = await sendNotificationEmail({ to: recipientEmail, subject, html, text });
+      emailSent = sent.ok;
+    }
+  }
+
+  if (wantsPush && pushConfigured) {
+    const pushResult = await sendPushToUser(recipientId, {
+      title: pushTitle,
+      body: summary,
+      url: link,
+    });
+    pushSent = pushResult.ok;
+  }
+
+  if (!emailSent && !pushSent) {
+    return { ok: false, skipped: "delivery_failed" };
   }
 
   await logSend(recipientId, "collab_activity", collaboration.id);
-  return { ok: true };
+  return { ok: true, email: emailSent, push: pushSent };
 }
