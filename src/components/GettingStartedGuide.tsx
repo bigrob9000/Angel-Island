@@ -12,6 +12,8 @@ type Props = {
   show: boolean;
   profile: ProfileCompletenessProfile | null;
   hasRooms: boolean;
+  hasConnected: boolean;
+  hasCollabs: boolean;
 };
 
 type Step = {
@@ -20,7 +22,13 @@ type Step = {
   label: ReactNode;
 };
 
-export function GettingStartedGuide({ show, profile, hasRooms }: Props) {
+export function GettingStartedGuide({
+  show,
+  profile,
+  hasRooms,
+  hasConnected,
+  hasCollabs,
+}: Props) {
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
@@ -84,13 +92,36 @@ export function GettingStartedGuide({ show, profile, hasRooms }: Props) {
     },
     {
       id: "explore",
-      done: false,
-      label: (
+      done: hasConnected,
+      label: hasConnected ? (
+        <span className="text-muted line-through">You&apos;ve started a conversation</span>
+      ) : (
         <>
           <Link href="/explore" className="text-foreground underline hover:no-underline">
             Explore people
           </Link>
-          <span className="text-muted"> — invite someone to chat if it feels right.</span>
+          <span className="text-muted"> — invite someone to chat when it feels right.</span>
+        </>
+      ),
+    },
+    {
+      id: "collab",
+      done: hasCollabs,
+      label: hasCollabs ? (
+        <span className="text-muted line-through">You have a collab space open</span>
+      ) : (
+        <>
+          <Link href="/explore" className="text-foreground underline hover:no-underline">
+            Invite someone to collaborate
+          </Link>
+          <span className="text-muted">
+            {" "}
+            — from their profile. When they&apos;re interested, a shared workspace opens under{" "}
+            <Link href="/collaborations" className="text-foreground underline hover:no-underline">
+              Collabs
+            </Link>
+            .
+          </span>
         </>
       ),
     },
@@ -105,7 +136,7 @@ export function GettingStartedGuide({ show, profile, hasRooms }: Props) {
           <h2 className="font-medium text-foreground">Getting started</h2>
           <p className="mt-1 text-sm text-muted">
             {doneCount === 0
-              ? "You finished onboarding — here are three gentle next steps."
+              ? "You finished onboarding — here are four gentle next steps."
               : `${doneCount} of ${steps.length} done — pick up wherever you left off.`}
           </p>
         </div>

@@ -44,6 +44,21 @@ export function collaborationToneLine(invite: CollabInvite): string | null {
   return COLLAB_PACE_LABELS[invite.pace];
 }
 
+/** After this many days without activity, show a soft quiet hint (no nudges). */
+export const COLLAB_QUIET_AFTER_MS = 14 * 24 * 60 * 60 * 1000;
+
+export function isCollaborationQuiet(
+  lastActivityAt: string,
+  nowMs: number = Date.now(),
+): boolean {
+  return nowMs - new Date(lastActivityAt).getTime() > COLLAB_QUIET_AFTER_MS;
+}
+
+export function collaborationQuietLine(lastActivityAt: string): string | null {
+  if (!isCollaborationQuiet(lastActivityAt)) return null;
+  return "This collaboration has been quiet for a while. No rush — resume whenever it feels right.";
+}
+
 async function loadInviteMap(
   inviteIds: string[]
 ): Promise<Record<string, CollabInvite>> {

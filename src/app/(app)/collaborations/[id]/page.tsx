@@ -11,6 +11,7 @@ import { COLLAB_PACE_LABELS } from "@/lib/types";
 import {
   addCollaborationEntry,
   collaborationFocusLine,
+  collaborationQuietLine,
   collaborationStatusLabel,
   collaborationsSetupError,
   deleteCollaborationEntry,
@@ -19,6 +20,10 @@ import {
   updateCollaborationStatus,
   type CollaborationDetail,
 } from "@/lib/collaborations";
+import {
+  subscribeToCollaboration,
+  unsubscribeFromCollaboration,
+} from "@/lib/collaboration-realtime";
 
 type Tab = CollaborationEntryType;
 
@@ -69,6 +74,53 @@ export default function CollaborationWorkspacePage() {
       setLoading(false);
     });
   }, [collaborationId, router]);
+
+  useEffect(() => {
+    if (!userId || loading) return;
+
+    const channel = subscribeToCollaboration(collaborationId, {
+      onEntryInsert: (entry) => {
+        setDetail((prev) => {
+          if (!prev || prev.entries.some((existing) => existing.id === entry.id)) return prev;
+          const activityAt = entry.updated_at ?? entry.created_at;
+          return {
+            ...prev,
+            entries: [...prev.entries, entry],
+            lastActivityAt: activityAt,
+          };
+        });
+      },
+      onEntryUpdate: (entry) => {
+        setDetail((prev) => {
+          if (!prev) return prev;
+          const activityAt = entry.updated_at ?? entry.created_at;
+          return {
+            ...prev,
+            entries: prev.entries.map((existing) =>
+              existing.id === entry.id ? entry : existing,
+            ),
+            lastActivityAt: activityAt,
+          };
+        });
+      },
+      onEntryDelete: (entry) => {
+        setDetail((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            entries: prev.entries.filter((existing) => existing.id !== entry.id),
+          };
+        });
+      },
+      onCollaborationUpdate: (collaboration) => {
+        setDetail((prev) => (prev ? { ...prev, ...collaboration } : prev));
+      },
+    });
+
+    return () => {
+      void unsubscribeFromCollaboration(channel);
+    };
+  }, [collaborationId, userId, loading]);
 
   const tabEntries = useMemo(() => {
     if (!detail) return [];
@@ -198,6 +250,9 @@ export default function CollaborationWorkspacePage() {
   const otherName = detail.other?.first_name ?? detail.other?.username ?? "your collaborator";
   const otherId = detail.invite.sender_id === userId ? detail.invite.receiver_id : detail.invite.sender_id;
   const paceLabel = detail.invite.pace ? COLLAB_PACE_LABELS[detail.invite.pace] : null;
+  const quietLine =
+    detail.status === "active" ? collaborationQuietLine(detail.lastActivityAt) : null;
+  const isNewWorkspace = detail.status === "active" && detail.entries.length === 0;
 
   return (
     <div className="space-y-8">
@@ -312,6 +367,17 @@ export default function CollaborationWorkspacePage() {
           </div>
         )}
       </div>
+
+      {isNewWorkspace && (
+        <p className="text-sm text-muted leading-relaxed italic">
+          You both chose to explore this collaboration. There&apos;s no rush — start with a note,
+          link, or next step when something comes to mind.
+        </p>
+      )}
+
+      {quietLine && (
+        <p className="text-sm text-muted italic">{quietLine}</p>
+      )}
 
       {detail.status === "paused" && (
         <div className="rounded-lg border border-foreground/10 bg-white/50 px-4 py-3 text-sm text-muted">

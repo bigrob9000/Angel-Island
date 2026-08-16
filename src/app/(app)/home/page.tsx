@@ -17,6 +17,8 @@ import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { EmptyState } from "@/components/EmptyState";
 import { GettingStartedGuide } from "@/components/GettingStartedGuide";
 import { ProfileCompletenessNudge } from "@/components/ProfileCompletenessNudge";
+import { CollaborationPreviewLink } from "@/components/CollaborationPreviewLink";
+import { loadCollaborationPreviews, type CollaborationPreview } from "@/lib/collaborations";
 
 export default function HomePage() {
   const [firstName, setFirstName] = useState<string | null>(null);
@@ -24,6 +26,7 @@ export default function HomePage() {
   const [myRooms, setMyRooms] = useState<Room[]>([]);
   const [onboardingDone, setOnboardingDone] = useState(false);
   const [people, setPeople] = useState<ReturnType<typeof rankProfilesForViewer>>([]);
+  const [activeCollabs, setActiveCollabs] = useState<CollaborationPreview[]>([]);
   const { conversations, loading: conversationsLoading } = useInbox();
   const recentConversations = conversations.slice(0, 5);
 
@@ -57,6 +60,9 @@ export default function HomePage() {
 
       setPeople(rankProfilesForViewer(viewer, candidates).slice(0, 5));
 
+      const collabResult = await loadCollaborationPreviews(user.id, "active");
+      setActiveCollabs(collabResult.previews.slice(0, 3));
+
       supabase
         .from("room_members")
         .select("room_id")
@@ -81,11 +87,12 @@ export default function HomePage() {
   const optionalComplete = viewerProfile
     ? getOptionalProfileCompleteness(viewerProfile).isComplete
     : true;
+  const hasConnected = conversations.length > 0;
+  const hasCollabs = activeCollabs.length > 0;
+  const gettingStartedComplete =
+    optionalComplete && myRooms.length > 0 && hasConnected && hasCollabs;
   const showGettingStarted =
-    onboardingDone &&
-    Boolean(viewerProfile) &&
-    (!optionalComplete || myRooms.length === 0) &&
-    conversations.length === 0;
+    onboardingDone && Boolean(viewerProfile) && !gettingStartedComplete;
 
   return (
     <div className="space-y-10">
@@ -99,6 +106,8 @@ export default function HomePage() {
         show={showGettingStarted}
         profile={viewerProfile}
         hasRooms={myRooms.length > 0}
+        hasConnected={hasConnected}
+        hasCollabs={hasCollabs}
       />
 
       {viewerProfile && <ProfileCompletenessNudge profile={viewerProfile} />}
@@ -227,14 +236,34 @@ export default function HomePage() {
         <p className="mt-2 text-sm text-muted">
           Shared spaces for projects you&apos;re exploring with other people.
         </p>
-        <div className="mt-4">
-          <Link
-            href="/collaborations"
-            className="inline-flex rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+        {activeCollabs.length === 0 ? (
+          <EmptyState
+            className="mt-4"
+            title="No active collaborations yet."
+            description="When someone responds interested to a collab invite, a shared workspace opens here for notes, links, and next steps."
           >
-            View collaborations
-          </Link>
-        </div>
+            <Link
+              href="/explore"
+              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+            >
+              Explore people
+            </Link>
+            <Link
+              href="/collaborations"
+              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+            >
+              View Collabs
+            </Link>
+          </EmptyState>
+        ) : (
+          <ul className="mt-4 space-y-3">
+            {activeCollabs.map((preview) => (
+              <li key={preview.id}>
+                <CollaborationPreviewLink preview={preview} />
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="border-t border-foreground/10 pt-8">

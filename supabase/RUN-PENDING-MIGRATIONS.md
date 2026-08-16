@@ -203,6 +203,22 @@ If either line errors with **already member of publication**, that table is alre
 | 016 | Collaboration workspaces (notes, links, next steps) |
 | 017 | Email notification prefs + send log |
 | 018 | Browser push prefs + push subscriptions |
+| 019 | Realtime on collaboration workspaces (live notes/steps) |
+
+---
+
+## 019 — Realtime collaborations
+
+Run the full file: `supabase/migrations/019_realtime_collaborations.sql`
+
+```sql
+alter publication supabase_realtime add table public.collaboration_entries;
+alter publication supabase_realtime add table public.collaborations;
+```
+
+If either line errors with **already member of publication**, skip that line.
+
+**Try it:** Open the same collab workspace in two browsers. Add a note in one — it appears in the other without refresh.
 
 ---
 
