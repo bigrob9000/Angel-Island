@@ -14,6 +14,7 @@ import { isListenRoom, LISTEN_COMPOSE_INTENTS } from "@/lib/listen";
 import { IntroductionsPinned } from "@/components/IntroductionsPinned";
 import { ListenPinned } from "@/components/ListenPinned";
 import { MediaEmbed } from "@/components/MediaEmbed";
+import { PostAuthorActions } from "@/components/PostAuthorActions";
 import { normalizeMediaUrl } from "@/lib/media-embed";
 import { PostCommentSection } from "@/components/PostCommentSection";
 import { PostLoveButton } from "@/components/PostLoveButton";
@@ -361,6 +362,13 @@ export default function RoomPage() {
         {post.body && (
           <p className="mt-2 text-muted whitespace-pre-wrap leading-relaxed">{post.body}</p>
         )}
+        <PostAuthorActions
+          username={author?.username ?? ""}
+          roomSlug={slug}
+          postId={post.id}
+          isOwn={isOwn}
+          interactionBlocked={blockedUserIds.has(post.author_id)}
+        />
         {isIntroductions && isOwn && (
           <div className="mt-4 flex flex-wrap gap-3">
             <button

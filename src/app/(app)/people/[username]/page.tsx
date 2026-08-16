@@ -1,17 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
 import type { CollabPace } from "@/lib/types";
 import { ProfileDisplay } from "@/components/ProfileDisplay";
 import { ProfileListenShares } from "@/components/ProfileListenShares";
+import { RoomDiscoveryBanner } from "@/components/RoomDiscoveryBanner";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
 import { loadRecentListenShares, type ProfileListenShare } from "@/lib/profile-shares";
 import { checkBlockBetween, unblockUser } from "@/lib/blocks";
+import {
+  parseRoomProfileContext,
+  postPreviewText,
+  suggestedInviteMessageFromRoom,
+} from "@/lib/room-context";
 
 const MAX_PENDING = 5;
 const COLLAB_ABOUT_OPTIONS = ["Co-writing", "Production", "Jam session", "Learning", "Other"] as const;
@@ -25,10 +31,13 @@ function collabInviteError(message: string): string {
   return message;
 }
 
-export default function PublicProfilePage() {
+function PublicProfilePageContent() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const username = params.username as string;
+  const roomContext = parseRoomProfileContext(searchParams);
+  const openInviteFromUrl = searchParams.get("invite") === "1";
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOwn, setIsOwn] = useState(false);
@@ -51,6 +60,9 @@ export default function PublicProfilePage() {
   const [blockedByThem, setBlockedByThem] = useState(false);
   const [safetyDialog, setSafetyDialog] = useState<SafetyDialog>(null);
   const [listenShares, setListenShares] = useState<ProfileListenShare[]>([]);
+  const [roomName, setRoomName] = useState<string | null>(null);
+  const [roomPostPreview, setRoomPostPreview] = useState<string | null>(null);
+  const [invitePrefillApplied, setInvitePrefillApplied] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -104,6 +116,67 @@ export default function PublicProfilePage() {
       }
     });
   }, [username]);
+
+  useEffect(() => {
+    if (!roomContext) {
+      setRoomName(null);
+      setRoomPostPreview(null);
+      return;
+    }
+
+    const supabase = createClient();
+    void supabase
+      .from("rooms")
+      .select("name")
+      .eq("slug", roomContext.roomSlug)
+      .maybeSingle()
+      .then(({ data }) => {
+        setRoomName(data?.name ?? roomContext.roomSlug);
+      });
+
+    if (!roomContext.postId) {
+      setRoomPostPreview(null);
+      return;
+    }
+
+    void supabase
+      .from("posts")
+      .select("body, title")
+      .eq("id", roomContext.postId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) {
+          setRoomPostPreview(null);
+          return;
+        }
+        const text = data.body?.trim() || data.title?.trim() || "";
+        setRoomPostPreview(text ? postPreviewText(text) : null);
+      });
+  }, [roomContext]);
+
+  useEffect(() => {
+    if (!roomContext || !roomName || invitePrefillApplied || loading || !profile || isOwn) return;
+
+    const suggested = suggestedInviteMessageFromRoom(roomName, {
+      roomSlug: roomContext.roomSlug,
+      postPreview: roomPostPreview,
+    });
+
+    setInviteMessage((current) => current || suggested);
+    if (openInviteFromUrl) {
+      setInviteOpen(true);
+    }
+    setInvitePrefillApplied(true);
+  }, [
+    roomContext,
+    roomName,
+    roomPostPreview,
+    openInviteFromUrl,
+    invitePrefillApplied,
+    loading,
+    profile,
+    isOwn,
+  ]);
 
   async function sendInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -272,6 +345,16 @@ export default function PublicProfilePage() {
 
   return (
     <div className="space-y-8">
+      {roomContext && roomName && (
+        <RoomDiscoveryBanner
+          roomName={roomName}
+          roomSlug={roomContext.roomSlug}
+          postId={roomContext.postId}
+          postPreview={roomPostPreview}
+          authorName={displayName}
+        />
+      )}
+
       <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">
         <ProfileDisplay profile={profile} />
       </div>
@@ -441,5 +524,13 @@ export default function PublicProfilePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PublicProfilePage() {
+  return (
+    <Suspense fallback={<p className="text-muted">Loading…</p>}>
+      <PublicProfilePageContent />
+    </Suspense>
   );
 }

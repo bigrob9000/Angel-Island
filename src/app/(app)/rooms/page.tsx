@@ -113,7 +113,10 @@ export default function RoomsPage() {
   return (
     <div>
       <h1 className="font-serif text-2xl font-medium text-foreground">Explore Rooms</h1>
-      <p className="mt-2 text-muted">Click a cloud to enter. Add any room to Your Spaces — no obligation to post.</p>
+      <p className="mt-2 text-muted">
+        Click a cloud to enter. Read posts, visit profiles, and invite someone to chat when it
+        feels right — no obligation to post.
+      </p>
 
       <div className="rooms-web mt-10">
         {rooms.slice(0, ROOM_POSITIONS.length).map((room, i) => {
