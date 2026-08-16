@@ -1,7 +1,7 @@
 "use client";
 
 import type { DiscoveryFilters } from "@/lib/discovery";
-import { HERE_FOR_OPTIONS, ROLE_OPTIONS } from "@/lib/profile-options";
+import { HERE_FOR_OPTIONS, OPEN_TO_OPTIONS, ROLE_OPTIONS } from "@/lib/profile-options";
 
 type Props = {
   filters: DiscoveryFilters;
@@ -50,18 +50,22 @@ function FilterGroup({
 }
 
 export function ExploreFilters({ filters, onChange, locations, genres }: Props) {
-  function toggleFilter<K extends "location" | "hereFor" | "role" | "genre">(
+  function toggleFilter<K extends "location" | "hereFor" | "role" | "genre" | "openTo">(
     key: K,
-    value: string
+    value: string,
   ) {
     onChange({ ...filters, [key]: filters[key] === value ? null : value });
   }
+
+  const hasChipFilters = Boolean(
+    filters.location || filters.hereFor || filters.role || filters.genre || filters.openTo,
+  );
 
   return (
     <div className="space-y-4 rounded-lg border border-foreground/10 bg-white/40 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-medium text-foreground">Narrow this list</p>
-        {(filters.location || filters.hereFor || filters.role || filters.genre) && (
+        {hasChipFilters && (
           <button
             type="button"
             onClick={() =>
@@ -71,6 +75,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
                 hereFor: null,
                 role: null,
                 genre: null,
+                openTo: null,
               })
             }
             className="text-sm text-muted hover:text-foreground"
@@ -100,6 +105,17 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
             label={option}
             active={filters.hereFor === option}
             onClick={() => toggleFilter("hereFor", option)}
+          />
+        ))}
+      </FilterGroup>
+
+      <FilterGroup title="Open to">
+        {OPEN_TO_OPTIONS.map((option) => (
+          <Chip
+            key={option}
+            label={option}
+            active={filters.openTo === option}
+            onClick={() => toggleFilter("openTo", option)}
           />
         ))}
       </FilterGroup>

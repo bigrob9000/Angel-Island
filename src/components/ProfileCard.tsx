@@ -16,7 +16,9 @@ export function ProfileCard({ profile, reason }: ProfileCardProps) {
       : profile.about;
   const hereForPreview = profile.here_for.slice(0, 3).join(" · ");
   const openToPreview = profile.open_to.slice(0, 2).join(" · ");
-  const genresPreview = profile.genres_make.slice(0, 3).join(", ");
+  const genresMakePreview = profile.genres_make.slice(0, 3).join(", ");
+  const genresLovePreview = profile.genres_love.slice(0, 3).join(", ");
+  const collaboratePreview = profile.collaborate_as.slice(0, 2).join(", ");
 
   const inner = (
     <>
@@ -40,8 +42,23 @@ export function ProfileCard({ profile, reason }: ProfileCardProps) {
           {profile.open_to.length > 2 ? "…" : ""}
         </p>
       )}
-      {genresPreview && (
-        <p className="mt-1 text-sm text-muted">Makes: {genresPreview}</p>
+      {genresMakePreview && (
+        <p className="mt-1 text-sm text-muted">
+          Makes: {genresMakePreview}
+          {profile.genres_make.length > 3 ? "…" : ""}
+        </p>
+      )}
+      {genresLovePreview && (
+        <p className="mt-1 text-sm text-muted">
+          Loves: {genresLovePreview}
+          {profile.genres_love.length > 3 ? "…" : ""}
+        </p>
+      )}
+      {collaboratePreview && (
+        <p className="mt-1 text-sm text-muted">
+          Collaborates as: {collaboratePreview}
+          {profile.collaborate_as.length > 2 ? "…" : ""}
+        </p>
       )}
       {excerpt && <p className="mt-2 text-sm text-muted leading-relaxed">{excerpt}</p>}
       {reason && <p className="mt-2 text-xs text-muted italic">{reason}</p>}

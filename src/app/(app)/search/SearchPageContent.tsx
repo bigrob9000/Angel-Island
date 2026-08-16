@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
+import { EmptyState } from "@/components/EmptyState";
 import { createClient } from "@/lib/supabase";
 import { searchAll, type ConversationSearchResult } from "@/lib/search";
+import { rankProfilesForViewer } from "@/lib/discovery";
 import { conversationStatusLabel } from "@/lib/conversations";
 import type { Profile, Room } from "@/lib/types";
+import { normalizeProfile } from "@/lib/types";
 
 export default function SearchPageContent() {
   const searchParams = useSearchParams();
@@ -16,7 +19,7 @@ export default function SearchPageContent() {
 
   const [submitted, setSubmitted] = useState("");
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [people, setPeople] = useState<Profile[]>([]);
+  const [people, setPeople] = useState<ReturnType<typeof rankProfilesForViewer>>([]);
   const [conversations, setConversations] = useState<ConversationSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -32,8 +35,20 @@ export default function SearchPageContent() {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     const results = await searchAll(trimmed, user?.id);
+
+    let rankedPeople = rankProfilesForViewer(null, results.people);
+    if (user) {
+      const { data: viewerRow } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      const viewer = viewerRow ? normalizeProfile(viewerRow as Profile) : null;
+      rankedPeople = rankProfilesForViewer(viewer, results.people);
+    }
+
     setRooms(results.rooms);
-    setPeople(results.people);
+    setPeople(rankedPeople);
     setConversations(results.conversations);
     setLoading(false);
   }, []);
@@ -58,18 +73,23 @@ export default function SearchPageContent() {
       {loading && <p className="text-sm text-muted">Searching…</p>}
 
       {searched && !loading && !hasResults && (
-        <div className="rounded-lg border border-foreground/10 bg-white/40 px-4 py-8 text-center text-sm text-muted">
-          <p>Nothing like that turned up.</p>
-          <p className="mt-2">You might try a different word — or explore a room instead.</p>
-          <div className="mt-4 flex flex-wrap justify-center gap-3">
-            <Link href="/rooms" className="text-foreground underline hover:no-underline">
-              Explore Rooms
-            </Link>
-            <Link href="/explore" className="text-foreground underline hover:no-underline">
-              Explore People
-            </Link>
-          </div>
-        </div>
+        <EmptyState
+          title="Nothing like that turned up."
+          description="Try a different word — or browse people and rooms instead."
+        >
+          <Link
+            href="/rooms"
+            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+          >
+            Explore rooms
+          </Link>
+          <Link
+            href="/explore"
+            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+          >
+            Explore people
+          </Link>
+        </EmptyState>
       )}
 
       {rooms.length > 0 && (
@@ -104,7 +124,10 @@ export default function SearchPageContent() {
               <li key={profile.id}>
                 <ProfileCard
                   profile={profile}
-                  reason={submitted ? `Matches "${submitted}" in profile` : undefined}
+                  reason={
+                    profile.reason ??
+                    (submitted ? `Matches "${submitted}" in profile` : undefined)
+                  }
                 />
               </li>
             ))}

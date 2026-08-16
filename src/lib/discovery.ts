@@ -6,6 +6,7 @@ export type DiscoveryFilters = {
   hereFor: string | null;
   role: string | null;
   genre: string | null;
+  openTo: string | null;
 };
 
 export const EMPTY_DISCOVERY_FILTERS: DiscoveryFilters = {
@@ -14,7 +15,10 @@ export const EMPTY_DISCOVERY_FILTERS: DiscoveryFilters = {
   hereFor: null,
   role: null,
   genre: null,
+  openTo: null,
 };
+
+export type DiscoverySort = "suggested" | "recent" | "name";
 
 function normalizeToken(value: string): string {
   return value.trim().toLowerCase();
@@ -71,9 +75,11 @@ export function applyDiscoveryFilters(
   filters: DiscoveryFilters
 ): Profile[] {
   const query = filters.query.trim().toLowerCase();
+  const tokens = query.split(/\s+/).filter(Boolean);
 
   return profiles.filter((profile) => {
-    if (query && !profileHaystack(profile).includes(query)) return false;
+    const haystack = profileHaystack(profile);
+    if (tokens.length > 0 && !tokens.every((token) => haystack.includes(token))) return false;
 
     if (filters.location && normalizeToken(profile.location ?? "") !== normalizeToken(filters.location)) {
       return false;
@@ -84,6 +90,10 @@ export function applyDiscoveryFilters(
     }
 
     if (filters.role && !profile.roles.some((item) => normalizeToken(item) === normalizeToken(filters.role!))) {
+      return false;
+    }
+
+    if (filters.openTo && !profile.open_to.some((item) => normalizeToken(item) === normalizeToken(filters.openTo!))) {
       return false;
     }
 
@@ -170,14 +180,71 @@ export function rankProfilesForViewer(
     return { ...profile, alignmentScore, reason };
   });
 
+  return sortRankedProfiles(ranked, "suggested");
+}
+
+export function sortRankedProfiles(profiles: RankedProfile[], sort: DiscoverySort): RankedProfile[] {
+  const ranked = [...profiles];
+
   ranked.sort((a, b) => {
-    if (b.alignmentScore !== a.alignmentScore) return b.alignmentScore - a.alignmentScore;
-    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    if (sort === "suggested") {
+      if (b.alignmentScore !== a.alignmentScore) return b.alignmentScore - a.alignmentScore;
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    }
+    if (sort === "recent") {
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    }
+    const nameA = (a.first_name ?? a.username ?? "").toLowerCase();
+    const nameB = (b.first_name ?? b.username ?? "").toLowerCase();
+    return nameA.localeCompare(nameB);
   });
 
   return ranked;
 }
 
+export function splitSuggestedProfiles(profiles: RankedProfile[]): {
+  suggested: RankedProfile[];
+  others: RankedProfile[];
+} {
+  const suggested = profiles.filter((profile) => profile.alignmentScore > 0);
+  const others = profiles.filter((profile) => profile.alignmentScore === 0);
+  return { suggested, others };
+}
+
+export type SuggestedDiscoveryFilter = {
+  label: string;
+  filters: Partial<DiscoveryFilters>;
+};
+
+export function suggestedDiscoveryFilters(viewer: Profile): SuggestedDiscoveryFilter[] {
+  const suggestions: SuggestedDiscoveryFilter[] = [];
+
+  for (const hereFor of viewer.here_for.slice(0, 1)) {
+    suggestions.push({ label: hereFor, filters: { hereFor } });
+  }
+  for (const genre of viewer.genres_make.slice(0, 1)) {
+    suggestions.push({ label: genre, filters: { genre } });
+  }
+  for (const role of viewer.roles.slice(0, 1)) {
+    suggestions.push({ label: role, filters: { role } });
+  }
+  for (const openTo of viewer.open_to.slice(0, 1)) {
+    suggestions.push({ label: openTo, filters: { openTo } });
+  }
+  if (viewer.location?.trim()) {
+    suggestions.push({ label: viewer.location.trim(), filters: { location: viewer.location.trim() } });
+  }
+
+  return suggestions.slice(0, 5);
+}
+
 export function hasActiveDiscoveryFilters(filters: DiscoveryFilters): boolean {
-  return Boolean(filters.location || filters.hereFor || filters.role || filters.genre || filters.query.trim());
+  return Boolean(
+    filters.location ||
+      filters.hereFor ||
+      filters.role ||
+      filters.genre ||
+      filters.openTo ||
+      filters.query.trim(),
+  );
 }
