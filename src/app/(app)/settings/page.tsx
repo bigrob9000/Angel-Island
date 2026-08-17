@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
+import { InviteMusiciansCard } from "@/components/InviteMusiciansCard";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { usePreferences } from "@/components/PreferencesProvider";
 import { fetchNotificationStatus, sendTestNotificationEmail } from "@/lib/notifications/client";
@@ -323,6 +324,8 @@ export default function SettingsPage() {
           </button>
         </form>
       </section>
+
+      <InviteMusiciansCard />
 
       <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-6">
         <div>

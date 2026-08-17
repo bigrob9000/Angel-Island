@@ -1,13 +1,12 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { postAuthPath } from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/onboarding";
-
   if (!token_hash || !type) {
     return NextResponse.redirect(new URL("/sign-in?error=missing_token", request.url));
   }
@@ -21,5 +20,19 @@ export async function GET(request: Request) {
     );
   }
 
-  return NextResponse.redirect(new URL(next, request.url));
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let destination: "/home" | "/onboarding" = "/onboarding";
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, username")
+      .eq("id", user.id)
+      .maybeSingle();
+    destination = postAuthPath(profile);
+  }
+
+  return NextResponse.redirect(new URL(destination, request.url));
 }

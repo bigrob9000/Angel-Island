@@ -3,8 +3,17 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { postAuthPath } from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
+
+function authCallbackUrl(invited: boolean, authMode: "sign-in" | "sign-up") {
+  const params = new URLSearchParams();
+  if (invited) params.set("invite", "1");
+  if (authMode === "sign-up") params.set("mode", "sign-up");
+  const qs = params.toString();
+  return `${window.location.origin}/auth/callback${qs ? `?${qs}` : ""}`;
+}
 
 export default function SignInPageContent() {
   const searchParams = useSearchParams();
@@ -21,6 +30,8 @@ export default function SignInPageContent() {
     if (err) setMessage({ type: "error", text: err });
     const modeParam = searchParams.get("mode");
     if (modeParam === "sign-up") setMode("sign-up");
+    else if (modeParam === "sign-in") setMode("sign-in");
+    else if (searchParams.get("invite") === "1") setMode("sign-up");
   }, [searchParams]);
 
   const invited = searchParams.get("invite") === "1";
@@ -42,14 +53,14 @@ export default function SignInPageContent() {
     setGoogleLoading(true);
     const supabase = createClient();
     const redirectTo =
-      typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : "";
+      typeof window !== "undefined" ? authCallbackUrl(invited, mode) : "";
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo,
         queryParams: {
-          prompt: "select_account",
+          prompt: invited ? "consent" : "select_account",
         },
       },
     });
@@ -80,7 +91,19 @@ export default function SignInPageContent() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setMessage({ type: "ok", text: "Signed in. Redirecting…" });
-        window.location.href = "/onboarding";
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("first_name, username")
+            .eq("id", user.id)
+            .maybeSingle();
+          window.location.href = postAuthPath(profile);
+        } else {
+          window.location.href = "/onboarding";
+        }
       }
     } catch (err: unknown) {
       let msg = err instanceof Error ? err.message : "Something went wrong.";
@@ -128,15 +151,30 @@ export default function SignInPageContent() {
           <AngelIslandLogo asLink={false} variant="mark" size="md" className="mb-8" />
         </Link>
         <h1 className="font-serif text-2xl font-medium mt-6">
-          {mode === "sign-in" ? "Sign in" : "Create an account"}
+          {invited && mode === "sign-up"
+            ? "Join Angel Island"
+            : mode === "sign-in"
+              ? "Sign in"
+              : "Create an account"}
         </h1>
         <p className="text-muted mt-2 text-sm">
           {invited
-            ? "Welcome — sign in to join Angel Island. Take your time getting settled."
+            ? mode === "sign-in"
+              ? "Welcome back. Sign in when you're ready — no rush."
+              : "Someone invited you to a calm space for musicians. Create an account with Google or email."
             : mode === "sign-in"
               ? "Sign in with Google, or use email and password."
               : "Create an account with Google, or use email and password."}
         </p>
+
+        {invited && (
+          <div className="mt-6 rounded-lg border border-foreground/15 bg-white/60 px-4 py-3 text-sm">
+            <p className="font-medium text-foreground">Invite-only, for now</p>
+            <p className="mt-1 text-muted">
+              No clout, no cold DMs — just musicians finding each other and collaborating at their own pace.
+            </p>
+          </div>
+        )}
 
         <button
           type="button"
