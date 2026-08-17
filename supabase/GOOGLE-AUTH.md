@@ -25,7 +25,8 @@ Production site: **https://www.angelislandconnect.com**
    - **User support email:** your email
    - **Developer contact:** your email
    - **App home page:** `https://www.angelislandconnect.com`
-   - **Privacy policy / Terms:** `https://www.angelislandconnect.com/privacy` (required before publishing)
+   - **Privacy policy:** `https://www.angelislandconnect.com/privacy`
+   - **Terms of service:** `https://www.angelislandconnect.com/terms`
 6. **Scopes:** add `email`, `profile`, `openid` (often added by default)
 7. **Test users** (while app is in “Testing”): add your Gmail and any beta invitees
 8. Save

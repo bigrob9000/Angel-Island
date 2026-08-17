@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LegalPageShell } from "@/components/LegalPageShell";
 import { FEEDBACK_EMAIL, getSiteUrl, SITE_NAME } from "@/lib/site";
 
@@ -20,7 +21,8 @@ export default function PrivacyPage() {
           {SITE_NAME} ({siteUrl}) is a calm, invite-first space for musicians to find each other,
           collaborate, and talk about music. This policy explains what we collect, why we collect
           it, and the choices you have. We keep things minimal and consent-first — we don&apos;t
-          sell your data or run attention algorithms.
+          sell your data or run attention algorithms. Use of Angel Island is also governed by our{" "}
+          <Link href="/terms">Terms of Service</Link>.
         </p>
       </section>
 

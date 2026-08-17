@@ -257,6 +257,10 @@ export default function SignInPageContent() {
           <Link href="/privacy" className="hover:text-foreground underline underline-offset-2">
             Privacy Policy
           </Link>
+          {" · "}
+          <Link href="/terms" className="hover:text-foreground underline underline-offset-2">
+            Terms of Service
+          </Link>
         </p>
       </div>
     </div>

@@ -24,6 +24,14 @@ export function LegalPageShell({ title, lastUpdated, children }: Props) {
             Back to Angel Island
           </Link>
           {" · "}
+          <Link href="/privacy" className="hover:text-foreground">
+            Privacy Policy
+          </Link>
+          {" · "}
+          <Link href="/terms" className="hover:text-foreground">
+            Terms of Service
+          </Link>
+          {" · "}
           <Link href="/sign-in" className="hover:text-foreground">
             Sign in
           </Link>
