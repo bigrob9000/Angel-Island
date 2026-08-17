@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { FeedbackCard } from "@/components/FeedbackCard";
 import { InviteMusiciansCard } from "@/components/InviteMusiciansCard";
+import { IphonePwaHint } from "@/components/IphonePwaHint";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { usePreferences } from "@/components/PreferencesProvider";
 import { fetchNotificationStatus, sendTestNotificationEmail } from "@/lib/notifications/client";
@@ -458,6 +459,10 @@ export default function SettingsPage() {
             <p className="mt-2 text-sm text-muted">{pushStatus.mobileHint}</p>
           )}
         </div>
+
+        {pushStatus?.platform === "ios" && !pushStatus.isStandalone && (
+          <IphonePwaHint respectDismiss={false} />
+        )}
 
         <SettingsToggle
           id="notify-push"

@@ -1,3 +1,5 @@
+import { getPwaEnvironment } from "@/lib/pwa";
+
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
@@ -28,15 +30,7 @@ export function getPushEnvironment(): PushEnvironment {
     };
   }
 
-  const ua = navigator.userAgent;
-  const isIOS =
-    /iPad|iPhone|iPod/.test(ua) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const isAndroid = /Android/.test(ua);
-  const isStandalone =
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true;
-  const isInAppBrowser = /FBAN|FBAV|Instagram|Twitter|LinkedInApp|Line\//i.test(ua);
+  const env = getPwaEnvironment();
 
   const supported =
     "serviceWorker" in navigator &&
@@ -45,16 +39,16 @@ export function getPushEnvironment(): PushEnvironment {
 
   let mobileHint: string | null = null;
   if (!supported) {
-    if (isInAppBrowser) {
+    if (env.isInAppBrowser) {
       mobileHint =
-        "In-app browsers (Instagram, Facebook, etc.) can't use push. Open angelislandconnect.com in Safari or Chrome instead.";
-    } else if (isIOS && !isStandalone) {
+        "In-app browsers (Instagram, Facebook, etc.) can't use push. Open angelislandconnect.com in Safari instead.";
+    } else if (env.isIOS && !env.isStandalone) {
       mobileHint =
-        "On iPhone/iPad: Share → Add to Home Screen, open Angel Island from that icon, then turn this on. Regular Safari tabs can't receive push.";
-    } else if (isIOS && isStandalone) {
+        "On iPhone/iPad, add Angel Island to your Home Screen first — see the steps above. Regular Safari tabs can't receive push.";
+    } else if (env.isIOS && env.isStandalone) {
       mobileHint =
         "Web push on iPhone needs iOS 16.4 or later. Update your device if this still doesn't work.";
-    } else if (isAndroid) {
+    } else if (env.isAndroid) {
       mobileHint =
         "Try opening the site in Chrome. Some Android browsers don't support web push.";
     } else {
@@ -65,9 +59,9 @@ export function getPushEnvironment(): PushEnvironment {
 
   return {
     supported,
-    platform: isIOS ? "ios" : isAndroid ? "android" : "desktop",
-    isStandalone,
-    isInAppBrowser,
+    platform: env.platform,
+    isStandalone: env.isStandalone,
+    isInAppBrowser: env.isInAppBrowser,
     mobileHint,
   };
 }
