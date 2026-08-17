@@ -5,6 +5,10 @@ export const SITE_DESCRIPTION =
 
 export const SITE_TAGLINE = "A place for musicians and creatives";
 
+/** Beta feedback inbox — override with NEXT_PUBLIC_FEEDBACK_EMAIL if needed. */
+export const FEEDBACK_EMAIL =
+  process.env.NEXT_PUBLIC_FEEDBACK_EMAIL?.trim() || "feedback@angelislandconnect.com";
+
 /** Canonical public URL — set NEXT_PUBLIC_SITE_URL when using a custom domain. */
 export function getSiteUrl(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();

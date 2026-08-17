@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
+import { FeedbackCard } from "@/components/FeedbackCard";
 import { InviteMusiciansCard } from "@/components/InviteMusiciansCard";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { usePreferences } from "@/components/PreferencesProvider";
@@ -553,6 +554,8 @@ export default function SettingsPage() {
           </p>
         )}
       </section>
+
+      <FeedbackCard />
 
       <section className="rounded-lg border border-foreground/10 bg-white/50 p-5">
         <SettingsToggle
