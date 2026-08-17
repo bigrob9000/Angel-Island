@@ -24,6 +24,7 @@ export default function SignInPageContent() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   useEffect(() => {
     const err = searchParams.get("error");
@@ -49,6 +50,10 @@ export default function SignInPageContent() {
   }, []);
 
   async function handleGoogleSignIn() {
+    if (mode === "sign-up" && !agreedToTerms) {
+      setMessage({ type: "error", text: "Please agree to the Terms of Service and Privacy Policy to create an account." });
+      return;
+    }
     setMessage(null);
     setGoogleLoading(true);
     const supabase = createClient();
@@ -74,6 +79,13 @@ export default function SignInPageContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMessage(null);
+    if (mode === "sign-up" && !agreedToTerms) {
+      setMessage({
+        type: "error",
+        text: "Please agree to the Terms of Service and Privacy Policy to create an account.",
+      });
+      return;
+    }
     setLoading(true);
     const supabase = createClient();
 
@@ -176,10 +188,41 @@ export default function SignInPageContent() {
           </div>
         )}
 
+        {mode === "sign-up" && (
+          <label className="mt-6 flex items-start gap-3 text-sm text-muted cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-foreground/30 accent-foreground"
+            />
+            <span>
+              I agree to the{" "}
+              <Link
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground underline underline-offset-2 hover:no-underline"
+              >
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground underline underline-offset-2 hover:no-underline"
+              >
+                Privacy Policy
+              </Link>
+            </span>
+          </label>
+        )}
+
         <button
           type="button"
           onClick={handleGoogleSignIn}
-          disabled={googleLoading || loading}
+          disabled={googleLoading || loading || (mode === "sign-up" && !agreedToTerms)}
           className="mt-8 w-full rounded-md border border-foreground/25 bg-white/80 py-2.5 text-sm font-medium text-foreground hover:bg-white disabled:opacity-50 transition-colors"
         >
           {googleLoading ? "Redirecting…" : "Continue with Google"}
@@ -224,7 +267,7 @@ export default function SignInPageContent() {
           )}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (mode === "sign-up" && !agreedToTerms)}
             className="w-full rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
             {loading ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Sign up"}
@@ -247,6 +290,7 @@ export default function SignInPageContent() {
           onClick={() => {
             setMode(mode === "sign-in" ? "sign-up" : "sign-in");
             setMessage(null);
+            setAgreedToTerms(false);
           }}
           className="mt-6 w-full text-center text-sm text-muted hover:text-foreground transition-colors"
         >
