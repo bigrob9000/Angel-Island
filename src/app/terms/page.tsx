@@ -70,6 +70,24 @@ export default function TermsPage() {
       </section>
 
       <section>
+        <h2>Sharing music and media</h2>
+        <p>
+          Angel Island lets you link to audio and video hosted elsewhere (for example in Listen
+          &amp; Share). We do not host, stream, or review that material for copyright clearance.
+        </p>
+        <p>
+          You are welcome to share your own work, demos, and clips at your own discretion. You are
+          solely responsible for making sure you have the right to share anything you post — including
+          covers, samples, collaborations, and links to third-party platforms.
+        </p>
+        <p>
+          {SITE_NAME} is not responsible for unauthorized or infringing use of music or other media
+          shared by members. We may remove content or restrict accounts if we receive a valid
+          complaint or believe a post violates these Terms.
+        </p>
+      </section>
+
+      <section>
         <h2>Acceptable use</h2>
         <p>You agree not to:</p>
         <ul>

@@ -12,7 +12,11 @@ export const LISTEN_PINNED = {
     "You don't have to comment on others' posts to belong here.",
   ],
   closing: "This isn't a competition. It's a listening room.",
+  disclaimer:
+    "You're welcome to share clips, demos, and links here — but only what you have the right to share. Angel Island doesn't host your audio or video, we don't review links for copyright, and we're not responsible if someone shares material without permission. Share at your own discretion.",
 };
+
+export const MUSIC_SHARING_DISCLAIMER = LISTEN_PINNED.disclaimer;
 
 export function isListenRoom(slug: string): boolean {
   return slug === LISTEN_SLUG;

@@ -11,6 +11,9 @@ export function ListenPinned() {
           <li key={item}>{item}</li>
         ))}
       </ul>
+      <p className="text-sm text-muted leading-relaxed border-t border-foreground/10 pt-4">
+        {LISTEN_PINNED.disclaimer}
+      </p>
       <p className="text-sm text-muted leading-relaxed italic">{LISTEN_PINNED.closing}</p>
     </aside>
   );

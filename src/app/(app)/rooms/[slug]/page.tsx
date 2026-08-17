@@ -10,7 +10,7 @@ import { normalizeProfile } from "@/lib/types";
 import { usePreferences } from "@/components/PreferencesProvider";
 import { emptyProfile, PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 import { isIntroductionsRoom } from "@/lib/introductions";
-import { isListenRoom, LISTEN_COMPOSE_INTENTS } from "@/lib/listen";
+import { isListenRoom, LISTEN_COMPOSE_INTENTS, MUSIC_SHARING_DISCLAIMER } from "@/lib/listen";
 import { IntroductionsPinned } from "@/components/IntroductionsPinned";
 import { ListenPinned } from "@/components/ListenPinned";
 import { MediaEmbed } from "@/components/MediaEmbed";
@@ -523,17 +523,20 @@ export default function RoomPage() {
                 </label>
               )}
               {composeIntent === "share_work" && (
-                <label className="block">
-                  <span className="text-sm text-muted">Link to audio or video</span>
-                  <input
-                    type="url"
-                    value={composeMediaUrl}
-                    onChange={(e) => setComposeMediaUrl(e.target.value)}
-                    required
-                    placeholder="https://youtube.com/… or SoundCloud, TikTok, etc."
-                    className={inputClass}
-                  />
-                </label>
+                <>
+                  <label className="block">
+                    <span className="text-sm text-muted">Link to audio or video</span>
+                    <input
+                      type="url"
+                      value={composeMediaUrl}
+                      onChange={(e) => setComposeMediaUrl(e.target.value)}
+                      required
+                      placeholder="https://youtube.com/… or SoundCloud, TikTok, etc."
+                      className={inputClass}
+                    />
+                  </label>
+                  <p className="text-xs text-muted leading-relaxed">{MUSIC_SHARING_DISCLAIMER}</p>
+                </>
               )}
               <label className="block">
                 <span className="text-sm text-muted">
