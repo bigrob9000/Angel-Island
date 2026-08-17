@@ -258,6 +258,12 @@ export default function Home() {
             </Link>
           </div>
         </section>
+
+        <footer className="text-center text-xs text-muted">
+          <Link href="/privacy" className="hover:text-foreground underline underline-offset-2">
+            Privacy Policy
+          </Link>
+        </footer>
       </main>
     </div>
   );

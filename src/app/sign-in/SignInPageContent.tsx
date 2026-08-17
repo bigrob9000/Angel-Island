@@ -252,6 +252,12 @@ export default function SignInPageContent() {
         >
           {mode === "sign-in" ? "Need an account? Sign up" : "Already have an account? Sign in"}
         </button>
+
+        <p className="mt-8 text-center text-xs text-muted">
+          <Link href="/privacy" className="hover:text-foreground underline underline-offset-2">
+            Privacy Policy
+          </Link>
+        </p>
       </div>
     </div>
   );
