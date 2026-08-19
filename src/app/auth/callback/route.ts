@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     searchParams.get("error");
   if (oauthError) {
     const friendly = oauthError.includes("Access blocked")
-      ? "Google sign-in is limited right now. Try email sign-up, or ask the person who invited you to add your Gmail as a test user in Google Cloud."
+      ? "Google sign-in was blocked. If this keeps happening, try email sign-in or contact support."
       : oauthError;
     const invite = searchParams.get("invite") === "1" ? "&invite=1" : "";
     return NextResponse.redirect(

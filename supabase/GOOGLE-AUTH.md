@@ -115,16 +115,34 @@ Copy this from **Settings → Invite musicians** when signed in.
 
 ---
 
-## Part 4 — Publish for real invitees (beta)
+## Part 4 — Publish Google OAuth (recommended for beta)
 
-While the OAuth app is in **Testing**, only Gmail accounts listed under **Test users** can sign in with Google. Email/password sign-up works for anyone.
+While the OAuth app is in **Testing**, only Gmail accounts listed under **Test users** can sign in with Google. Email/password sign-up works for anyone with an invite link.
 
-To let invitees use Google without adding each one manually:
+**Angel Island stays invite-only** even after you publish Google — new Google accounts without an invite link are deleted on first sign-in (`NEXT_PUBLIC_INVITE_ONLY` defaults to on). Publishing only removes Google’s test-user cap so invitees can use **Continue with Google** without you adding each Gmail manually.
 
-1. Google Cloud → **OAuth consent screen**
-2. Complete any required fields (privacy policy URL if prompted)
-3. Click **Publish app** (moves from Testing → Production)
-4. For a small friends-and-family beta, Google often allows this without full verification if you only use basic scopes (`email`, `profile`, `openid`)
+### Publish checklist
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → your **Angel Island** project
+2. **APIs & Services** → **OAuth consent screen**
+3. Confirm required fields are filled:
+   - App home page: `https://www.angelislandconnect.com`
+   - Privacy policy: `https://www.angelislandconnect.com/privacy`
+   - Terms: `https://www.angelislandconnect.com/terms`
+   - Scopes: `email`, `profile`, `openid` only (sensitive scopes trigger verification)
+4. Click **Publish app** (Testing → **In production**)
+5. Google may show an “unverified app” warning for up to 100 users — normal for a small beta with basic scopes
+
+### After publishing — smoke test
+
+1. Open an **incognito** window (not logged into your Google dev account as a test user)
+2. Visit your invite link from **Settings → Invite musicians**
+3. Click **Continue with Google** and complete sign-up
+4. Confirm you land on onboarding, not an “Access blocked” error
+
+### Vercel
+
+Confirm **`NEXT_PUBLIC_INVITE_ONLY`** is set (or unset — it defaults to invite-only). Set to `false` only when you want open sign-up.
 
 Until you publish, share the invite link and tell people they can **sign up with email** if Google blocks them.
 
@@ -150,7 +168,7 @@ Your app                    Supabase                     Google
 | Error | Fix |
 |--------|-----|
 | `redirect_uri_mismatch` | In Google, redirect URI must be exactly `https://fhqvybspdjitvkejypus.supabase.co/auth/v1/callback` |
-| `Access blocked: app has not completed verification` | Add invitee Gmail under OAuth consent screen → **Test users**, publish the app, or use email sign-up |
+| `Access blocked: app has not completed verification` | Publish the OAuth consent screen (Part 4), or use email sign-up with an invite link |
 | `missing_code` on sign-in page | Add `/auth/callback` to Supabase **Redirect URLs** for your domain |
 | Google works but profile empty | Complete onboarding — account is created automatically |
 | `Failed to fetch` on sign-in | Dev server not running from `web` folder, or Supabase project paused |
