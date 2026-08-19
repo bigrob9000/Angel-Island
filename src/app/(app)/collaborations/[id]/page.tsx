@@ -26,6 +26,8 @@ import {
 } from "@/lib/collaboration-realtime";
 import { markCollaborationRead } from "@/lib/collaboration-reads";
 import { useCollab } from "@/components/CollabProvider";
+import { NotFoundPanel } from "@/components/NotFoundPanel";
+import { PageLoading } from "@/components/PageLoading";
 
 type Tab = CollaborationEntryType;
 
@@ -234,7 +236,7 @@ export default function CollaborationWorkspacePage() {
     if (status === "ended") router.push("/collaborations");
   }
 
-  if (loading) return <p className="text-muted">Loading…</p>;
+  if (loading) return <PageLoading />;
 
   if (tableMissing) {
     return (
@@ -249,12 +251,12 @@ export default function CollaborationWorkspacePage() {
 
   if (!detail || !userId) {
     return (
-      <div>
-        <p className="text-muted">Collaboration not found.</p>
-        <Link href="/collaborations" className="mt-4 inline-block text-foreground underline hover:no-underline">
-          ← Collaborations
-        </Link>
-      </div>
+      <NotFoundPanel
+        title="Collaboration not found"
+        description="This workspace may have ended, or you may not have access to it."
+        backHref="/collaborations"
+        backLabel="← Collaborations"
+      />
     );
   }
 

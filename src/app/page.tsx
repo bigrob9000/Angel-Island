@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
 import { getInviteSignUpPath, persistInviteAcceptance } from "@/lib/invite";
 
-import { ONBOARDING_KEY } from "@/lib/onboarding";
+import { ONBOARDING_KEY, isOnboardingCompleteFromProfile } from "@/lib/onboarding";
 
 function LandingPageContent() {
   const router = useRouter();
@@ -22,9 +22,16 @@ function LandingPageContent() {
   useEffect(() => {
     try {
       const supabase = createClient();
-      supabase.auth.getSession().then(({ data: { session } }) => {
+      supabase.auth.getSession().then(async ({ data: { session } }) => {
         if (!session) return;
-        const done = typeof window !== "undefined" && window.localStorage.getItem(ONBOARDING_KEY) === "done";
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("onboarding_complete")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        const done =
+          isOnboardingCompleteFromProfile(profile) ||
+          (typeof window !== "undefined" && window.localStorage.getItem(ONBOARDING_KEY) === "done");
         router.replace(done ? "/home" : "/onboarding");
       });
     } catch {

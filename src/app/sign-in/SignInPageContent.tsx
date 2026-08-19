@@ -153,7 +153,7 @@ export default function SignInPageContent() {
         if (user) {
           const { data: profile } = await supabase
             .from("profiles")
-            .select("first_name, username")
+            .select("first_name, username, onboarding_complete")
             .eq("id", user.id)
             .maybeSingle();
           window.location.href = postAuthPath(profile);

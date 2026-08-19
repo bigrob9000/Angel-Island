@@ -9,7 +9,9 @@ import { HERE_FOR_OPTIONS, ROLE_OPTIONS } from "@/lib/profile-options";
 import { ChipSelect } from "@/components/ChipSelect";
 import { TagInput } from "@/components/TagInput";
 import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
-import { ONBOARDING_KEY } from "@/lib/onboarding";
+import { formatProfileSaveError, validateUsername } from "@/lib/profile-errors";
+import { hasFinishedOnboarding, markOnboardingCompleteLocal } from "@/lib/onboarding";
+import { PageLoading } from "@/components/PageLoading";
 
 const REASONS = [...HERE_FOR_OPTIONS];
 
@@ -42,10 +44,6 @@ export default function OnboardingPage() {
         router.replace("/sign-in");
         return;
       }
-      if (typeof window !== "undefined" && window.localStorage.getItem(ONBOARDING_KEY) === "done") {
-        router.replace("/home");
-        return;
-      }
 
       setUserId(session.user.id);
       const meta = session.user.user_metadata ?? {};
@@ -70,6 +68,10 @@ export default function OnboardingPage() {
 
       if (profileRow) {
         const profile = normalizeProfile(profileRow);
+        if (hasFinishedOnboarding(profile)) {
+          router.replace("/home");
+          return;
+        }
         if (profile.first_name) setFirstName(profile.first_name);
         if (profile.username) setUsername(profile.username);
         if (profile.location) {
@@ -83,6 +85,9 @@ export default function OnboardingPage() {
         if (profile.roles.length > 0) setRoles(profile.roles);
         if (profile.genres_make.length > 0) setGenresMake(profile.genres_make);
         if (profile.about) setAbout(profile.about);
+      } else if (hasFinishedOnboarding(null)) {
+        router.replace("/home");
+        return;
       }
 
       setLoading(false);
@@ -98,7 +103,7 @@ export default function OnboardingPage() {
     return location.trim() || null;
   }
 
-  async function saveProfile(partial?: { skipOptional?: boolean }) {
+  async function saveProfile(partial?: { skipOptional?: boolean; markComplete?: boolean }) {
     if (!userId) return false;
     setSaveError(null);
     setSaving(true);
@@ -106,6 +111,13 @@ export default function OnboardingPage() {
     const supabase = createClient();
     const trimmedName = firstName.trim();
     const trimmedUsername = username.trim().toLowerCase();
+    const usernameError = validateUsername(trimmedUsername);
+    if (usernameError) {
+      setSaveError(usernameError);
+      setSaving(false);
+      return false;
+    }
+
     const loc = resolvedLocation();
 
     const row = {
@@ -117,13 +129,18 @@ export default function OnboardingPage() {
       roles: partial?.skipOptional ? [] : roles,
       genres_make: partial?.skipOptional ? [] : genresMake.slice(0, 5),
       about: partial?.skipOptional ? null : about.trim() || null,
+      onboarding_complete: partial?.markComplete ? true : undefined,
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase.from("profiles").upsert(row, { onConflict: "id" });
+    const upsertRow = partial?.markComplete
+      ? row
+      : Object.fromEntries(Object.entries(row).filter(([, value]) => value !== undefined));
+
+    const { error } = await supabase.from("profiles").upsert(upsertRow, { onConflict: "id" });
 
     if (error) {
-      setSaveError(error.message);
+      setSaveError(formatProfileSaveError(error));
       setSaving(false);
       return false;
     }
@@ -142,11 +159,9 @@ export default function OnboardingPage() {
   }
 
   async function finishOnboarding() {
-    const ok = await saveProfile();
+    const ok = await saveProfile({ markComplete: true });
     if (!ok) return;
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(ONBOARDING_KEY, "done");
-    }
+    markOnboardingCompleteLocal();
     router.push("/home");
   }
 
@@ -174,7 +189,7 @@ export default function OnboardingPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-ethereal flex items-center justify-center">
-        <p className="text-muted">Loading…</p>
+        <PageLoading />
       </div>
     );
   }

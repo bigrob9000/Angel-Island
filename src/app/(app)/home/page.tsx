@@ -9,7 +9,7 @@ import { useInbox } from "@/components/InboxProvider";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { isDiscoverableProfile } from "@/lib/profile";
 import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
-import { isOnboardingComplete } from "@/lib/onboarding";
+import { isOnboardingCompleteFromProfile } from "@/lib/onboarding";
 import { rankProfilesForViewer } from "@/lib/discovery";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
@@ -42,10 +42,6 @@ export default function HomePage() {
   }, [trackedCollabs]);
 
   useEffect(() => {
-    setOnboardingDone(isOnboardingComplete());
-  }, []);
-
-  useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       const name = user?.user_metadata?.first_name ?? user?.email?.split("@")[0] ?? null;
@@ -63,6 +59,7 @@ export default function HomePage() {
 
       const viewer = viewerRes.data ? normalizeProfile(viewerRes.data as Profile) : null;
       setViewerProfile(viewer);
+      setOnboardingDone(isOnboardingCompleteFromProfile(viewer));
 
       const candidates = (peopleRes.data ?? [])
         .map((row) => normalizeProfile(row as Profile))

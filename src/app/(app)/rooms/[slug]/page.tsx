@@ -15,6 +15,8 @@ import { IntroductionsPinned } from "@/components/IntroductionsPinned";
 import { ListenPinned } from "@/components/ListenPinned";
 import { MediaEmbed } from "@/components/MediaEmbed";
 import { PostAuthorActions } from "@/components/PostAuthorActions";
+import { NotFoundPanel } from "@/components/NotFoundPanel";
+import { PageLoading } from "@/components/PageLoading";
 import { normalizeMediaUrl } from "@/lib/media-embed";
 import { PostCommentSection } from "@/components/PostCommentSection";
 import { PostLoveButton } from "@/components/PostLoveButton";
@@ -309,21 +311,17 @@ export default function RoomPage() {
   }
 
   if (loading) {
-    return (
-      <div>
-        <p className="text-muted">Loading…</p>
-      </div>
-    );
+    return <PageLoading />;
   }
 
   if (!room) {
     return (
-      <div>
-        <p className="text-muted">Room not found.</p>
-        <Link href="/rooms" className="mt-4 inline-block text-foreground underline hover:no-underline">
-          ← Back to Rooms
-        </Link>
-      </div>
+      <NotFoundPanel
+        title="Room not found"
+        description="That room may have moved or doesn't exist yet."
+        backHref="/rooms"
+        backLabel="← Back to Rooms"
+      />
     );
   }
 

@@ -21,7 +21,9 @@ import {
 } from "@/lib/profile";
 import { ChipSelect } from "@/components/ChipSelect";
 import { TagInput } from "@/components/TagInput";
+import { formatProfileSaveError, validateUsername } from "@/lib/profile-errors";
 import { ProfileAvatarUpload } from "@/components/ProfileAvatarUpload";
+import { PageLoading } from "@/components/PageLoading";
 
 const STEP_COUNT = 9;
 
@@ -30,7 +32,7 @@ const inputClass =
 
 export default function EditProfilePage() {
   return (
-    <Suspense fallback={<p className="text-muted">Loading…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <EditProfilePageContent />
     </Suspense>
   );
@@ -97,10 +99,18 @@ function EditProfilePageContent() {
 
     const supabase = createClient();
     const row = buildProfileRow(userId, form);
+    if (row.username) {
+      const usernameError = validateUsername(row.username);
+      if (usernameError) {
+        setError(usernameError);
+        setSaving(false);
+        return false;
+      }
+    }
     const { error: profileError } = await supabase.from("profiles").upsert(row, { onConflict: "id" });
 
     if (profileError) {
-      setError(profileError.message);
+      setError(formatProfileSaveError(profileError));
       setSaving(false);
       return false;
     }
@@ -132,7 +142,7 @@ function EditProfilePageContent() {
     await persist("/explore");
   }
 
-  if (loading || !form) return <p className="text-muted">Loading…</p>;
+  if (loading || !form) return <PageLoading />;
 
   return (
     <div className="space-y-8 max-w-lg">

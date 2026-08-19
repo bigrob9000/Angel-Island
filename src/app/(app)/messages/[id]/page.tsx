@@ -13,6 +13,8 @@ import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyAct
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 import { subscribeToConversation, unsubscribeFromConversation } from "@/lib/message-realtime";
 import { useInbox } from "@/components/InboxProvider";
+import { NotFoundPanel } from "@/components/NotFoundPanel";
+import { PageLoading } from "@/components/PageLoading";
 
 type ModalKind = "pause" | "end" | null;
 
@@ -245,15 +247,15 @@ export default function ConversationPage() {
     await updateConversationStatus("ended");
   }
 
-  if (loading) return <p className="text-muted">Loading…</p>;
+  if (loading) return <PageLoading />;
   if (!invite) {
     return (
-      <div>
-        <p className="text-muted">Conversation not found.</p>
-        <Link href="/messages" className="mt-4 inline-block text-foreground underline hover:no-underline">
-          ← Messages
-        </Link>
-      </div>
+      <NotFoundPanel
+        title="Conversation not found"
+        description="This conversation may have ended, or you may not have access to it."
+        backHref="/messages"
+        backLabel="← Messages"
+      />
     );
   }
 

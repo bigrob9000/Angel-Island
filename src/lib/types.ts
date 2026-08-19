@@ -59,6 +59,7 @@ export interface Profile {
   notify_email_messages: boolean;
   notify_email_collab: boolean;
   notify_push_collab: boolean;
+  onboarding_complete: boolean;
   updated_at: string;
 }
 
@@ -83,6 +84,7 @@ export function normalizeProfile(row: Partial<Profile> & { id: string }): Profil
     notify_email_messages: row.notify_email_messages ?? true,
     notify_email_collab: row.notify_email_collab ?? true,
     notify_push_collab: row.notify_push_collab ?? false,
+    onboarding_complete: row.onboarding_complete ?? false,
     updated_at: row.updated_at ?? "",
   };
 }

@@ -18,6 +18,8 @@ import {
   postPreviewText,
   suggestedInviteMessageFromRoom,
 } from "@/lib/room-context";
+import { NotFoundPanel } from "@/components/NotFoundPanel";
+import { PageLoading } from "@/components/PageLoading";
 
 const MAX_PENDING = 5;
 const COLLAB_ABOUT_OPTIONS = ["Co-writing", "Production", "Jam session", "Learning", "Other"] as const;
@@ -287,13 +289,15 @@ function PublicProfilePageContent() {
     setCollabPace("");
   }
 
-  if (loading) return <p className="text-muted">Loading…</p>;
+  if (loading) return <PageLoading />;
   if (!profile) {
     return (
-      <div>
-        <p className="text-muted">Profile not found.</p>
-        <Link href="/explore" className="mt-4 inline-block text-foreground underline hover:no-underline">← Explore</Link>
-      </div>
+      <NotFoundPanel
+        title="Profile not found"
+        description="That username doesn't match anyone on Angel Island, or the profile isn't available."
+        backHref="/explore"
+        backLabel="← Explore"
+      />
     );
   }
 

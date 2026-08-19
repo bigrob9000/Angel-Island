@@ -207,6 +207,7 @@ If either line errors with **already member of publication**, that table is alre
 | 020 | Collab workspace activity in notification log |
 | 021 | Browser push preference for collab workspace activity |
 | 022 | Cancel sent collab invites (`cancelled` status + sender RLS) |
+| 023 | Onboarding completion flag on profiles (`onboarding_complete`) |
 
 ---
 
@@ -227,6 +228,16 @@ Run the full file: `supabase/migrations/022_collab_invite_cancel.sql`
 Adds `cancelled` as a valid collab invite status and lets the sender cancel a **pending** invite from **Messages**.
 
 **Try it:** Send a collab invite → **Messages** → **Sent** → **Cancel invite** on a pending collab.
+
+---
+
+## 023 — Onboarding completion flag
+
+Run the full file: `supabase/migrations/023_onboarding_complete.sql`
+
+Stores onboarding completion on the profile so clearing browser data won't send someone back through onboarding.
+
+**Try it:** Finish onboarding → clear site data → sign in again → you should land on Home, not onboarding.
 
 ---
 
