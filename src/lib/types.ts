@@ -127,7 +127,7 @@ export interface Message {
 }
 
 export type CollabPace = "low-pressure" | "structured" | "flexible";
-export type CollabInviteStatus = "pending" | "interested" | "maybe" | "not_fit";
+export type CollabInviteStatus = "pending" | "interested" | "maybe" | "not_fit" | "cancelled";
 
 export type CollaborationStatus = "active" | "paused" | "ended";
 export type CollaborationEntryType = "note" | "reference" | "step";

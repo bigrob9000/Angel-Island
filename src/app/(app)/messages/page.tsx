@@ -145,6 +145,24 @@ export default function MessagesPage() {
     setActingId(null);
   }
 
+  async function cancelCollabInvite(collabId: string) {
+    const supabase = createClient();
+    setActingId(collabId);
+    const { error } = await supabase
+      .from("collab_invites")
+      .update({ status: "cancelled" })
+      .eq("id", collabId)
+      .eq("status", "pending");
+    setActingId(null);
+    if (error) {
+      if (error.message.includes("cancelled") || error.code === "23514") {
+        window.alert("Collab cancel isn't set up yet. Run migration 022_collab_invite_cancel.sql in Supabase.");
+      }
+      return;
+    }
+    setSentCollabInvites((prev) => prev.filter((c) => c.id !== collabId));
+  }
+
   async function respondToCollab(collabId: string, response: "interested" | "maybe" | "not_fit") {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -278,7 +296,7 @@ export default function MessagesPage() {
 
       <section>
         <h2 className="font-serif text-lg font-medium text-foreground">Invites you sent</h2>
-        <p className="mt-1 text-sm text-muted">Waiting for a response. Chat invites can be cancelled.</p>
+        <p className="mt-1 text-sm text-muted">Waiting for a response. Pending invites can be cancelled.</p>
         {!hasSentInvites ? (
           <p className="mt-4 text-sm text-muted">No pending invites out.</p>
         ) : (
@@ -308,8 +326,9 @@ export default function MessagesPage() {
             {sentCollabInvites.map((c) => (
               <li
                 key={`collab-${c.id}`}
-                className="rounded-lg border border-foreground/10 bg-white/40 px-4 py-3"
+                className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-3"
               >
+                <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-muted">Collab invite</p>
                 <ProfileAttribution profile={c.receiver} className="mt-1 font-medium" />
                 <p className="mt-1 text-sm text-muted">About: {c.about}</p>
@@ -325,6 +344,17 @@ export default function MessagesPage() {
                   </Link>
                 ) : (
                   <p className="mt-2 text-xs text-muted italic">Waiting for their response</p>
+                )}
+                </div>
+                {c.status === "pending" && (
+                  <button
+                    type="button"
+                    onClick={() => cancelCollabInvite(c.id)}
+                    disabled={actingId === c.id}
+                    className="text-sm text-muted hover:text-foreground disabled:opacity-50 shrink-0"
+                  >
+                    Cancel invite
+                  </button>
                 )}
               </li>
             ))}

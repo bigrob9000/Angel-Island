@@ -206,6 +206,7 @@ If either line errors with **already member of publication**, that table is alre
 | 019 | Realtime on collaboration workspaces (live notes/steps) |
 | 020 | Collab workspace activity in notification log |
 | 021 | Browser push preference for collab workspace activity |
+| 022 | Cancel sent collab invites (`cancelled` status + sender RLS) |
 
 ---
 
@@ -216,6 +217,16 @@ Run the full file: `supabase/migrations/021_notify_push_collab.sql`
 Adds `notify_push_collab` on profiles. Enable under Settings → Browser notifications → **Collab workspace activity**.
 
 **Try it:** Turn on the toggle → another account adds a note in your shared collab → browser alert (HTTPS required).
+
+---
+
+## 022 — Cancel sent collab invites
+
+Run the full file: `supabase/migrations/022_collab_invite_cancel.sql`
+
+Adds `cancelled` as a valid collab invite status and lets the sender cancel a **pending** invite from **Messages**.
+
+**Try it:** Send a collab invite → **Messages** → **Sent** → **Cancel invite** on a pending collab.
 
 ---
 

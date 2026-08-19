@@ -9,6 +9,15 @@ export const SITE_TAGLINE = "A place for musicians and creatives";
 export const FEEDBACK_EMAIL =
   process.env.NEXT_PUBLIC_FEEDBACK_EMAIL?.trim() || "feedback@angelislandconnect.com";
 
+/** Where report alert emails go — defaults to feedback email. */
+export function getReportAlertEmail(): string {
+  return (
+    process.env.REPORT_ALERT_EMAIL?.trim() ||
+    process.env.NEXT_PUBLIC_FEEDBACK_EMAIL?.trim() ||
+    FEEDBACK_EMAIL
+  );
+}
+
 /** Canonical public URL — set NEXT_PUBLIC_SITE_URL when using a custom domain. */
 export function getSiteUrl(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
