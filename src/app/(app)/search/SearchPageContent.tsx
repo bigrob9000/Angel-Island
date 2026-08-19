@@ -71,8 +71,8 @@ export default function SearchPageContent() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-serif text-2xl font-medium text-foreground">Search Angel Island</h1>
-        <p className="mt-2 text-sm text-muted">
+        <h1 className="page-lead">Search Angel Island</h1>
+        <p className="section-copy">
           Find rooms, people, conversations, and collaborations — no popularity ranking.
         </p>
       </div>
@@ -86,16 +86,10 @@ export default function SearchPageContent() {
           title="Nothing like that turned up."
           description="Try a different word — or browse people and rooms instead."
         >
-          <Link
-            href="/rooms"
-            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-          >
+          <Link href="/rooms" className="btn-secondary">
             Explore rooms
           </Link>
-          <Link
-            href="/explore"
-            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-          >
+          <Link href="/explore" className="btn-secondary">
             Explore people
           </Link>
         </EmptyState>
@@ -103,13 +97,13 @@ export default function SearchPageContent() {
 
       {rooms.length > 0 && (
         <section>
-          <h2 className="font-serif text-lg font-medium text-foreground">Rooms</h2>
+          <h2 className="section-heading">Rooms</h2>
           <ul className="mt-4 space-y-2">
             {rooms.map((room) => (
               <li key={room.id}>
                 <Link
                   href={`/rooms/${room.slug}`}
-                  className="block rounded-lg border border-foreground/10 bg-white/50 px-4 py-3 hover:bg-white/70"
+                  className="surface-interactive block px-4 py-3"
                 >
                   <p className="font-medium text-foreground">{room.name}</p>
                   {room.description && <p className="mt-1 text-sm text-muted">{room.description}</p>}
@@ -127,7 +121,7 @@ export default function SearchPageContent() {
 
       {people.length > 0 && (
         <section>
-          <h2 className="font-serif text-lg font-medium text-foreground">People</h2>
+          <h2 className="section-heading">People</h2>
           <ul className="mt-4 space-y-3">
             {people.map((profile) => (
               <li key={profile.id}>
@@ -146,7 +140,7 @@ export default function SearchPageContent() {
 
       {conversations.length > 0 && (
         <section>
-          <h2 className="font-serif text-lg font-medium text-foreground">Conversations</h2>
+          <h2 className="section-heading">Conversations</h2>
           <ul className="mt-4 space-y-2">
             {conversations.map((conv) => {
               const statusLabel = conversationStatusLabel(conv.conversation_status);
@@ -154,7 +148,7 @@ export default function SearchPageContent() {
                 <li key={conv.id}>
                   <Link
                     href={`/messages/${conv.id}`}
-                    className="block rounded-lg border border-foreground/10 bg-white/50 px-4 py-3 hover:bg-white/70"
+                    className="surface-interactive block px-4 py-3"
                   >
                     <p className="font-medium text-foreground">
                       {conv.otherName}
@@ -173,7 +167,7 @@ export default function SearchPageContent() {
       )}
       {collaborations.length > 0 && (
         <section>
-          <h2 className="font-serif text-lg font-medium text-foreground">Collaborations</h2>
+          <h2 className="section-heading">Collaborations</h2>
           <ul className="mt-4 space-y-2">
             {collaborations.map((collab) => {
               const statusLabel = collaborationStatusLabel(collab.status);
@@ -181,7 +175,7 @@ export default function SearchPageContent() {
                 <li key={collab.id}>
                   <Link
                     href={`/collaborations/${collab.id}`}
-                    className="block rounded-lg border border-foreground/10 bg-white/50 px-4 py-3 hover:bg-white/70"
+                    className="surface-interactive block px-4 py-3"
                   >
                     <p className="font-medium text-foreground">
                       {collab.otherName}

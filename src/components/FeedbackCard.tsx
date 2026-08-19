@@ -22,7 +22,7 @@ export function FeedbackCard() {
   }, []);
 
   return (
-    <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-3">
+    <section className="surface p-5 space-y-3">
       <div>
         <h2 className="font-medium text-foreground">Beta feedback</h2>
         <p className="mt-1 text-sm text-muted">

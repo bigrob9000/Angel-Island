@@ -130,10 +130,10 @@ export function GettingStartedGuide({
   const doneCount = steps.filter((step) => step.done).length;
 
   return (
-    <section className="rounded-lg border border-foreground/10 bg-white/60 p-5">
+    <section className="surface p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-medium text-foreground">Getting started</h2>
+          <h2 className="section-heading">Getting started</h2>
           <p className="mt-1 text-sm text-muted">
             {doneCount === 0
               ? "You finished onboarding — here are four gentle next steps."

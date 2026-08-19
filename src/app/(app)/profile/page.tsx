@@ -61,7 +61,7 @@ export default function ProfilePage() {
       <ProfileCompletenessNudge profile={profile} />
 
       {userId && (
-        <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">
+        <div className="surface p-5">
           <ProfileAvatarUpload
             userId={userId}
             first_name={profile.first_name}
@@ -74,7 +74,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">
+      <div className="surface p-5">
         <ProfileDisplay profile={profile} />
       </div>
 

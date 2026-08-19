@@ -320,7 +320,7 @@ function PublicProfilePageContent() {
   if (blockedByMe) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">
+        <div className="surface p-5">
           <p className="text-foreground font-medium">You&apos;ve blocked {displayName}.</p>
           <p className="mt-2 text-sm text-muted">
             They won&apos;t appear in search or Explore, and you can&apos;t message each other.
@@ -359,14 +359,14 @@ function PublicProfilePageContent() {
         />
       )}
 
-      <div className="rounded-lg border border-foreground/10 bg-white/50 p-5">
+      <div className="surface p-5">
         <ProfileDisplay profile={profile} />
       </div>
 
       <ProfileListenShares shares={listenShares} />
 
       {!currentUserId ? (
-        <div className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-3">
+        <div className="surface p-5 space-y-3">
           <p className="text-sm text-muted">
             Angel Island is consent-first — no cold DMs. Sign in to invite {displayName} to chat or
             collaborate.

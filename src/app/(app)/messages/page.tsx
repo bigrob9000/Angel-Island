@@ -244,7 +244,7 @@ export default function MessagesPage() {
         ) : (
           <ul className="mt-4 space-y-3">
             {receivedInvites.map((inv) => (
-              <li key={inv.id} className="rounded-lg border border-foreground/10 bg-white/50 p-4">
+              <li key={inv.id} className="surface p-4">
                 <ProfileAttribution profile={inv.sender} className="font-medium" />
                 {inv.optional_message && <p className="mt-1 text-sm text-muted">{inv.optional_message}</p>}
                 <div className="mt-3 flex gap-2">
@@ -277,7 +277,7 @@ export default function MessagesPage() {
           <p className="mt-1 text-sm text-muted">Respond below. If you&apos;re interested, you&apos;ll open a shared collaboration space.</p>
           <ul className="mt-4 space-y-3">
             {receivedCollabInvites.map((c) => (
-              <li key={c.id} className="rounded-lg border border-foreground/10 bg-white/50 p-4">
+              <li key={c.id} className="surface p-4">
                 <ProfileAttribution profile={c.sender} className="font-medium" />
                 <p className="text-sm text-muted mt-1">About: {c.about}</p>
                 {c.message && <p className="text-sm text-muted">{c.message}</p>}
@@ -304,7 +304,7 @@ export default function MessagesPage() {
             {sentInvites.map((inv) => (
               <li
                 key={`chat-${inv.id}`}
-                className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-3"
+                className="surface flex flex-wrap items-start justify-between gap-4 px-4 py-3"
               >
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-muted">Chat invite</p>
@@ -326,7 +326,7 @@ export default function MessagesPage() {
             {sentCollabInvites.map((c) => (
               <li
                 key={`collab-${c.id}`}
-                className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-3"
+                className="surface flex flex-wrap items-start justify-between gap-4 px-4 py-3"
               >
                 <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-muted">Collab invite</p>

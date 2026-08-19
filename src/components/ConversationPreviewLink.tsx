@@ -15,15 +15,13 @@ export function ConversationPreviewLink({ conversation, className = "" }: Props)
   return (
     <Link
       href={`/messages/${conversation.id}`}
-      className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-foreground hover:bg-white/60 ${
-        conversation.unread
-          ? "border-foreground/20 bg-white/60"
-          : "border-foreground/10 bg-white/40"
+      className={`surface-interactive flex items-start gap-3 px-4 py-3 text-foreground ${
+        conversation.unread ? "ring-1 ring-accent/15" : ""
       } ${className}`.trim()}
     >
       {conversation.unread ? (
         <span
-          className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-foreground/80"
+          className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent"
           aria-hidden
         />
       ) : (

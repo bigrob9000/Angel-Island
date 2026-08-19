@@ -38,7 +38,7 @@ export function IphonePwaHint({ respectDismiss = true }: Props) {
   }
 
   return (
-    <section className="rounded-lg border border-foreground/10 bg-white/60 p-5">
+    <section className="surface p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <h2 className="font-medium text-foreground">Add Angel Island to your Home Screen</h2>

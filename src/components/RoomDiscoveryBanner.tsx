@@ -19,7 +19,7 @@ export function RoomDiscoveryBanner({
   const roomLink = postId ? roomPostUrl(roomSlug, postId) : `/rooms/${roomSlug}`;
 
   return (
-    <section className="rounded-lg border border-foreground/10 bg-white/60 p-4">
+    <section className="surface p-4">
       <p className="text-sm text-muted">You found {authorName} in a room</p>
       <p className="mt-1 text-sm text-foreground">
         <Link href={roomLink} className="underline underline-offset-2 hover:no-underline">

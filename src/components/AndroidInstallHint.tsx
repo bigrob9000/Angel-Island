@@ -43,7 +43,7 @@ export function AndroidInstallHint() {
   }
 
   return (
-    <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-3">
+    <section className="surface p-5 space-y-3">
       <h2 className="font-medium text-foreground">Add Angel Island to your home screen</h2>
       <p className="text-sm text-muted leading-relaxed">
         Install the app for quicker access and a calmer full-screen experience.

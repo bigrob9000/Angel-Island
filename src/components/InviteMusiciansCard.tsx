@@ -20,7 +20,7 @@ export function InviteMusiciansCard() {
   }
 
   return (
-    <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-4">
+    <section className="surface p-5">
       <div>
         <h2 className="font-medium text-foreground">Invite musicians</h2>
         <p className="mt-1 text-sm text-muted">

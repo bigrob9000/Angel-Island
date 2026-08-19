@@ -36,8 +36,8 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
 
   if (missingBasics) {
     return (
-      <section className="rounded-lg border border-foreground/10 bg-white/60 p-5">
-        <h2 className="font-medium text-foreground">One more thing</h2>
+      <section className="surface p-5">
+        <h2 className="section-heading">One more thing</h2>
         <p className="mt-1 text-sm text-muted">
           Add your name and username so you show up in Explore and people can find your profile.
         </p>
@@ -54,18 +54,18 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
   const remaining = optional.items.length - optional.completeCount;
 
   return (
-    <section className="rounded-lg border border-foreground/10 bg-white/60 p-5">
+    <section className="surface p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="font-medium text-foreground">Help people find you</h2>
+          <h2 className="section-heading">Help people find you</h2>
           <p className="mt-1 text-sm text-muted">
             {remaining === 1
               ? "One optional detail left — only if you want to share it."
               : `${remaining} optional details left — add what feels comfortable.`}
           </p>
-          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-foreground/10">
+          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-accent/15">
             <div
-              className="h-full rounded-full bg-foreground/50 transition-all"
+              className="h-full rounded-full bg-accent transition-all"
               style={{ width: `${optional.percent}%` }}
             />
           </div>

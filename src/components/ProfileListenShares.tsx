@@ -13,16 +13,13 @@ export function ProfileListenShares({ shares, isOwn = false, showPrompt = false 
     if (!isOwn || !showPrompt) return null;
 
     return (
-      <section className="rounded-lg border border-foreground/10 bg-white/50 p-5">
-        <h2 className="font-serif text-lg font-medium text-foreground">From Listen & Share</h2>
+      <section className="surface p-5">
+        <h2 className="section-heading">From Listen & Share</h2>
         <p className="mt-2 text-sm text-muted leading-relaxed">
           Want to share a clip or demo? Listen & Share is the place — your profile can show your
           recent shares here.
         </p>
-        <Link
-          href="/rooms/listen?compose=share_work"
-          className="mt-4 inline-block rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-        >
+        <Link href="/rooms/listen?compose=share_work" className="btn-secondary mt-4 inline-flex">
           Share something in Listen & Share
         </Link>
       </section>
@@ -32,7 +29,7 @@ export function ProfileListenShares({ shares, isOwn = false, showPrompt = false 
   return (
     <section className="rounded-lg border border-foreground/10 bg-white/50 p-5">
       <div className="flex items-baseline justify-between gap-4">
-        <h2 className="font-serif text-lg font-medium text-foreground">From Listen & Share</h2>
+        <h2 className="section-heading">From Listen & Share</h2>
         <Link href="/rooms/listen" className="text-sm text-muted hover:text-foreground shrink-0">
           Visit room
         </Link>
@@ -51,7 +48,7 @@ export function ProfileListenShares({ shares, isOwn = false, showPrompt = false 
             <li key={share.id}>
               <Link
                 href={listenShareHref(share.id)}
-                className="block rounded-lg border border-foreground/10 bg-white/60 px-4 py-3 hover:bg-white/80"
+                className="surface-interactive block px-4 py-3"
               >
                 <p className="font-medium text-foreground">{listenSharePreview(share)}</p>
                 <p className="mt-1 text-sm text-muted">

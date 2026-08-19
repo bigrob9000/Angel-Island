@@ -75,20 +75,18 @@ export function CollaborationPreviewLink({
   }
 
   return (
-    <div
-      className={`rounded-lg border border-foreground/10 bg-white/50 text-foreground ${className}`.trim()}
-    >
+    <div className={`surface text-foreground ${className}`.trim()}>
       <Link
         href={`/collaborations/${preview.id}`}
-        className={`block px-4 py-3 transition-colors hover:bg-white/70 rounded-lg ${
-          unread ? "bg-white/70" : ""
+        className={`block px-4 py-3 transition-colors hover:bg-white/40 rounded-[1rem] ${
+          unread ? "bg-white/30" : ""
         }`}
       >
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <ProfileAttribution profile={preview.other} className="font-medium" />
           <div className="flex items-center gap-2">
             {unread && (
-              <span className="h-2 w-2 rounded-full bg-foreground/80" aria-hidden />
+              <span className="h-2 w-2 rounded-full bg-accent" aria-hidden />
             )}
             <span className="text-xs text-muted">{collaborationStatusLabel(preview.status)}</span>
           </div>

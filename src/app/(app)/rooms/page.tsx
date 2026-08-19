@@ -153,7 +153,7 @@ export default function RoomsPage() {
         })}
       </div>
 
-      <div className="mt-24 rounded-lg border border-foreground/10 bg-white/40 p-4 text-sm text-muted">
+      <div className="surface mt-24 p-4 text-sm text-muted">
         <p className="font-medium text-foreground mb-1">Activity</p>
         <ul className="space-y-1">
           {rooms.map((room) => (

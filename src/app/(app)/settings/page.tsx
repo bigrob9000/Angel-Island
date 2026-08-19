@@ -309,7 +309,7 @@ export default function SettingsPage() {
         <p className="mt-2 text-sm text-muted">Adjust the space to feel right for you.</p>
       </div>
 
-      <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-5">
+      <section className="surface p-5 space-y-5">
         <div>
           <h2 className="font-medium text-foreground">Account</h2>
           <p className="mt-1 text-sm text-muted">Your sign-in details.</p>
@@ -400,7 +400,7 @@ export default function SettingsPage() {
 
       <InviteMusiciansCard />
 
-      <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-6">
+      <section className="surface p-5 space-y-6">
         <div>
           <h2 className="font-medium text-foreground">Calm Mode</h2>
           <p className="mt-1 text-sm text-muted">
@@ -427,7 +427,7 @@ export default function SettingsPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-6">
+      <section className="surface p-5 space-y-6">
         <div>
           <h2 className="font-medium text-foreground">Email updates</h2>
           <p className="mt-1 text-sm text-muted">
@@ -496,7 +496,7 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-6">
+      <section className="surface p-5 space-y-6">
         <div>
           <h2 className="font-medium text-foreground">Browser notifications</h2>
           <p className="mt-1 text-sm text-muted">
@@ -570,7 +570,7 @@ export default function SettingsPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-5">
+      <section className="surface p-5 space-y-5">
         <div>
           <h2 className="font-medium text-foreground">Blocked people</h2>
           <p className="mt-1 text-sm text-muted">
@@ -633,7 +633,7 @@ export default function SettingsPage() {
 
       <FeedbackCard />
 
-      <section className="rounded-lg border border-foreground/10 bg-white/50 p-5">
+      <section className="surface p-5">
         <SettingsToggle
           id="reduce-motion"
           label="Reduce motion"

@@ -8,10 +8,7 @@ function ChipList({ items }: { items: string[] }) {
   return (
     <div className="flex flex-wrap gap-2">
       {items.map((item) => (
-        <span
-          key={item}
-          className="rounded-full border border-foreground/15 bg-white/60 px-3 py-1 text-sm text-foreground"
-        >
+        <span key={item} className="chip">
           {item}
         </span>
       ))}
@@ -21,8 +18,8 @@ function ChipList({ items }: { items: string[] }) {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="space-y-2">
-      <h2 className="text-sm font-medium text-foreground">{title}</h2>
+    <section className="space-y-2.5">
+      <h2 className="profile-section-label">{title}</h2>
       {children}
     </section>
   );

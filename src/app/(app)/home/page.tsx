@@ -107,7 +107,7 @@ export default function HomePage() {
     <div className="space-y-10">
       <SearchBar />
 
-      <p className="font-serif text-xl text-foreground sm:text-2xl">
+      <p className="page-lead">
         Welcome back{welcomeName}. Where would you like to spend your time today?
       </p>
 
@@ -125,8 +125,8 @@ export default function HomePage() {
       <AndroidInstallHint />
 
       <section>
-        <h2 className="font-serif text-lg font-medium text-foreground">Your Spaces</h2>
-        <p className="mt-2 text-sm text-muted">
+        <h2 className="section-heading">Your Spaces</h2>
+        <p className="section-copy">
           Rooms you&apos;ve added. No obligation to post — just a place to return to.
         </p>
         {myRooms.length === 0 ? (
@@ -135,10 +135,7 @@ export default function HomePage() {
             title="No spaces yet."
             description="Rooms are calm corners for listening, learning, and collab posts. Add one when something catches your eye."
           >
-            <Link
-              href="/rooms"
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
+            <Link href="/rooms" className="btn-secondary">
               Explore rooms
             </Link>
           </EmptyState>
@@ -148,10 +145,12 @@ export default function HomePage() {
               <li key={room.id}>
                 <Link
                   href={`/rooms/${room.slug}`}
-                  className="block rounded-lg border border-foreground/10 bg-white/40 px-4 py-3 text-foreground hover:bg-white/60"
+                  className="surface-interactive block px-4 py-3 text-foreground"
                 >
                   <span className="font-medium">{room.name}</span>
-                  {room.description && <span className="ml-2 text-sm text-muted">— {room.description}</span>}
+                  {room.description && (
+                    <span className="mt-1 block text-sm text-muted">{room.description}</span>
+                  )}
                 </Link>
               </li>
             ))}
@@ -161,12 +160,12 @@ export default function HomePage() {
 
       <section>
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="font-serif text-lg font-medium text-foreground">Explore</h2>
+          <h2 className="section-heading">Explore</h2>
           <Link href="/explore" className="text-sm text-muted hover:text-foreground shrink-0">
             See all
           </Link>
         </div>
-        <p className="mt-2 text-sm text-muted">
+        <p className="section-copy">
           People you might want to spend time with — shared genres, roles, and interests when we
           can see them.
         </p>
@@ -176,10 +175,7 @@ export default function HomePage() {
             title="You're the first one here — or almost."
             description="As others join, they'll show up here. You can browse Explore anytime."
           >
-            <Link
-              href="/explore"
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
+            <Link href="/explore" className="btn-secondary">
               Explore people
             </Link>
           </EmptyState>
@@ -196,14 +192,14 @@ export default function HomePage() {
 
       <section>
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="font-serif text-lg font-medium text-foreground">Conversations</h2>
+          <h2 className="section-heading">Conversations</h2>
           {recentConversations.length > 0 && (
             <Link href="/messages" className="text-sm text-muted hover:text-foreground shrink-0">
               See all
             </Link>
           )}
         </div>
-        <p className="mt-2 text-sm text-muted">
+        <p className="section-copy">
           Chats and collab threads you&apos;re part of.
         </p>
         {conversationsLoading ? (
@@ -214,16 +210,10 @@ export default function HomePage() {
             title="No conversations yet."
             description="Messages start with an invite — send one from someone's profile, or wait for one to arrive."
           >
-            <Link
-              href="/explore"
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
+            <Link href="/explore" className="btn-secondary">
               Explore people
             </Link>
-            <Link
-              href="/messages"
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
+            <Link href="/messages" className="btn-secondary">
               Open Messages
             </Link>
           </EmptyState>
@@ -240,12 +230,12 @@ export default function HomePage() {
 
       <section>
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="font-serif text-lg font-medium text-foreground">Collaborations</h2>
+          <h2 className="section-heading">Collaborations</h2>
           <Link href="/collaborations" className="text-sm text-muted hover:text-foreground shrink-0">
             See all
           </Link>
         </div>
-        <p className="mt-2 text-sm text-muted">
+        <p className="section-copy">
           Shared spaces for projects you&apos;re exploring with other people.
         </p>
         {activeCollabs.length === 0 ? (
@@ -254,16 +244,10 @@ export default function HomePage() {
             title="No active collaborations yet."
             description="When someone responds interested to a collab invite, a shared workspace opens here for notes, links, and next steps."
           >
-            <Link
-              href="/explore"
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
+            <Link href="/explore" className="btn-secondary">
               Explore people
             </Link>
-            <Link
-              href="/collaborations"
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
+            <Link href="/collaborations" className="btn-secondary">
               View Collabs
             </Link>
           </EmptyState>
@@ -282,25 +266,16 @@ export default function HomePage() {
         )}
       </section>
 
-      <section className="border-t border-foreground/10 pt-8">
+      <section className="border-t border-foreground/5 pt-8">
         <p className="text-sm text-muted mb-4">Invitations only — no pressure.</p>
         <div className="flex flex-wrap gap-3">
-          <Link
-            href="/rooms/collaborate?compose=collab_invite"
-            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-          >
+          <Link href="/rooms/collaborate?compose=collab_invite" className="btn-secondary">
             Start a collab post
           </Link>
-          <Link
-            href="/rooms/learn?compose=question"
-            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-          >
+          <Link href="/rooms/learn?compose=question" className="btn-secondary">
             Ask a question
           </Link>
-          <Link
-            href="/rooms/listen?compose=share_work"
-            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-          >
+          <Link href="/rooms/listen?compose=share_work" className="btn-secondary">
             Share what you&apos;re working on
           </Link>
         </div>

@@ -62,14 +62,14 @@ function AppNav() {
                 <Link
                   key={href}
                   href={href}
-                  className={`relative shrink-0 whitespace-nowrap text-sm font-medium transition-colors ${
-                    active ? "text-foreground" : "text-muted hover:text-foreground"
+                  className={`nav-pill relative shrink-0 whitespace-nowrap text-sm font-medium transition-colors ${
+                    active ? "nav-pill-active" : "text-muted hover:text-foreground"
                   }`}
                 >
                   {label}
                   {badgeCount > 0 && (
                     <span
-                      className="absolute -right-2 top-0 h-2 w-2 rounded-full bg-foreground/80"
+                      className="absolute -right-1 top-0 h-2 w-2 rounded-full bg-accent"
                       aria-label={`${badgeCount} unread ${isActivity ? "activity item" : isCollabs ? "collaboration" : "conversation"}${badgeCount === 1 ? "" : "s"}`}
                     />
                   )}

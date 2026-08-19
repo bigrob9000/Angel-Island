@@ -62,7 +62,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
   );
 
   return (
-    <div className="space-y-4 rounded-lg border border-foreground/10 bg-white/40 p-4">
+    <div className="surface space-y-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-medium text-foreground">Narrow this list</p>
         {hasChipFilters && (

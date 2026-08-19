@@ -23,19 +23,15 @@ export function SearchBar({ className = "", defaultValue = "" }: SearchBarProps)
     <form onSubmit={handleSubmit} className={className}>
       <label className="block">
         <span className="sr-only">Search Angel Island</span>
-        <div className="flex gap-2">
+        <div className="surface flex gap-2 p-1.5">
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search people, rooms, or conversations"
-            className="min-w-0 flex-1 rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
+            placeholder="Search people, rooms, conversations…"
+            className="min-w-0 flex-1 rounded-full border-0 bg-transparent px-3 py-2 text-foreground placeholder:text-muted focus:outline-none"
           />
-          <button
-            type="submit"
-            disabled={!query.trim()}
-            className="shrink-0 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
-          >
+          <button type="submit" disabled={!query.trim()} className="btn-primary shrink-0 disabled:opacity-50">
             Search
           </button>
         </div>
