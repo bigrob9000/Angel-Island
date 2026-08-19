@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { FeedbackCard } from "@/components/FeedbackCard";
 import { InviteMusiciansCard } from "@/components/InviteMusiciansCard";
+import { SignOutButton } from "@/components/SignOutButton";
 import { IphonePwaHint } from "@/components/IphonePwaHint";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { usePreferences } from "@/components/PreferencesProvider";
@@ -21,7 +21,6 @@ import type { BlockedUser } from "@/lib/blocks";
 import { userHasEmailPassword } from "@/lib/auth-providers";
 
 export default function SettingsPage() {
-  const router = useRouter();
   const { preferences, setPreference } = usePreferences();
   const [email, setEmail] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
@@ -128,12 +127,6 @@ export default function SettingsPage() {
     setNewPassword("");
     setConfirmPassword("");
     setAccountMessage({ type: "ok", text: "Password updated." });
-  }
-
-  async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.replace("/");
   }
 
   async function handleDeleteAccount(e: React.FormEvent) {
@@ -312,9 +305,12 @@ export default function SettingsPage() {
       <Link href="/profile" className="text-sm text-muted hover:text-foreground">
         ← Profile
       </Link>
-      <div>
-        <h1 className="font-serif text-2xl font-medium text-foreground">Settings</h1>
-        <p className="mt-2 text-sm text-muted">Adjust the space to feel right for you.</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-2xl font-medium text-foreground">Settings</h1>
+          <p className="mt-2 text-sm text-muted">Adjust the space to feel right for you.</p>
+        </div>
+        <SignOutButton />
       </div>
 
       <section className="surface p-5 space-y-5">
@@ -372,18 +368,6 @@ export default function SettingsPage() {
             You sign in with Google — there&apos;s no password to change here.
           </p>
         )}
-
-        <div className="border-t border-foreground/10 pt-5">
-          <p className="text-sm font-medium text-foreground">Sign out</p>
-          <p className="mt-1 text-sm text-muted">Leave Angel Island on this device.</p>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="btn-secondary mt-3"
-          >
-            Sign out
-          </button>
-        </div>
 
         <form onSubmit={handleDeleteAccount} className="space-y-4 border-t border-foreground/10 pt-5">
           <p className="text-sm font-medium text-foreground">Delete account</p>

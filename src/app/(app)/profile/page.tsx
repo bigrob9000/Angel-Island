@@ -11,6 +11,7 @@ import { ProfileDisplay } from "@/components/ProfileDisplay";
 import { ProfileAvatarUpload } from "@/components/ProfileAvatarUpload";
 import { ProfileListenShares } from "@/components/ProfileListenShares";
 import { ProfileCompletenessNudge } from "@/components/ProfileCompletenessNudge";
+import { SignOutButton } from "@/components/SignOutButton";
 import { loadRecentListenShares, type ProfileListenShare } from "@/lib/profile-shares";
 
 export default function ProfilePage() {
@@ -81,18 +82,13 @@ export default function ProfilePage() {
       <ProfileListenShares shares={listenShares} isOwn showPrompt />
 
       <div className="flex flex-wrap gap-3">
-        <Link
-          href="/profile/edit"
-          className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-        >
+        <Link href="/profile/edit" className="btn-secondary">
           Edit profile
         </Link>
-        <Link
-          href="/settings"
-          className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-        >
+        <Link href="/settings" className="btn-secondary">
           Settings
         </Link>
+        <SignOutButton />
       </div>
     </div>
   );
