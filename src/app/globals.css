@@ -88,35 +88,28 @@ body {
   }
 }
 
-/* Ink-on-mat logo — sage ring for extra definition on sky backgrounds */
+/* Full-color logo — square artwork with built-in sky background */
 .logo-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
-  box-shadow:
-    0 0 0 1px var(--logo-ring),
-    0 4px 16px var(--logo-glow);
+  border-radius: 0.75rem;
 }
 
 .logo-badge-nav {
-  box-shadow:
-    0 0 0 1px var(--logo-ring),
-    0 2px 8px rgba(212, 226, 240, 0.35);
+  box-shadow: 0 2px 8px rgba(212, 226, 240, 0.35);
 }
 
 .logo-badge-hero {
   box-shadow:
-    0 0 0 1px var(--logo-ring),
-    0 0 0 4px rgba(250, 248, 245, 0.75),
     0 6px 22px rgba(212, 226, 240, 0.5),
-    0 2px 8px rgba(95, 122, 107, 0.1);
+    0 2px 8px rgba(95, 122, 107, 0.08);
 }
 
 .logo-badge-image {
   position: relative;
   display: block;
-  border-radius: 9999px;
+  border-radius: 0.75rem;
   overflow: hidden;
 }
 

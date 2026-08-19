@@ -1,4 +1,4 @@
-const CACHE = "angel-island-shell-v1";
+const CACHE = "angel-island-shell-v3";
 const PRECACHE = ["/", "/manifest.webmanifest", "/angel-island-mark-light.png"];
 
 self.addEventListener("install", (event) => {
