@@ -16,13 +16,11 @@ import { PwaServiceWorkerRegistration } from "@/components/PwaServiceWorkerRegis
 const nav = [
   { href: "/home", label: "Home" },
   { href: "/explore", label: "Explore" },
-  { href: "/search", label: "Search" },
   { href: "/rooms", label: "Rooms" },
   { href: "/messages", label: "Messages" },
   { href: "/notifications", label: "Activity" },
   { href: "/collaborations", label: "Collabs" },
   { href: "/profile", label: "Profile" },
-  { href: "/settings", label: "Settings" },
 ] as const;
 
 function AppNav() {
@@ -47,7 +45,7 @@ function AppNav() {
           <SignOutButton variant="header" />
         </div>
         <nav
-          className="mt-2.5 flex flex-nowrap items-center gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="mt-2.5 flex flex-wrap items-center gap-1.5"
           aria-label="Main"
         >
           {nav.map(({ href, label }) => {
