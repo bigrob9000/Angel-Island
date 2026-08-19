@@ -88,29 +88,25 @@ body {
   }
 }
 
-/* Full-color logo — square artwork with built-in sky background */
+/* Logo — transparent PNG; internal whites match page cream / sky */
 .logo-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
 }
 
 .logo-badge-nav {
-  box-shadow: 0 2px 8px rgba(212, 226, 240, 0.35);
+  box-shadow: none;
 }
 
 .logo-badge-hero {
-  box-shadow:
-    0 6px 22px rgba(212, 226, 240, 0.5),
-    0 2px 8px rgba(95, 122, 107, 0.08);
+  box-shadow: none;
 }
 
 .logo-badge-image {
   position: relative;
   display: block;
-  border-radius: 0.75rem;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Ethereal landing background */
