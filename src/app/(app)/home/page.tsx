@@ -17,6 +17,7 @@ import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { EmptyState } from "@/components/EmptyState";
 import { GettingStartedGuide } from "@/components/GettingStartedGuide";
 import { IphonePwaHint } from "@/components/IphonePwaHint";
+import { AndroidInstallHint } from "@/components/AndroidInstallHint";
 import { ProfileCompletenessNudge } from "@/components/ProfileCompletenessNudge";
 import { CollaborationPreviewLink } from "@/components/CollaborationPreviewLink";
 import { useCollab } from "@/components/CollabProvider";
@@ -121,6 +122,7 @@ export default function HomePage() {
       {viewerProfile && <ProfileCompletenessNudge profile={viewerProfile} />}
 
       <IphonePwaHint />
+      <AndroidInstallHint />
 
       <section>
         <h2 className="font-serif text-lg font-medium text-foreground">Your Spaces</h2>

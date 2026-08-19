@@ -208,6 +208,7 @@ If either line errors with **already member of publication**, that table is alre
 | 021 | Browser push preference for collab workspace activity |
 | 022 | Cancel sent collab invites (`cancelled` status + sender RLS) |
 | 023 | Onboarding completion flag on profiles (`onboarding_complete`) |
+| 024 | Public read of discoverable profiles (shared links + OG) |
 
 ---
 
@@ -238,6 +239,16 @@ Run the full file: `supabase/migrations/023_onboarding_complete.sql`
 Stores onboarding completion on the profile so clearing browser data won't send someone back through onboarding.
 
 **Try it:** Finish onboarding → clear site data → sign in again → you should land on Home, not onboarding.
+
+---
+
+## 024 — Public profile links
+
+Run the full file: `supabase/migrations/024_public_profiles.sql`
+
+Lets anyone view a discoverable profile (`first_name` + `username` set) without signing in — for shared `/people/username` links and link previews.
+
+**Try it:** Open a profile link in a private/incognito window → profile loads with a **Sign in to connect** prompt.
 
 ---
 

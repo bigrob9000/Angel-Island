@@ -295,13 +295,13 @@ function PublicProfilePageContent() {
       <NotFoundPanel
         title="Profile not found"
         description="That username doesn't match anyone on Angel Island, or the profile isn't available."
-        backHref="/explore"
-        backLabel="← Explore"
+        backHref="/"
+        backLabel="← About Angel Island"
       />
     );
   }
 
-  if (isOwn) {
+  if (isOwn && currentUserId) {
     router.replace("/profile");
     return null;
   }
@@ -365,6 +365,21 @@ function PublicProfilePageContent() {
 
       <ProfileListenShares shares={listenShares} />
 
+      {!currentUserId ? (
+        <div className="rounded-lg border border-foreground/10 bg-white/50 p-5 space-y-3">
+          <p className="text-sm text-muted">
+            Angel Island is consent-first — no cold DMs. Sign in to invite {displayName} to chat or
+            collaborate.
+          </p>
+          <Link
+            href="/sign-in"
+            className="inline-block rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
+          >
+            Sign in to connect
+          </Link>
+        </div>
+      ) : (
+        <>
       <p className="text-sm text-muted">No cold DMs. Start with an invite.</p>
       <div className="flex flex-wrap gap-3">
         <button
@@ -527,13 +542,15 @@ function PublicProfilePageContent() {
           </div>
         </div>
       )}
+        </>
+      )}
     </div>
   );
 }
 
 export default function PublicProfilePage() {
   return (
-    <Suspense fallback={<p className="text-muted">Loading…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <PublicProfilePageContent />
     </Suspense>
   );

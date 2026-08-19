@@ -10,6 +10,7 @@ import { CollabProvider, useCollab } from "@/components/CollabProvider";
 import { InboxMessageNotice } from "@/components/InboxMessageNotice";
 import { InboxCollabNotice } from "@/components/InboxCollabNotice";
 import { PushRegistration } from "@/components/PushRegistration";
+import { PwaServiceWorkerRegistration } from "@/components/PwaServiceWorkerRegistration";
 
 const nav = [
   { href: "/home", label: "Home" },
@@ -17,6 +18,7 @@ const nav = [
   { href: "/search", label: "Search" },
   { href: "/rooms", label: "Rooms" },
   { href: "/messages", label: "Messages" },
+  { href: "/notifications", label: "Activity" },
   { href: "/collaborations", label: "Collabs" },
   { href: "/profile", label: "Profile" },
 ] as const;
@@ -26,6 +28,7 @@ function AppNav() {
   const router = useRouter();
   const { unreadCount } = useInbox();
   const { unreadCount: collabUnreadCount } = useCollab();
+  const activityUnreadCount = unreadCount + collabUnreadCount;
 
   useEffect(() => {
     const supabase = createClient();
@@ -46,8 +49,15 @@ function AppNav() {
             {nav.map(({ href, label }) => {
               const isMessages = href === "/messages";
               const isCollabs = href === "/collaborations";
+              const isActivity = href === "/notifications";
               const active = pathname === href || pathname.startsWith(`${href}/`);
-              const badgeCount = isMessages ? unreadCount : isCollabs ? collabUnreadCount : 0;
+              const badgeCount = isMessages
+                ? unreadCount
+                : isCollabs
+                  ? collabUnreadCount
+                  : isActivity
+                    ? activityUnreadCount
+                    : 0;
               return (
                 <Link
                   key={href}
@@ -60,7 +70,7 @@ function AppNav() {
                   {badgeCount > 0 && (
                     <span
                       className="absolute -right-2 top-0 h-2 w-2 rounded-full bg-foreground/80"
-                      aria-label={`${badgeCount} unread ${isCollabs ? "collaboration" : "conversation"}${badgeCount === 1 ? "" : "s"}`}
+                      aria-label={`${badgeCount} unread ${isActivity ? "activity item" : isCollabs ? "collaboration" : "conversation"}${badgeCount === 1 ? "" : "s"}`}
                     />
                   )}
                 </Link>
@@ -94,6 +104,7 @@ export default function AppLayout({
       <CollabProvider>
         <div className="min-h-screen bg-ethereal text-foreground">
           <PushRegistration />
+          <PwaServiceWorkerRegistration />
           <AppNav />
           <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">{children}</main>
           <InboxMessageNotice />

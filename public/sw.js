@@ -1,3 +1,42 @@
+const CACHE = "angel-island-shell-v1";
+const PRECACHE = ["/", "/manifest.webmanifest", "/angel-island-mark-light.png"];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(PRECACHE))
+      .then(() => self.skipWaiting()),
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))),
+      )
+      .then(() => self.clients.claim()),
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+
+  event.respondWith(
+    fetch(event.request).catch(async () => {
+      const cached = await caches.match(event.request);
+      if (cached) return cached;
+      if (event.request.mode === "navigate") {
+        const fallback = await caches.match("/");
+        if (fallback) return fallback;
+      }
+      throw new Error("Offline");
+    }),
+  );
+});
+
 self.addEventListener("push", (event) => {
   let payload = {};
   try {

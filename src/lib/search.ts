@@ -1,9 +1,14 @@
+import type { CollaborationStatus } from "@/lib/types";
 import { createClient } from "@/lib/supabase";
 import type { Profile, Room, ConversationStatus } from "@/lib/types";
 import { normalizeProfile, normalizeConversationStatus } from "@/lib/types";
 import { conversationPreviewText } from "@/lib/conversations";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { isDiscoverableProfile, PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
+import {
+  collaborationFocusLine,
+  loadCollaborationPreviews,
+} from "@/lib/collaborations";
 
 export type ConversationSearchResult = {
   id: string;
@@ -13,10 +18,24 @@ export type ConversationSearchResult = {
   conversation_status: ConversationStatus;
 };
 
+export type CollaborationSearchResult = {
+  id: string;
+  otherName: string;
+  focus: string;
+  preview: string;
+  reason: string;
+  status: CollaborationStatus;
+};
+
 export async function searchAll(query: string, userId?: string) {
   const q = query.trim();
   if (!q) {
-    return { rooms: [] as Room[], people: [] as Profile[], conversations: [] as ConversationSearchResult[] };
+    return {
+      rooms: [] as Room[],
+      people: [] as Profile[],
+      conversations: [] as ConversationSearchResult[],
+      collaborations: [] as CollaborationSearchResult[],
+    };
   }
 
   const supabase = createClient();
@@ -29,10 +48,11 @@ export async function searchAll(query: string, userId?: string) {
   const matchesText = (values: (string | null | undefined)[]) =>
     values.some((v) => v?.toLowerCase().includes(needle));
 
-  const [roomsRes, peopleRes, conversations] = await Promise.all([
+  const [roomsRes, peopleRes, conversations, collaborations] = await Promise.all([
     supabase.from("rooms").select("*").order("name"),
     supabase.from("profiles").select("*").order("updated_at", { ascending: false }),
     userId ? searchConversations(needle, userId, blockedIds) : Promise.resolve([]),
+    userId ? searchCollaborations(needle, userId, blockedIds) : Promise.resolve([]),
   ]);
 
   const rooms = ((roomsRes.data ?? []) as Room[]).filter((room) =>
@@ -60,7 +80,7 @@ export async function searchAll(query: string, userId?: string) {
       ])
     );
 
-  return { rooms, people, conversations };
+  return { rooms, people, conversations, collaborations };
 }
 
 /** @deprecated Use searchAll */
@@ -138,6 +158,73 @@ async function searchConversations(
       preview: conversationPreviewText(matchedMessage ?? lastBody, conv.optional_message),
       reason,
       conversation_status: normalizeConversationStatus(conv.conversation_status),
+    });
+  }
+
+  return results;
+}
+
+async function searchCollaborations(
+  needle: string,
+  userId: string,
+  blockedIds: Set<string>,
+): Promise<CollaborationSearchResult[]> {
+  const supabase = createClient();
+  const previewMap = new Map<string, Awaited<ReturnType<typeof loadCollaborationPreviews>>["previews"][number]>();
+
+  for (const filter of ["active", "paused", "past"] as const) {
+    const { previews } = await loadCollaborationPreviews(userId, filter);
+    for (const preview of previews) {
+      previewMap.set(preview.id, preview);
+    }
+  }
+
+  const collabIds = [...previewMap.keys()];
+  const entryPreviewByCollab: Record<string, string> = {};
+
+  if (collabIds.length > 0) {
+    const { data: entries } = await supabase
+      .from("collaboration_entries")
+      .select("collaboration_id, body, url")
+      .in("collaboration_id", collabIds);
+
+    for (const entry of entries ?? []) {
+      const text = [entry.body, entry.url].filter(Boolean).join(" ");
+      if (text.toLowerCase().includes(needle)) {
+        entryPreviewByCollab[entry.collaboration_id] = text.slice(0, 140);
+      }
+    }
+  }
+
+  const results: CollaborationSearchResult[] = [];
+
+  for (const preview of previewMap.values()) {
+    const otherId =
+      preview.invite.sender_id === userId ? preview.invite.receiver_id : preview.invite.sender_id;
+    if (blockedIds.has(otherId)) continue;
+
+    const otherName = preview.other?.first_name ?? preview.other?.username ?? "Collaborator";
+    const haystack = [
+      preview.invite.about,
+      preview.invite.message,
+      preview.invite.role,
+      otherName,
+      preview.other?.username,
+    ].filter(Boolean) as string[];
+
+    const entryPreview = entryPreviewByCollab[preview.id];
+    const matched = haystack.some((value) => value.toLowerCase().includes(needle)) || Boolean(entryPreview);
+    if (!matched) continue;
+
+    results.push({
+      id: preview.id,
+      otherName,
+      focus: collaborationFocusLine(preview.invite),
+      preview: entryPreview ?? preview.invite.message ?? preview.invite.about,
+      reason: entryPreview
+        ? `Matches "${needle}" in workspace notes or links`
+        : `Matches "${needle}" in collaboration details`,
+      status: preview.status,
     });
   }
 
