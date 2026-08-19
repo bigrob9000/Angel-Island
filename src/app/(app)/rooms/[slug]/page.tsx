@@ -192,43 +192,30 @@ export default function RoomPage() {
     setComposeError(null);
   }
 
-  function startEditIntro(post: Post) {
+  function startEditPost(post: Post) {
     setEditingPost(post);
     setComposeIntent(post.intent);
     setComposeTitle(post.title ?? "");
     setComposeBody(post.body);
+    setComposeMediaUrl(post.media_url ?? "");
     setComposeError(null);
     setShowCompose(true);
+    requestAnimationFrame(() => {
+      document.getElementById("room-compose")?.scrollIntoView({
+        behavior: motionReduced ? "auto" : "smooth",
+        block: "start",
+      });
+    });
   }
 
   async function handleSubmitPost(e: React.FormEvent) {
     e.preventDefault();
     if (!room || !composeIntent) return;
 
-    const isShareWork = composeIntent === "share_work";
-    let mediaUrl: string | null = null;
-
-    if (isShareWork) {
-      if (!composeMediaUrl.trim()) {
-        setComposeError("Add a link to your audio or video.");
-        return;
-      }
-      mediaUrl = normalizeMediaUrl(composeMediaUrl);
-      if (!mediaUrl) {
-        setComposeError("That link doesn't look valid. Try a full https:// URL.");
-        return;
-      }
-    } else if (!composeBody.trim()) {
-      return;
-    }
-
-    if (isIntroductions && !editingPost && myIntroPost) {
-      setComposeError("You already have an introduction here. Edit or delete it to change.");
-      return;
-    }
-
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     setSubmitting(true);
@@ -237,11 +224,42 @@ export default function RoomPage() {
     const title = composeTitle.trim() || null;
     const body = composeBody.trim();
     const now = new Date().toISOString();
+    const isShareWork = composeIntent === "share_work";
 
     if (editingPost) {
+      const patch: {
+        title: string | null;
+        body: string;
+        updated_at: string;
+        media_url?: string | null;
+      } = {
+        title,
+        body,
+        updated_at: now,
+      };
+
+      if (isShareWork) {
+        if (!composeMediaUrl.trim()) {
+          setComposeError("Add a link to your audio or video.");
+          setSubmitting(false);
+          return;
+        }
+        const normalized = normalizeMediaUrl(composeMediaUrl);
+        if (!normalized) {
+          setComposeError("That link doesn't look valid. Try a full https:// URL.");
+          setSubmitting(false);
+          return;
+        }
+        patch.media_url = normalized;
+      } else if (!body) {
+        setComposeError("Add something to your post before saving.");
+        setSubmitting(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("posts")
-        .update({ title, body, updated_at: now })
+        .update(patch)
         .eq("id", editingPost.id)
         .eq("author_id", user.id)
         .select("*")
@@ -256,6 +274,31 @@ export default function RoomPage() {
       const updated = data as Post;
       setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
       resetCompose();
+      return;
+    }
+
+    let mediaUrl: string | null = null;
+
+    if (isShareWork) {
+      if (!composeMediaUrl.trim()) {
+        setComposeError("Add a link to your audio or video.");
+        setSubmitting(false);
+        return;
+      }
+      mediaUrl = normalizeMediaUrl(composeMediaUrl);
+      if (!mediaUrl) {
+        setComposeError("That link doesn't look valid. Try a full https:// URL.");
+        setSubmitting(false);
+        return;
+      }
+    } else if (!composeBody.trim()) {
+      setSubmitting(false);
+      return;
+    }
+
+    if (isIntroductions && myIntroPost) {
+      setComposeError("You already have an introduction here. Edit or delete it to change.");
+      setSubmitting(false);
       return;
     }
 
@@ -289,7 +332,7 @@ export default function RoomPage() {
     resetCompose();
   }
 
-  async function handleDeleteIntro(postId: string) {
+  async function handleDeletePost(postId: string) {
     if (!userId) return;
     const supabase = createClient();
     setDeletingId(postId);
@@ -344,6 +387,10 @@ export default function RoomPage() {
       minute: "2-digit",
     });
 
+    const edited =
+      post.updated_at &&
+      new Date(post.updated_at).getTime() > new Date(post.created_at).getTime() + 1000;
+
     return (
       <li id={`post-${post.id}`} key={post.id} className="rounded-lg border border-foreground/10 bg-white/40 p-4 scroll-mt-24">
         <div className="flex flex-wrap items-baseline gap-2 text-xs text-muted">
@@ -351,7 +398,10 @@ export default function RoomPage() {
             {postIntentLabel(post)}
           </span>
           <ProfileAttribution profile={author} />
-          <span>{time}</span>
+          <span>
+            {time}
+            {edited && <span className="text-muted/80"> · edited</span>}
+          </span>
         </div>
         {!isIntroductions && post.title && (
           <p className="mt-2 font-medium text-foreground">{post.title}</p>
@@ -367,18 +417,18 @@ export default function RoomPage() {
           isOwn={isOwn}
           interactionBlocked={blockedUserIds.has(post.author_id)}
         />
-        {isIntroductions && isOwn && (
+        {isOwn && (
           <div className="mt-4 flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={() => startEditIntro(post)}
+              onClick={() => startEditPost(post)}
               className="text-sm text-foreground underline hover:no-underline"
             >
               Edit
             </button>
             <button
               type="button"
-              onClick={() => handleDeleteIntro(post.id)}
+              onClick={() => handleDeletePost(post.id)}
               disabled={deletingId === post.id}
               className="text-sm text-muted hover:text-foreground disabled:opacity-50"
             >
@@ -473,7 +523,7 @@ export default function RoomPage() {
           )}
         </div>
       ) : (
-        <div className="rounded-lg border border-foreground/10 bg-white/60 p-4">
+        <div id="room-compose" className="rounded-lg border border-foreground/10 bg-white/60 p-4 scroll-mt-24">
           {!isIntroductions && !composeIntent ? (
             <div>
               <p className="text-sm text-muted mb-3">Choose what you&apos;re adding:</p>
@@ -504,7 +554,9 @@ export default function RoomPage() {
                   ? editingPost
                     ? "Edit your introduction"
                     : "Your introduction — one post per person, edit or delete anytime."
-                  : POST_INTENT_LABELS[composeIntent!]}
+                  : editingPost
+                    ? "Edit your post"
+                    : POST_INTENT_LABELS[composeIntent!]}
               </p>
               {!isIntroductions && (
                 <label className="block">
@@ -570,13 +622,13 @@ export default function RoomPage() {
                 >
                   {submitting
                     ? "Saving…"
-                    : isIntroductions
-                      ? editingPost
-                        ? "Save changes"
-                        : "Post introduction"
-                      : composeIntent === "share_work"
-                        ? "Share"
-                        : "Post"}
+                    : editingPost
+                      ? "Save changes"
+                      : isIntroductions
+                        ? "Post introduction"
+                        : composeIntent === "share_work"
+                          ? "Share"
+                          : "Post"}
                 </button>
                 {!isIntroductions && (
                   <button
