@@ -4,6 +4,7 @@ import type { Profile, Room, ConversationStatus } from "@/lib/types";
 import { normalizeProfile, normalizeConversationStatus } from "@/lib/types";
 import { conversationPreviewText } from "@/lib/conversations";
 import { loadBlockedUserIds } from "@/lib/blocks";
+import { loadArchivedInviteIds } from "@/lib/conversation-archive";
 import { isDiscoverableProfile, PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 import {
   collaborationFocusLine,
@@ -96,10 +97,11 @@ async function searchConversations(
 ): Promise<ConversationSearchResult[]> {
   const supabase = createClient();
 
-  const { data: convs } = await supabase
-    .from("chat_invites")
-    .select(
-      `
+  const [{ data: convs }, archivedIds] = await Promise.all([
+    supabase
+      .from("chat_invites")
+      .select(
+        `
       id,
       optional_message,
       conversation_status,
@@ -107,9 +109,11 @@ async function searchConversations(
       receiver_id,
       messages (body)
     `
-    )
-    .eq("status", "accepted")
-    .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+      )
+      .eq("status", "accepted")
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`),
+    loadArchivedInviteIds(userId),
+  ]);
 
   if (!convs?.length) return [];
 
@@ -132,6 +136,7 @@ async function searchConversations(
   const results: ConversationSearchResult[] = [];
 
   for (const conv of convs) {
+    if (archivedIds.has(conv.id)) continue;
     const otherId = conv.sender_id === userId ? conv.receiver_id : conv.sender_id;
     if (blockedIds.has(otherId)) continue;
     const other = profilesById[otherId];

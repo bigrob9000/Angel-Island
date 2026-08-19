@@ -4,6 +4,7 @@ import type { Message } from "@/lib/types";
 import type { ChatInvite, ConversationStatus, Profile } from "@/lib/types";
 import { normalizeConversationStatus } from "@/lib/types";
 import { loadBlockedUserIds } from "@/lib/blocks";
+import { loadArchivedInviteIds } from "@/lib/conversation-archive";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 
 export type ConversationPreview = ChatInvite & {
@@ -69,7 +70,10 @@ export async function loadConversationPreviews(
   limit?: number
 ): Promise<ConversationPreview[]> {
   const supabase = createClient();
-  const { blockedIds } = await loadBlockedUserIds(userId);
+  const [{ blockedIds }, archivedIds] = await Promise.all([
+    loadBlockedUserIds(userId),
+    loadArchivedInviteIds(userId),
+  ]);
 
   const { data: convData, error } = await supabase
     .from("chat_invites")
@@ -90,7 +94,7 @@ export async function loadConversationPreviews(
 
   const convs = (convData as InviteWithMessages[]).filter((c) => {
     const otherId = c.sender_id === userId ? c.receiver_id : c.sender_id;
-    return !blockedIds.has(otherId);
+    return !blockedIds.has(otherId) && !archivedIds.has(c.id);
   });
   const otherIds = [
     ...new Set(convs.map((c) => (c.sender_id === userId ? c.receiver_id : c.sender_id))),
@@ -172,6 +176,13 @@ export function applyInboxMessage(
   next.unshift(updated);
 
   return withUnreadState(next, userId, openInviteId);
+}
+
+export function applyInboxRemove(
+  previews: ConversationPreview[],
+  inviteId: string
+): ConversationPreview[] {
+  return previews.filter((preview) => preview.id !== inviteId);
 }
 
 export function applyInboxInviteUpdate(

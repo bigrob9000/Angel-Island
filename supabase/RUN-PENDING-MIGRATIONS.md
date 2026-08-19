@@ -209,6 +209,28 @@ If either line errors with **already member of publication**, that table is alre
 | 022 | Cancel sent collab invites (`cancelled` status + sender RLS) |
 | 023 | Onboarding completion flag on profiles (`onboarding_complete`) |
 | 024 | Public read of discoverable profiles (shared links + OG) |
+| 025 | Per-user conversation archive (remove closed chats from your list) |
+| 026 | Permanent delete for ended conversations (both participants) |
+
+---
+
+## 025 — Remove conversations from your list
+
+Run the full file: `supabase/migrations/025_conversation_archive.sql`
+
+Adds a per-user archive so you can hide a **closed** conversation from Messages and Home without deleting it for the other person.
+
+**Try it:** End a conversation → open it → **Remove from list** → it disappears from Messages. The thread still opens from a direct link if you saved it.
+
+---
+
+## 026 — Permanently delete ended conversations
+
+Run the full file: `supabase/migrations/026_conversation_delete.sql`
+
+Lets either participant permanently delete an **ended** conversation — all messages are erased for both people.
+
+**Try it:** End a conversation → **Delete permanently** → confirm → the thread is gone for both accounts.
 
 ---
 

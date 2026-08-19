@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase";
 import type { ChatInvite, Message, Profile } from "@/lib/types";
 import { normalizeConversationStatus } from "@/lib/types";
 import { usePreferences } from "@/components/PreferencesProvider";
+import { hideConversationFromList, permanentlyDeleteConversation } from "@/lib/conversation-archive";
 import { isMessagingEnabled } from "@/lib/conversations";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
@@ -16,7 +17,7 @@ import { useInbox } from "@/components/InboxProvider";
 import { NotFoundPanel } from "@/components/NotFoundPanel";
 import { PageLoading } from "@/components/PageLoading";
 
-type ModalKind = "pause" | "end" | null;
+type ModalKind = "pause" | "end" | "remove" | "delete" | null;
 
 function normalizeInvite(row: ChatInvite): ChatInvite {
   return {
@@ -71,7 +72,7 @@ export default function ConversationPage() {
   const [resumeMessage, setResumeMessage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { motionReduced } = usePreferences();
-  const { markRead } = useInbox();
+  const { markRead, refresh } = useInbox();
 
   const canMessage = invite ? isMessagingEnabled(invite.conversation_status) : false;
 
@@ -247,6 +248,42 @@ export default function ConversationPage() {
     await updateConversationStatus("ended");
   }
 
+  async function handleRemoveFromList() {
+    if (!userId) return;
+    setActing(true);
+    const { error } = await hideConversationFromList(userId, inviteId);
+    setActing(false);
+    setModal(null);
+    setMenuOpen(false);
+
+    if (error) {
+      setActionError(error);
+      return;
+    }
+
+    setActionError(null);
+    await refresh();
+    router.push("/messages");
+  }
+
+  async function handleDeletePermanently() {
+    if (!userId) return;
+    setActing(true);
+    const { error } = await permanentlyDeleteConversation(userId, inviteId);
+    setActing(false);
+    setModal(null);
+    setMenuOpen(false);
+
+    if (error) {
+      setActionError(error);
+      return;
+    }
+
+    setActionError(null);
+    await refresh();
+    router.push("/messages");
+  }
+
   if (loading) return <PageLoading />;
   if (!invite) {
     return (
@@ -349,6 +386,31 @@ export default function ConversationPage() {
                     End conversation
                   </button>
                 </>
+              ) : invite.conversation_status === "ended" ? (
+                <>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setModal("remove");
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
+                  >
+                    Remove from list
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setModal("delete");
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm text-red-700 hover:bg-red-50"
+                  >
+                    Delete permanently
+                  </button>
+                </>
               ) : null}
               {userId && otherId && (
                 <>
@@ -410,8 +472,30 @@ export default function ConversationPage() {
       )}
 
       {invite.conversation_status === "ended" && (
-        <div className="mt-4 rounded-lg border border-foreground/10 bg-white/50 px-4 py-3 text-sm">
+        <div className="mt-4 surface px-4 py-3 text-sm">
           <p className="font-medium text-foreground">This conversation is closed.</p>
+          <p className="mt-1 text-muted">
+            Remove it from your list, or delete it permanently — that erases all messages for both
+            of you.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setModal("remove")}
+              disabled={acting}
+              className="btn-secondary"
+            >
+              Remove from list
+            </button>
+            <button
+              type="button"
+              onClick={() => setModal("delete")}
+              disabled={acting}
+              className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-100 disabled:opacity-50"
+            >
+              Delete permanently
+            </button>
+          </div>
         </div>
       )}
 
@@ -524,12 +608,12 @@ export default function ConversationPage() {
                   </button>
                 </div>
               </>
-            ) : (
+            ) : modal === "end" ? (
               <>
                 <h2 className="font-serif text-lg font-medium text-foreground">End conversation</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Ending will close this conversation permanently. This can&apos;t be undone, and no
-                  explanation is required.
+                  explanation is required. You can remove it from your Messages list afterward.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button
@@ -539,6 +623,57 @@ export default function ConversationPage() {
                     className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
                   >
                     {acting ? "Ending…" : "End"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModal(null)}
+                    className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : modal === "remove" ? (
+              <>
+                <h2 className="font-serif text-lg font-medium text-foreground">Remove from list</h2>
+                <p className="mt-3 text-sm text-muted leading-relaxed">
+                  This hides the conversation from your Messages list and Home. The other person
+                  still has access, and you can open this thread again from a direct link if you
+                  need it.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleRemoveFromList}
+                    disabled={acting}
+                    className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                  >
+                    {acting ? "Removing…" : "Remove from list"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModal(null)}
+                    className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="font-serif text-lg font-medium text-foreground">Delete permanently</h2>
+                <p className="mt-3 text-sm text-muted leading-relaxed">
+                  This deletes the entire conversation and all messages for both of you. It cannot
+                  be undone. The other person will no longer see this thread either.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleDeletePermanently}
+                    disabled={acting}
+                    className="rounded-md bg-red-800 px-4 py-2 text-sm font-medium text-white hover:bg-red-900 disabled:opacity-50"
+                  >
+                    {acting ? "Deleting…" : "Delete permanently"}
                   </button>
                   <button
                     type="button"
