@@ -24,6 +24,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/auth/reset-password", request.url));
   }
 
+  if (type === "email_change") {
+    return NextResponse.redirect(new URL("/settings?email_updated=1", request.url));
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

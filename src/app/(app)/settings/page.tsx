@@ -18,11 +18,23 @@ import {
 } from "@/lib/push/client";
 import { loadBlockedUsers, unblockUser } from "@/lib/blocks";
 import type { BlockedUser } from "@/lib/blocks";
-import { userHasEmailPassword } from "@/lib/auth-providers";
+import { userHasEmailPassword, userHasGoogle } from "@/lib/auth-providers";
+import {
+  emailChangeErrorMessage,
+  getAuthConfirmRedirectUrl,
+  isValidEmailAddress,
+} from "@/lib/auth-account";
 
 export default function SettingsPage() {
   const { preferences, setPreference } = usePreferences();
   const [email, setEmail] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [newEmail, setNewEmail] = useState("");
+  const [emailChangePassword, setEmailChangePassword] = useState("");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailMessage, setEmailMessage] = useState<{ type: "ok" | "error"; text: string } | null>(
+    null
+  );
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [accountMessage, setAccountMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
@@ -34,6 +46,7 @@ export default function SettingsPage() {
   const [blocksMessage, setBlocksMessage] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [hasPassword, setHasPassword] = useState(false);
+  const [hasGoogle, setHasGoogle] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deleteSaving, setDeleteSaving] = useState(false);
   const [deleteMessage, setDeleteMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
@@ -74,8 +87,10 @@ export default function SettingsPage() {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       setEmail(user?.email ?? null);
+      setPendingEmail(user?.new_email ?? null);
       setUserId(user?.id ?? null);
       setHasPassword(user ? userHasEmailPassword(user) : false);
+      setHasGoogle(user ? userHasGoogle(user) : false);
       if (!user) {
         setBlocksLoading(false);
         return;
@@ -100,6 +115,77 @@ export default function SettingsPage() {
       });
     });
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("email_updated") !== "1") return;
+
+    setEmailMessage({ type: "ok", text: "Your email address was updated." });
+    window.history.replaceState({}, "", "/settings");
+
+    const supabase = createClient();
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      setEmail(user?.email ?? null);
+      setPendingEmail(user?.new_email ?? null);
+    });
+  }, []);
+
+  async function handleEmailChange(e: React.FormEvent) {
+    e.preventDefault();
+    setEmailMessage(null);
+
+    const trimmed = newEmail.trim();
+    if (!trimmed) {
+      setEmailMessage({ type: "error", text: "Enter a new email address." });
+      return;
+    }
+    if (!isValidEmailAddress(trimmed)) {
+      setEmailMessage({ type: "error", text: "Enter a valid email address." });
+      return;
+    }
+    if (email && trimmed.toLowerCase() === email.toLowerCase()) {
+      setEmailMessage({ type: "error", text: "That's already your email address." });
+      return;
+    }
+    if (!emailChangePassword) {
+      setEmailMessage({ type: "error", text: "Enter your current password to confirm this change." });
+      return;
+    }
+
+    setEmailSaving(true);
+    const supabase = createClient();
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email!,
+      password: emailChangePassword,
+    });
+    if (signInError) {
+      setEmailSaving(false);
+      setEmailMessage({ type: "error", text: "Current password is incorrect." });
+      return;
+    }
+
+    const { data, error } = await supabase.auth.updateUser(
+      { email: trimmed },
+      { emailRedirectTo: getAuthConfirmRedirectUrl() }
+    );
+
+    setEmailSaving(false);
+
+    if (error) {
+      setEmailMessage({ type: "error", text: emailChangeErrorMessage(error.message) });
+      return;
+    }
+
+    setNewEmail("");
+    setEmailChangePassword("");
+    setPendingEmail(data.user?.new_email ?? trimmed);
+    setEmailMessage({
+      type: "ok",
+      text: "Confirmation sent. Check your new inbox for a link — Supabase may also email your current address to confirm the change.",
+    });
+  }
 
   async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault();
@@ -322,7 +408,62 @@ export default function SettingsPage() {
         <div>
           <p className="text-sm text-muted">Email</p>
           <p className="mt-1 text-foreground">{email ?? "—"}</p>
+          {pendingEmail && pendingEmail !== email && (
+            <p className="mt-2 text-sm text-muted">
+              Waiting for confirmation:{" "}
+              <span className="text-foreground">{pendingEmail}</span>
+            </p>
+          )}
         </div>
+
+        {hasPassword ? (
+          <form onSubmit={handleEmailChange} className="space-y-4 border-t border-foreground/10 pt-5">
+            <p className="text-sm font-medium text-foreground">Change email</p>
+            <p className="text-sm text-muted">
+              We&apos;ll send a confirmation link to your new address. You may need to confirm from
+              both your old and new inbox.
+            </p>
+            <label className="block">
+              <span className="text-sm text-muted">New email</span>
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                autoComplete="email"
+                className="mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm text-muted">Current password</span>
+              <input
+                type="password"
+                value={emailChangePassword}
+                onChange={(e) => setEmailChangePassword(e.target.value)}
+                autoComplete="current-password"
+                className="mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
+              />
+            </label>
+            {emailMessage && (
+              <p
+                className={`text-sm ${emailMessage.type === "ok" ? "text-accent" : "text-red-600"}`}
+                role="status"
+              >
+                {emailMessage.text}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={emailSaving || !newEmail.trim() || !emailChangePassword}
+              className="btn-secondary disabled:opacity-50"
+            >
+              {emailSaving ? "Sending…" : "Update email"}
+            </button>
+          </form>
+        ) : hasGoogle ? (
+          <p className="border-t border-foreground/10 pt-5 text-sm text-muted">
+            You sign in with Google — your email and password are managed by your Google account.
+          </p>
+        ) : null}
 
         {hasPassword ? (
         <form onSubmit={handlePasswordChange} className="space-y-4 border-t border-foreground/10 pt-5">
@@ -363,11 +504,7 @@ export default function SettingsPage() {
             {accountSaving ? "Saving…" : "Update password"}
           </button>
         </form>
-        ) : (
-          <p className="border-t border-foreground/10 pt-5 text-sm text-muted">
-            You sign in with Google — there&apos;s no password to change here.
-          </p>
-        )}
+        ) : null}
 
         <form onSubmit={handleDeleteAccount} className="space-y-4 border-t border-foreground/10 pt-5">
           <p className="text-sm font-medium text-foreground">Delete account</p>
