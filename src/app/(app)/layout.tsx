@@ -40,10 +40,10 @@ function AppNav() {
   return (
     <header className="sticky top-0 z-20 border-b border-foreground/10 bg-ethereal/95 backdrop-blur-sm">
       <div className="mx-auto max-w-2xl px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-6 sm:gap-8">
+        <div className="flex items-center gap-3 sm:gap-4">
           <AngelIslandLogo variant="mark" size="nav" className="shrink-0" />
           <nav
-            className="flex min-w-0 flex-1 flex-nowrap items-center justify-between overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex min-w-0 flex-1 flex-nowrap items-center gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             aria-label="Main"
           >
             {nav.map(({ href, label }) => {
@@ -76,18 +76,18 @@ function AppNav() {
                 </Link>
               );
             })}
-            <button
-              type="button"
-              onClick={async () => {
-                const supabase = createClient();
-                await supabase.auth.signOut();
-                router.replace("/");
-              }}
-              className="shrink-0 whitespace-nowrap text-sm font-medium text-muted hover:text-foreground"
-            >
-              Sign out
-            </button>
           </nav>
+          <button
+            type="button"
+            onClick={async () => {
+              const supabase = createClient();
+              await supabase.auth.signOut();
+              router.replace("/");
+            }}
+            className="shrink-0 whitespace-nowrap text-sm font-medium text-muted hover:text-foreground"
+          >
+            Sign out
+          </button>
         </div>
       </div>
     </header>

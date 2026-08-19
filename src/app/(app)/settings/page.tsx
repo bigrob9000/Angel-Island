@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { FeedbackCard } from "@/components/FeedbackCard";
@@ -20,6 +21,7 @@ import type { BlockedUser } from "@/lib/blocks";
 import { userHasEmailPassword } from "@/lib/auth-providers";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { preferences, setPreference } = usePreferences();
   const [email, setEmail] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
@@ -126,6 +128,12 @@ export default function SettingsPage() {
     setNewPassword("");
     setConfirmPassword("");
     setAccountMessage({ type: "ok", text: "Password updated." });
+  }
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.replace("/");
   }
 
   async function handleDeleteAccount(e: React.FormEvent) {
@@ -364,6 +372,18 @@ export default function SettingsPage() {
             You sign in with Google — there&apos;s no password to change here.
           </p>
         )}
+
+        <div className="border-t border-foreground/10 pt-5">
+          <p className="text-sm font-medium text-foreground">Sign out</p>
+          <p className="mt-1 text-sm text-muted">Leave Angel Island on this device.</p>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="btn-secondary mt-3"
+          >
+            Sign out
+          </button>
+        </div>
 
         <form onSubmit={handleDeleteAccount} className="space-y-4 border-t border-foreground/10 pt-5">
           <p className="text-sm font-medium text-foreground">Delete account</p>
