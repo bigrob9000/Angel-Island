@@ -146,8 +146,8 @@ export default function TermsPage() {
       <section>
         <h2>Ending your account</h2>
         <p>
-          You may stop using Angel Island at any time and sign out. To request account deletion,
-          email{" "}
+          You may stop using Angel Island at any time and sign out. Delete your account in
+          Settings → Account (type DELETE to confirm), or email{" "}
           <a href={`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("Delete my Angel Island account")}`}>
             {FEEDBACK_EMAIL}
           </a>{" "}

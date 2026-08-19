@@ -20,6 +20,10 @@ export async function GET(request: Request) {
     );
   }
 
+  if (type === "recovery") {
+    return NextResponse.redirect(new URL("/auth/reset-password", request.url));
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

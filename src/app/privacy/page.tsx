@@ -164,11 +164,12 @@ export default function PrivacyPage() {
             <strong>Sign out</strong> — available from the main navigation when signed in.
           </li>
           <li>
-            <strong>Account deletion</strong> — during beta, email{" "}
+            <strong>Account deletion</strong> — delete your account anytime in Settings → Account
+            (type DELETE to confirm). You can also email{" "}
             <a href={`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("Delete my Angel Island account")}`}>
               {FEEDBACK_EMAIL}
-            </a>{" "}
-            from the address on your account and we will delete your account and associated data.
+            </a>
+            .
           </li>
         </ul>
       </section>

@@ -17,6 +17,7 @@ import {
 } from "@/lib/push/client";
 import { loadBlockedUsers, unblockUser } from "@/lib/blocks";
 import type { BlockedUser } from "@/lib/blocks";
+import { userHasEmailPassword } from "@/lib/auth-providers";
 
 export default function SettingsPage() {
   const { preferences, setPreference } = usePreferences();
@@ -31,6 +32,10 @@ export default function SettingsPage() {
   const [unblockingId, setUnblockingId] = useState<string | null>(null);
   const [blocksMessage, setBlocksMessage] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [hasPassword, setHasPassword] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [deleteSaving, setDeleteSaving] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
   const [notifyMessages, setNotifyMessages] = useState(true);
   const [notifyCollab, setNotifyCollab] = useState(true);
   const [notifyPush, setNotifyPush] = useState(false);
@@ -69,6 +74,7 @@ export default function SettingsPage() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setEmail(user?.email ?? null);
       setUserId(user?.id ?? null);
+      setHasPassword(user ? userHasEmailPassword(user) : false);
       if (!user) {
         setBlocksLoading(false);
         return;
@@ -120,6 +126,33 @@ export default function SettingsPage() {
     setNewPassword("");
     setConfirmPassword("");
     setAccountMessage({ type: "ok", text: "Password updated." });
+  }
+
+  async function handleDeleteAccount(e: React.FormEvent) {
+    e.preventDefault();
+    setDeleteMessage(null);
+
+    if (deleteConfirmation.trim().toUpperCase() !== "DELETE") {
+      setDeleteMessage({ type: "error", text: "Type DELETE to confirm." });
+      return;
+    }
+
+    setDeleteSaving(true);
+    const response = await fetch("/api/account/delete", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmation: deleteConfirmation.trim() }),
+    });
+    const data = (await response.json().catch(() => ({}))) as { error?: string };
+    setDeleteSaving(false);
+
+    if (!response.ok) {
+      setDeleteMessage({ type: "error", text: data.error ?? "Could not delete account." });
+      return;
+    }
+
+    window.location.href = "/";
   }
 
   async function handleUnblock(blockedId: string) {
@@ -287,6 +320,7 @@ export default function SettingsPage() {
           <p className="mt-1 text-foreground">{email ?? "—"}</p>
         </div>
 
+        {hasPassword ? (
         <form onSubmit={handlePasswordChange} className="space-y-4 border-t border-foreground/10 pt-5">
           <p className="text-sm font-medium text-foreground">Change password</p>
           <label className="block">
@@ -323,6 +357,43 @@ export default function SettingsPage() {
             className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5 disabled:opacity-50"
           >
             {accountSaving ? "Saving…" : "Update password"}
+          </button>
+        </form>
+        ) : (
+          <p className="border-t border-foreground/10 pt-5 text-sm text-muted">
+            You sign in with Google — there&apos;s no password to change here.
+          </p>
+        )}
+
+        <form onSubmit={handleDeleteAccount} className="space-y-4 border-t border-foreground/10 pt-5">
+          <p className="text-sm font-medium text-foreground">Delete account</p>
+          <p className="text-sm text-muted">
+            Permanently remove your profile, messages, and collaboration data. This cannot be undone.
+          </p>
+          <label className="block">
+            <span className="text-sm text-muted">Type DELETE to confirm</span>
+            <input
+              type="text"
+              value={deleteConfirmation}
+              onChange={(e) => setDeleteConfirmation(e.target.value)}
+              autoComplete="off"
+              className="mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
+            />
+          </label>
+          {deleteMessage && (
+            <p
+              className={`text-sm ${deleteMessage.type === "ok" ? "text-accent" : "text-red-600"}`}
+              role="status"
+            >
+              {deleteMessage.text}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={deleteSaving || deleteConfirmation.trim().toUpperCase() !== "DELETE"}
+            className="rounded-md border border-red-600/40 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+          >
+            {deleteSaving ? "Deleting…" : "Delete my account"}
           </button>
         </form>
       </section>

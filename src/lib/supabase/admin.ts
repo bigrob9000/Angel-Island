@@ -16,3 +16,7 @@ export function createAdminClient() {
 export function isNotificationEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY?.trim() && process.env.RESEND_FROM?.trim());
 }
+
+export function isAdminConfigured(): boolean {
+  return Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() && isSupabaseConfigured());
+}
