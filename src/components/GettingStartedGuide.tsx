@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
 import type { ProfileCompletenessProfile } from "@/lib/profile-completeness";
 import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
+import { useDismissStorage } from "@/hooks/useDismissStorage";
 
 const DISMISS_KEY = "angel_island_getting_started_dismissed";
 
@@ -29,19 +29,10 @@ export function GettingStartedGuide({
   hasConnected,
   hasCollabs,
 }: Props) {
-  const [dismissed, setDismissed] = useState(true);
+  const { dismissed, ready, dismiss } = useDismissStorage(DISMISS_KEY);
 
-  useEffect(() => {
-    setDismissed(window.localStorage.getItem(DISMISS_KEY) === "1");
-  }, []);
-
-  if (!show || dismissed || !profile) {
+  if (!ready || !show || dismissed || !profile) {
     return null;
-  }
-
-  function dismiss() {
-    window.localStorage.setItem(DISMISS_KEY, "1");
-    setDismissed(true);
   }
 
   const optional = getOptionalProfileCompleteness(profile);

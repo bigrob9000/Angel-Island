@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import type { ProfileCompletenessProfile } from "@/lib/profile-completeness";
 import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
+import { useDismissStorage } from "@/hooks/useDismissStorage";
 
 const DISMISS_KEY = "angel_island_profile_nudge_dismissed";
 
@@ -14,11 +14,7 @@ type Props = {
 };
 
 export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: Props) {
-  const [dismissed, setDismissed] = useState(true);
-
-  useEffect(() => {
-    setDismissed(window.localStorage.getItem(DISMISS_KEY) === "1");
-  }, []);
+  const { dismissed, ready, dismiss } = useDismissStorage(DISMISS_KEY);
 
   const optional = getOptionalProfileCompleteness(profile);
   const nextItems = optional.items.filter((item) => !item.done).slice(0, 3);
@@ -27,12 +23,7 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
 
   const showNudge = missingBasics || (!dismissed && !optional.isComplete && nextItems.length > 0);
 
-  if (!showNudge) return null;
-
-  function dismiss() {
-    window.localStorage.setItem(DISMISS_KEY, "1");
-    setDismissed(true);
-  }
+  if (!ready || !showNudge) return null;
 
   if (missingBasics) {
     return (

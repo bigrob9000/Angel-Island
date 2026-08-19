@@ -30,6 +30,7 @@ export default function HomePage() {
   const [onboardingDone, setOnboardingDone] = useState(false);
   const [people, setPeople] = useState<ReturnType<typeof rankProfilesForViewer>>([]);
   const [activeCollabs, setActiveCollabs] = useState<CollaborationPreview[]>([]);
+  const [homeReady, setHomeReady] = useState(false);
   const { conversations, loading: conversationsLoading } = useInbox();
   const { collaborations: trackedCollabs } = useCollab();
   const recentConversations = conversations.slice(0, 5);
@@ -43,20 +44,36 @@ export default function HomePage() {
   }, [trackedCollabs]);
 
   useEffect(() => {
+    let cancelled = false;
     const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+
+    void (async () => {
+      setHomeReady(false);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (cancelled) return;
+
       const name = user?.user_metadata?.first_name ?? user?.email?.split("@")[0] ?? null;
       setFirstName(name ?? null);
 
       if (!user) {
+        setHomeReady(true);
         return;
       }
 
-      const [peopleRes, viewerRes, { blockedIds }] = await Promise.all([
-        supabase.from("profiles").select("*").neq("id", user.id),
-        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-        loadBlockedUserIds(user.id),
-      ]);
+      const [peopleRes, viewerRes, { blockedIds }, collabResult, roomMembersRes] =
+        await Promise.all([
+          supabase.from("profiles").select("*").neq("id", user.id),
+          supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+          loadBlockedUserIds(user.id),
+          loadCollaborationPreviews(user.id, "active"),
+          supabase.from("room_members").select("room_id").eq("user_id", user.id),
+        ]);
+
+      if (cancelled) return;
 
       const viewer = viewerRes.data ? normalizeProfile(viewerRes.data as Profile) : null;
       setViewerProfile(viewer);
@@ -68,28 +85,26 @@ export default function HomePage() {
         .filter((profile) => !blockedIds.has(profile.id));
 
       setPeople(rankProfilesForViewer(viewer, candidates).slice(0, 5));
-
-      const collabResult = await loadCollaborationPreviews(user.id, "active");
       setActiveCollabs(collabResult.previews.slice(0, 3));
 
-      supabase
-        .from("room_members")
-        .select("room_id")
-        .eq("user_id", user.id)
-        .then((res) => {
-          const ids = (res.data ?? []).map((r) => r.room_id);
-          if (ids.length === 0) {
-            setMyRooms([]);
-            return;
-          }
-          supabase
-            .from("rooms")
-            .select("*")
-            .in("id", ids)
-            .order("name")
-            .then((roomsRes) => setMyRooms(roomsRes.data ?? []));
-        });
-    });
+      const roomIds = (roomMembersRes.data ?? []).map((row) => row.room_id);
+      if (roomIds.length === 0) {
+        setMyRooms([]);
+      } else {
+        const roomsRes = await supabase.from("rooms").select("*").in("id", roomIds).order("name");
+        if (!cancelled) {
+          setMyRooms(roomsRes.data ?? []);
+        }
+      }
+
+      if (!cancelled) {
+        setHomeReady(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const welcomeName = firstName ? `, ${firstName}` : "";
@@ -100,8 +115,9 @@ export default function HomePage() {
   const hasCollabs = activeCollabs.length > 0;
   const gettingStartedComplete =
     optionalComplete && myRooms.length > 0 && hasConnected && hasCollabs;
+  const homeDataReady = homeReady && !conversationsLoading;
   const showGettingStarted =
-    onboardingDone && Boolean(viewerProfile) && !gettingStartedComplete;
+    homeDataReady && onboardingDone && Boolean(viewerProfile) && !gettingStartedComplete;
 
   return (
     <div className="space-y-10">
@@ -119,7 +135,9 @@ export default function HomePage() {
         hasCollabs={hasCollabs}
       />
 
-      {viewerProfile && <ProfileCompletenessNudge profile={viewerProfile} />}
+      {homeDataReady && viewerProfile && (
+        <ProfileCompletenessNudge profile={viewerProfile} />
+      )}
 
       <IphonePwaHint />
       <AndroidInstallHint />
