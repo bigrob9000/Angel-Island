@@ -25,7 +25,7 @@ export function InviteMusiciansCard() {
         <h2 className="font-medium text-foreground">Invite musicians</h2>
         <p className="mt-1 text-sm text-muted">
           Share this link with people you&apos;d actually want to play or collaborate with. They&apos;ll
-          land on a welcome sign-up page — Google or email works.
+          read about Angel Island first, then create an account when they&apos;re ready.
         </p>
       </div>
 

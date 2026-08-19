@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { postAuthPath } from "@/lib/auth-redirect";
 import {
   inviteRequiredMessage,
@@ -21,6 +21,7 @@ function authCallbackUrl(invited: boolean, authMode: "sign-in" | "sign-up") {
 }
 
 export default function SignInPageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const inviteOnly = isInviteOnlyEnabled();
   const [mode, setMode] = useState<"sign-in" | "sign-up" | "forgot">("sign-in");
@@ -35,6 +36,14 @@ export default function SignInPageContent() {
 
   useEffect(() => {
     const err = searchParams.get("error");
+    const invitedFromUrl = searchParams.get("invite") === "1";
+    const enteredFromWelcome = searchParams.get("enter") === "1";
+
+    if (invitedFromUrl && !enteredFromWelcome && !err) {
+      router.replace("/?invite=1");
+      return;
+    }
+
     if (err) setMessage({ type: "error", text: err });
     const modeParam = searchParams.get("mode");
     if (modeParam === "sign-up" && (!inviteOnly || searchParams.get("invite") === "1")) {
@@ -47,7 +56,7 @@ export default function SignInPageContent() {
       setMode("sign-in");
       setMessage({ type: "error", text: inviteRequiredMessage() });
     }
-  }, [searchParams, inviteOnly]);
+  }, [searchParams, inviteOnly, router]);
 
   const invited = searchParams.get("invite") === "1";
 

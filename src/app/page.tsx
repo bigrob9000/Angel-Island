@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
+import { getInviteSignUpPath, persistInviteAcceptance } from "@/lib/invite";
 
 import { ONBOARDING_KEY } from "@/lib/onboarding";
 
-export default function Home() {
+function LandingPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const invited = searchParams.get("invite") === "1";
+  const enterHref = invited ? getInviteSignUpPath() : "/sign-in";
+
+  useEffect(() => {
+    if (invited) persistInviteAcceptance();
+  }, [invited]);
 
   useEffect(() => {
     try {
@@ -149,19 +157,24 @@ export default function Home() {
             A place for musicians and creatives who care about music. No clout.
             No pressure. Just connection, collaboration, and conversation.
           </p>
-          <p className="mt-4 text-sm text-muted">
-            Someone invited you?{" "}
-            <Link href="/sign-in?invite=1" className="text-foreground underline underline-offset-2 hover:no-underline">
-              Sign in
-            </Link>
-            {" "}or{" "}
-            <Link href="/sign-in?invite=1&mode=sign-up" className="text-foreground underline underline-offset-2 hover:no-underline">
-              create an account
-            </Link>
-            . No rush.
-          </p>
+          {invited ? (
+            <p className="mt-4 text-sm text-foreground">
+              You&apos;re invited — take your time reading below, then enter when you&apos;re ready.{" "}
+              <Link href="/sign-in" className="underline underline-offset-2 hover:no-underline">
+                Already have an account? Sign in
+              </Link>
+            </p>
+          ) : (
+            <p className="mt-4 text-sm text-muted">
+              Someone invited you?{" "}
+              <Link href="/sign-in" className="text-foreground underline underline-offset-2 hover:no-underline">
+                Sign in
+              </Link>
+              {" "}if you already have an account. No rush.
+            </p>
+          )}
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-6">
-            <Link href="/sign-in" className="btn-cloud">
+            <Link href={enterHref} className="btn-cloud">
               <span className="btn-cloud-blob" style={{ width: 56, height: 48, top: 14, left: 0 }} />
               <span className="btn-cloud-blob" style={{ width: 68, height: 58, top: 4, left: 38 }} />
               <span className="btn-cloud-blob" style={{ width: 62, height: 54, top: 12, left: 82 }} />
@@ -247,7 +260,7 @@ export default function Home() {
             You just need to care.
           </p>
           <div className="mt-10">
-            <Link href="/sign-in" className="btn-cloud">
+            <Link href={enterHref} className="btn-cloud">
               <span className="btn-cloud-blob" style={{ width: 56, height: 48, top: 14, left: 0 }} />
               <span className="btn-cloud-blob" style={{ width: 68, height: 58, top: 4, left: 38 }} />
               <span className="btn-cloud-blob" style={{ width: 62, height: 54, top: 12, left: 82 }} />
@@ -270,5 +283,19 @@ export default function Home() {
         </footer>
       </main>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense
+      fallback={
+        <div className="relative min-h-screen bg-ethereal text-foreground flex items-center justify-center">
+          <p className="text-muted">Loading…</p>
+        </div>
+      }
+    >
+      <LandingPageContent />
+    </Suspense>
   );
 }
