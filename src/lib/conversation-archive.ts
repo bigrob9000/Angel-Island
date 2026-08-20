@@ -41,6 +41,30 @@ export async function hideConversationFromList(
   return { error: null };
 }
 
+export async function restoreConversationToList(
+  userId: string,
+  inviteId: string,
+): Promise<{ error: string | null }> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("conversation_archive")
+    .delete()
+    .eq("user_id", userId)
+    .eq("invite_id", inviteId);
+
+  if (error) {
+    if (error.message.includes("conversation_archive")) {
+      return {
+        error:
+          "Restore isn't set up yet. Run migration 025_conversation_archive.sql in Supabase (see supabase/RUN-PENDING-MIGRATIONS.md).",
+      };
+    }
+    return { error: error.message };
+  }
+
+  return { error: null };
+}
+
 export async function permanentlyDeleteConversation(
   userId: string,
   inviteId: string

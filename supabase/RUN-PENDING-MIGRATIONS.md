@@ -231,7 +231,7 @@ Run the full file: `supabase/migrations/025_conversation_archive.sql`
 
 Adds a per-user archive so you can hide a **closed** conversation from Messages and Home without deleting it for the other person.
 
-**Try it:** End a conversation → open it → **Remove from list** → it disappears from Messages. The thread still opens from a direct link if you saved it.
+**Try it:** End a conversation → open it → **Remove from list** → it disappears from Messages. Use **Hidden from your list** on Messages (or **Restore to list** on the thread) to bring it back.
 
 ---
 

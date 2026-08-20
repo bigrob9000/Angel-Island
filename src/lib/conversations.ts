@@ -67,7 +67,7 @@ async function latestMessagesByInvite(
 
 export async function loadConversationPreviews(
   userId: string,
-  limit?: number
+  options?: { limit?: number; archivedOnly?: boolean },
 ): Promise<ConversationPreview[]> {
   const supabase = createClient();
   const [{ blockedIds }, archivedIds] = await Promise.all([
@@ -94,7 +94,10 @@ export async function loadConversationPreviews(
 
   const convs = (convData as InviteWithMessages[]).filter((c) => {
     const otherId = c.sender_id === userId ? c.receiver_id : c.sender_id;
-    return !blockedIds.has(otherId) && !archivedIds.has(c.id);
+    if (blockedIds.has(otherId)) return false;
+    const isArchived = archivedIds.has(c.id);
+    if (options?.archivedOnly) return isArchived;
+    return !isArchived;
   });
   const otherIds = [
     ...new Set(convs.map((c) => (c.sender_id === userId ? c.receiver_id : c.sender_id))),
@@ -140,7 +143,7 @@ export async function loadConversationPreviews(
     (a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime()
   );
 
-  return limit ? previews.slice(0, limit) : previews;
+  return options?.limit ? previews.slice(0, options.limit) : previews;
 }
 
 export function withUnreadState(

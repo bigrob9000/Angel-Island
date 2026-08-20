@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase";
 import type { ChatInvite, Message, Profile } from "@/lib/types";
 import { normalizeConversationStatus } from "@/lib/types";
 import { usePreferences } from "@/components/PreferencesProvider";
-import { hideConversationFromList, permanentlyDeleteConversation } from "@/lib/conversation-archive";
+import { hideConversationFromList, loadArchivedInviteIds, permanentlyDeleteConversation, restoreConversationToList } from "@/lib/conversation-archive";
 import { isMessagingEnabled } from "@/lib/conversations";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
@@ -70,6 +70,7 @@ export default function ConversationPage() {
   const [acting, setActing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [resumeMessage, setResumeMessage] = useState<string | null>(null);
+  const [isArchived, setIsArchived] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { motionReduced } = usePreferences();
   const { markRead, refresh } = useInbox();
@@ -84,6 +85,10 @@ export default function ConversationPage() {
         return;
       }
       setUserId(user.id);
+
+      void loadArchivedInviteIds(user.id).then((ids) => {
+        setIsArchived(ids.has(inviteId));
+      });
 
       void Promise.resolve(
         supabase
@@ -262,8 +267,26 @@ export default function ConversationPage() {
     }
 
     setActionError(null);
+    setIsArchived(true);
     await refresh();
     router.push("/messages");
+  }
+
+  async function handleRestoreToList() {
+    if (!userId) return;
+    setActing(true);
+    const { error } = await restoreConversationToList(userId, inviteId);
+    setActing(false);
+    setMenuOpen(false);
+
+    if (error) {
+      setActionError(error);
+      return;
+    }
+
+    setActionError(null);
+    setIsArchived(false);
+    await refresh();
   }
 
   async function handleDeletePermanently() {
@@ -456,6 +479,23 @@ export default function ConversationPage() {
           onDialogChange={setSafetyDialog}
           onBlocked={() => router.push("/messages")}
         />
+      )}
+
+      {isArchived && (
+        <div className="mt-4 surface px-4 py-3 text-sm">
+          <p className="font-medium text-foreground">Hidden from your Messages list.</p>
+          <p className="mt-1 text-muted">
+            You can still read it here. Restore it to show up on Messages and Home again.
+          </p>
+          <button
+            type="button"
+            onClick={handleRestoreToList}
+            disabled={acting}
+            className="btn-secondary btn-sm mt-3"
+          >
+            {acting ? "Restoring…" : "Restore to list"}
+          </button>
+        </div>
       )}
 
       {invite.conversation_status === "paused" && (

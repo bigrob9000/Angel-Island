@@ -13,18 +13,26 @@ import { createCollaborationWorkspace, findCollaborationIdByInvite } from "@/lib
 import { notifyCollabResponse } from "@/lib/notifications/client";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
+import {
+  conversationStatusLabel,
+  loadConversationPreviews,
+  type ConversationPreview,
+} from "@/lib/conversations";
+import { restoreConversationToList } from "@/lib/conversation-archive";
 
 const PACE_LABELS: Record<string, string> = { "low-pressure": "Low-pressure", "structured": "Structured", "flexible": "Flexible" };
 
 export default function MessagesPage() {
   const router = useRouter();
-  const { userId, conversations, loading: inboxLoading } = useInbox();
+  const { userId, conversations, loading: inboxLoading, refresh: refreshInbox } = useInbox();
   const [receivedInvites, setReceivedInvites] = useState<(ChatInvite & { sender?: Profile })[]>([]);
   const [sentInvites, setSentInvites] = useState<(ChatInvite & { receiver?: Profile })[]>([]);
   const [receivedCollabInvites, setReceivedCollabInvites] = useState<(CollabInvite & { sender?: Profile })[]>([]);
   const [sentCollabInvites, setSentCollabInvites] = useState<(CollabInvite & { receiver?: Profile; workspaceId?: string | null })[]>([]);
+  const [archivedConversations, setArchivedConversations] = useState<ConversationPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [actingId, setActingId] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) {
@@ -119,6 +127,28 @@ export default function MessagesPage() {
         } else setSentCollabInvites([]);
       }).finally(() => setLoading(false));
   }, [router, userId, inboxLoading]);
+
+  useEffect(() => {
+    if (!userId) {
+      setArchivedConversations([]);
+      return;
+    }
+    loadConversationPreviews(userId, { archivedOnly: true }).then(setArchivedConversations);
+  }, [userId, conversations.length]);
+
+  async function restoreConversation(inviteId: string) {
+    if (!userId) return;
+    setActingId(inviteId);
+    setRestoreError(null);
+    const { error } = await restoreConversationToList(userId, inviteId);
+    setActingId(null);
+    if (error) {
+      setRestoreError(error);
+      return;
+    }
+    setArchivedConversations((prev) => prev.filter((c) => c.id !== inviteId));
+    await refreshInbox();
+  }
 
   async function acceptInvite(inviteId: string) {
     const supabase = createClient();
@@ -371,6 +401,53 @@ export default function MessagesPage() {
           </ul>
         )}
       </section>
+
+      {archivedConversations.length > 0 && (
+        <section>
+          <h2 className="section-heading">Hidden from your list</h2>
+          <p className="section-copy">
+            Closed conversations you removed. Restore any time — the other person still has access.
+          </p>
+          {restoreError && (
+            <p className="mt-3 text-sm text-red-600" role="alert">
+              {restoreError}
+            </p>
+          )}
+          <ul className="mt-4 space-y-2">
+            {archivedConversations.map((conv) => {
+              const name = conv.other?.first_name ?? conv.other?.username ?? "Someone";
+              const statusLabel = conversationStatusLabel(conv.conversation_status);
+              return (
+                <li
+                  key={conv.id}
+                  className="surface flex flex-wrap items-start justify-between gap-4 px-4 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/messages/${conv.id}`}
+                      className="font-medium text-foreground hover:underline"
+                    >
+                      {name}
+                    </Link>
+                    {statusLabel && (
+                      <span className="ml-2 text-xs text-muted">· {statusLabel}</span>
+                    )}
+                    <p className="mt-1 truncate text-sm text-muted">{conv.preview}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => restoreConversation(conv.id)}
+                    disabled={actingId === conv.id}
+                    className="btn-secondary btn-sm shrink-0"
+                  >
+                    {actingId === conv.id ? "Restoring…" : "Restore"}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
