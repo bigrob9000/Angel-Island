@@ -14,13 +14,13 @@ import { PushRegistration } from "@/components/PushRegistration";
 import { PwaServiceWorkerRegistration } from "@/components/PwaServiceWorkerRegistration";
 
 const nav = [
-  { href: "/home", label: "Home" },
-  { href: "/explore", label: "Explore" },
-  { href: "/rooms", label: "Rooms" },
-  { href: "/messages", label: "Messages" },
-  { href: "/notifications", label: "Activity" },
-  { href: "/collaborations", label: "Collabs" },
-  { href: "/profile", label: "Profile" },
+  { href: "/home", label: "Home", shortLabel: "Home" },
+  { href: "/explore", label: "Explore", shortLabel: "Find" },
+  { href: "/rooms", label: "Rooms", shortLabel: "Rooms" },
+  { href: "/messages", label: "Messages", shortLabel: "Msgs" },
+  { href: "/notifications", label: "Activity", shortLabel: "Act" },
+  { href: "/collaborations", label: "Collabs", shortLabel: "Collab" },
+  { href: "/profile", label: "Profile", shortLabel: "Me" },
 ] as const;
 
 function AppNav() {
@@ -39,14 +39,14 @@ function AppNav() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-foreground/10 bg-ethereal/95 backdrop-blur-sm">
-      <div className="mx-auto max-w-2xl px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <AngelIslandLogo variant="mark" size="nav" className="shrink-0" />
+      <div className="mx-auto w-full px-2 py-2 sm:px-4 sm:py-3">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <AngelIslandLogo variant="mark" size="compact" className="shrink-0" />
           <nav
-            className="app-header-nav flex min-w-0 flex-1 flex-nowrap items-center gap-1 overflow-x-auto"
+            className="flex min-w-0 flex-1 items-center"
             aria-label="Main"
           >
-            {nav.map(({ href, label }) => {
+            {nav.map(({ href, label, shortLabel }) => {
               const isMessages = href === "/messages";
               const isCollabs = href === "/collaborations";
               const isActivity = href === "/notifications";
@@ -62,11 +62,14 @@ function AppNav() {
                 <Link
                   key={href}
                   href={href}
-                  className={`nav-pill nav-pill-header relative shrink-0 whitespace-nowrap text-xs font-medium transition-colors sm:text-sm ${
+                  aria-label={label}
+                  title={label}
+                  className={`nav-pill nav-pill-header relative flex flex-1 items-center justify-center whitespace-nowrap text-[0.625rem] font-medium leading-none transition-colors sm:text-xs md:text-sm ${
                     active ? "nav-pill-active" : "text-muted hover:text-foreground"
                   }`}
                 >
-                  {label}
+                  <span className="sm:hidden">{shortLabel}</span>
+                  <span className="hidden sm:inline">{label}</span>
                   {badgeCount > 0 && (
                     <span
                       className="absolute -right-1 top-0 h-2 w-2 rounded-full bg-accent"

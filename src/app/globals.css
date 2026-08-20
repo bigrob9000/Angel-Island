@@ -656,23 +656,21 @@ html.reduce-motion .room-enter {
   box-shadow: 0 1px 6px rgba(212, 226, 240, 0.45);
 }
 
-/* App header — one row; scroll nav horizontally on narrow viewports */
-.app-header-nav {
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.app-header-nav::-webkit-scrollbar {
-  display: none;
-}
-
+/* App header — equal-width nav slots so every link stays visible */
 .nav-pill-header {
-  padding: 0.3rem 0.5rem;
+  padding: 0.25rem 0.125rem;
+  min-width: 0;
 }
 
 @media (min-width: 640px) {
   .nav-pill-header {
-    padding: 0.35rem 0.65rem;
+    padding: 0.3rem 0.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .nav-pill-header {
+    padding: 0.35rem 0.4rem;
   }
 }
 
