@@ -230,19 +230,21 @@ export default function SignInPageContent() {
   return (
     <div className="relative min-h-screen bg-ethereal text-foreground flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <Link href="/" className="inline-block mb-6">
-          <AngelIslandLogo asLink={false} variant="mark" size="md" className="mb-8" />
-        </Link>
-        <h1 className="font-serif text-2xl font-medium mt-6">
-          {showForgot
-            ? "Reset password"
-            : invited && showSignUp
-              ? "Join Angel Island"
-              : mode === "sign-in"
-                ? "Sign in"
-                : "Create an account"}
-        </h1>
-        <p className="text-muted mt-2 text-sm">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <Link href="/" className="shrink-0 mt-0.5">
+            <AngelIslandLogo asLink={false} variant="mark" size="nav" />
+          </Link>
+          <div className="min-w-0">
+            <h1 className="font-serif text-2xl font-medium">
+              {showForgot
+                ? "Reset password"
+                : invited && showSignUp
+                  ? "Join Angel Island"
+                  : mode === "sign-in"
+                    ? "Sign in"
+                    : "Create an account"}
+            </h1>
+            <p className="text-muted mt-2 text-sm">
           {showForgot
             ? "Enter your email and we will send a link to choose a new password."
             : invited
@@ -254,7 +256,9 @@ export default function SignInPageContent() {
                 : inviteOnly
                   ? "Angel Island is invite-only during beta. Use the link someone shared with you."
                   : "Create an account with Google, or use email and password."}
-        </p>
+            </p>
+          </div>
+        </div>
 
         {inviteOnly && !invited && !showForgot && (
           <div className="mt-6 rounded-lg border border-foreground/15 bg-white/60 px-4 py-3 text-sm">

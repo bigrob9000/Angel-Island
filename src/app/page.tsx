@@ -156,46 +156,56 @@ function LandingPageContent() {
       <main className="relative z-10 mx-auto max-w-2xl px-6 py-16 sm:px-8 sm:py-24">
         {/* Hero */}
         <section className="mb-20 text-center sm:text-left">
-          <AngelIslandLogo asLink={false} variant="mark" size="hero" priority className="mx-auto sm:mx-0 mb-6" />
-          <h1 className="brand-font text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Angel Island
-          </h1>
-          <p className="mt-6 text-lg leading-relaxed text-muted sm:text-xl max-w-xl">
-            A place for musicians and creatives who care about music. No clout.
-            No pressure. Just connection, collaboration, and conversation.
-          </p>
-          {invited ? (
-            <p className="mt-4 text-sm text-foreground">
-              You&apos;re invited — take your time reading below, then enter when you&apos;re ready.{" "}
-              <Link href="/sign-in" className="underline underline-offset-2 hover:no-underline">
-                Already have an account? Sign in
-              </Link>
-            </p>
-          ) : (
-            <p className="mt-4 text-sm text-muted">
-              Someone invited you?{" "}
-              <Link href="/sign-in" className="text-foreground underline underline-offset-2 hover:no-underline">
-                Sign in
-              </Link>
-              {" "}if you already have an account. No rush.
-            </p>
-          )}
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-6">
-            <Link href={enterHref} className="btn-cloud">
-              <span className="btn-cloud-blob" style={{ width: 56, height: 48, top: 14, left: 0 }} />
-              <span className="btn-cloud-blob" style={{ width: 68, height: 58, top: 4, left: 38 }} />
-              <span className="btn-cloud-blob" style={{ width: 62, height: 54, top: 12, left: 82 }} />
-              <span className="btn-cloud-blob" style={{ width: 72, height: 60, top: 2, left: 118 }} />
-              <span className="btn-cloud-blob" style={{ width: 52, height: 46, top: 18, left: 162 }} />
-              <span className="btn-cloud-blob" style={{ width: 48, height: 44, top: 22, left: 188 }} />
-              <span className="btn-cloud-text">Enter Angel Island</span>
-            </Link>
-            <a
-              href="#why"
-              className="inline-flex items-center justify-center text-base font-medium text-muted underline-offset-4 hover:underline hover:text-foreground"
-            >
-              Learn more
-            </a>
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
+            <AngelIslandLogo
+              asLink={false}
+              variant="mark"
+              size="heading"
+              priority
+              className="shrink-0 sm:mt-1"
+            />
+            <div className="min-w-0">
+              <h1 className="brand-font text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+                Angel Island
+              </h1>
+              <p className="mt-6 text-lg leading-relaxed text-muted sm:text-xl max-w-xl">
+                A place for musicians and creatives who care about music. No clout.
+                No pressure. Just connection, collaboration, and conversation.
+              </p>
+              {invited ? (
+                <p className="mt-4 text-sm text-foreground">
+                  You&apos;re invited — take your time reading below, then enter when you&apos;re ready.{" "}
+                  <Link href="/sign-in" className="underline underline-offset-2 hover:no-underline">
+                    Already have an account? Sign in
+                  </Link>
+                </p>
+              ) : (
+                <p className="mt-4 text-sm text-muted">
+                  Someone invited you?{" "}
+                  <Link href="/sign-in" className="text-foreground underline underline-offset-2 hover:no-underline">
+                    Sign in
+                  </Link>
+                  {" "}if you already have an account. No rush.
+                </p>
+              )}
+              <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-6">
+                <Link href={enterHref} className="btn-cloud">
+                  <span className="btn-cloud-blob" style={{ width: 56, height: 48, top: 14, left: 0 }} />
+                  <span className="btn-cloud-blob" style={{ width: 68, height: 58, top: 4, left: 38 }} />
+                  <span className="btn-cloud-blob" style={{ width: 62, height: 54, top: 12, left: 82 }} />
+                  <span className="btn-cloud-blob" style={{ width: 72, height: 60, top: 2, left: 118 }} />
+                  <span className="btn-cloud-blob" style={{ width: 52, height: 46, top: 18, left: 162 }} />
+                  <span className="btn-cloud-blob" style={{ width: 48, height: 44, top: 22, left: 188 }} />
+                  <span className="btn-cloud-text">Enter Angel Island</span>
+                </Link>
+                <a
+                  href="#why"
+                  className="inline-flex items-center justify-center text-base font-medium text-muted underline-offset-4 hover:underline hover:text-foreground"
+                >
+                  Learn more
+                </a>
+              </div>
+            </div>
           </div>
         </section>
 

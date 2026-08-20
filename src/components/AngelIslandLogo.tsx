@@ -6,19 +6,21 @@ type Props = {
   className?: string;
   variant?: "mark" | "full";
   showWordmark?: boolean;
-  size?: "nav" | "md" | "hero";
+  size?: "nav" | "heading" | "md" | "hero";
   priority?: boolean;
 };
 
 /** Fixed square boxes so the logo never blows up to full page width */
 const markBoxes = {
   nav: "h-10 w-10 sm:h-11 sm:w-11",
+  heading: "h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24",
   md: "h-24 w-24 sm:h-28 sm:w-28",
   hero: "h-36 w-36 sm:h-44 sm:w-44 md:h-48 md:w-48",
 };
 
 const fullBoxes = {
   nav: "h-14 w-14 sm:h-16 sm:w-16",
+  heading: "h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28",
   md: "h-32 w-32 sm:h-36 sm:w-36",
   hero: "h-48 w-48 sm:h-56 sm:w-56 md:h-64 md:w-64",
 };

@@ -68,11 +68,15 @@ export default function ResetPasswordPageContent() {
   return (
     <div className="relative min-h-screen bg-ethereal text-foreground flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <Link href="/" className="inline-block mb-6">
-          <AngelIslandLogo asLink={false} variant="mark" size="md" className="mb-8" />
-        </Link>
-        <h1 className="font-serif text-2xl font-medium mt-6">Choose a new password</h1>
-        <p className="text-muted mt-2 text-sm">Enter a new password for your account.</p>
+        <div className="flex items-start gap-3 sm:gap-4">
+          <Link href="/" className="shrink-0 mt-0.5">
+            <AngelIslandLogo asLink={false} variant="mark" size="nav" />
+          </Link>
+          <div className="min-w-0">
+            <h1 className="font-serif text-2xl font-medium">Choose a new password</h1>
+            <p className="text-muted mt-2 text-sm">Enter a new password for your account.</p>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <label className="block">
