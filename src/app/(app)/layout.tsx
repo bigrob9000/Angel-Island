@@ -40,10 +40,10 @@ function AppNav() {
   return (
     <header className="sticky top-0 z-20 border-b border-foreground/10 bg-ethereal/95 backdrop-blur-sm">
       <div className="mx-auto max-w-2xl px-4 py-3 sm:px-6">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="flex items-center gap-2 sm:gap-3">
           <AngelIslandLogo variant="mark" size="nav" className="shrink-0" />
           <nav
-            className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5"
+            className="app-header-nav flex min-w-0 flex-1 flex-nowrap items-center gap-1 overflow-x-auto"
             aria-label="Main"
           >
             {nav.map(({ href, label }) => {
@@ -62,7 +62,7 @@ function AppNav() {
                 <Link
                   key={href}
                   href={href}
-                  className={`nav-pill relative shrink-0 whitespace-nowrap text-sm font-medium transition-colors ${
+                  className={`nav-pill nav-pill-header relative shrink-0 whitespace-nowrap text-xs font-medium transition-colors sm:text-sm ${
                     active ? "nav-pill-active" : "text-muted hover:text-foreground"
                   }`}
                 >
@@ -77,7 +77,7 @@ function AppNav() {
               );
             })}
           </nav>
-          <SignOutButton variant="header" className="shrink-0 sm:ml-auto" />
+          <SignOutButton variant="header" className="shrink-0" />
         </div>
       </div>
     </header>

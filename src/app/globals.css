@@ -656,6 +656,26 @@ html.reduce-motion .room-enter {
   box-shadow: 0 1px 6px rgba(212, 226, 240, 0.45);
 }
 
+/* App header — one row; scroll nav horizontally on narrow viewports */
+.app-header-nav {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.app-header-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-pill-header {
+  padding: 0.3rem 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .nav-pill-header {
+    padding: 0.35rem 0.65rem;
+  }
+}
+
 .profile-section-label {
   font-size: 0.6875rem;
   font-weight: 600;
