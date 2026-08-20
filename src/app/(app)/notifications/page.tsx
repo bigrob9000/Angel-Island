@@ -36,7 +36,9 @@ export default function NotificationsPage() {
   const loading = inboxLoading || collabLoading;
 
   function markAllRead() {
-    unreadConversations.forEach((conversation) => markConversationRead(conversation.id));
+    unreadConversations.forEach((conversation) =>
+      markConversationRead(conversation.id, conversation.lastActivityAt),
+    );
     unreadCollaborations.forEach((collaboration) => markCollabRead(collaboration.id));
   }
 

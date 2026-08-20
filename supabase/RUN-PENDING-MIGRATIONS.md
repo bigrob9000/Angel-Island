@@ -211,6 +211,17 @@ If either line errors with **already member of publication**, that table is alre
 | 024 | Public read of discoverable profiles (shared links + OG) |
 | 025 | Per-user conversation archive (remove closed chats from your list) |
 | 026 | Permanent delete for ended conversations (both participants) |
+| 027 | Conversation read state synced across devices (unread badges) |
+
+---
+
+## 027 — Conversation read state sync
+
+Run the full file: `supabase/migrations/027_conversation_reads.sql`
+
+Stores when you last read each conversation so unread badges stay in sync across phones, tablets, and browsers. Existing local read state is migrated automatically on next sign-in.
+
+**Try it:** Read a DM on one device → sign in on another → the conversation should no longer show as unread there.
 
 ---
 

@@ -11,7 +11,7 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase";
-import { markConversationRead } from "@/lib/conversation-reads";
+import { ensureConversationReadsLoaded, markConversationRead, resetConversationReadsCache } from "@/lib/conversation-reads";
 import {
   applyInboxInviteUpdate,
   applyInboxMessage,
@@ -89,12 +89,16 @@ export function InboxProvider({ children }: { children: ReactNode }) {
     if (!user) {
       setUserId(null);
       setConversations([]);
+      resetConversationReadsCache();
       setLoading(false);
       return;
     }
 
     setUserId(user.id);
-    const previews = await loadConversationPreviews(user.id);
+    const [previews] = await Promise.all([
+      loadConversationPreviews(user.id),
+      ensureConversationReadsLoaded(user.id),
+    ]);
     setConversations(withUnreadState(previews, user.id, openInviteId));
     setLoading(false);
   }, [openInviteId]);
