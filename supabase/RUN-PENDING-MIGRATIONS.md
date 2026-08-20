@@ -212,6 +212,17 @@ If either line errors with **already member of publication**, that table is alre
 | 025 | Per-user conversation archive (remove closed chats from your list) |
 | 026 | Permanent delete for ended conversations (both participants) |
 | 027 | Conversation read state synced across devices (unread badges) |
+| 028 | Collaboration read state synced across devices (Activity badges) |
+
+---
+
+## 028 — Collaboration read state sync
+
+Run the full file: `supabase/migrations/028_collaboration_reads.sql`
+
+Stores when you last viewed each collaboration workspace so Activity badges stay in sync across devices. Existing local read state is migrated automatically on next sign-in.
+
+**Try it:** Open a collab on one device → sign in on another → the workspace should no longer show as unread in Activity.
 
 ---
 

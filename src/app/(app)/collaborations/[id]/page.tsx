@@ -24,7 +24,6 @@ import {
   subscribeToCollaboration,
   unsubscribeFromCollaboration,
 } from "@/lib/collaboration-realtime";
-import { markCollaborationRead } from "@/lib/collaboration-reads";
 import { useCollab } from "@/components/CollabProvider";
 import { NotFoundPanel } from "@/components/NotFoundPanel";
 import { PageLoading } from "@/components/PageLoading";

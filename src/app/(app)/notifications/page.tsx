@@ -39,7 +39,9 @@ export default function NotificationsPage() {
     unreadConversations.forEach((conversation) =>
       markConversationRead(conversation.id, conversation.lastActivityAt),
     );
-    unreadCollaborations.forEach((collaboration) => markCollabRead(collaboration.id));
+    unreadCollaborations.forEach((collaboration) =>
+      markCollabRead(collaboration.id, collaboration.lastActivityAt),
+    );
   }
 
   if (loading) return <PageLoading />;

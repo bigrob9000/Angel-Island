@@ -14,8 +14,10 @@ import { createClient } from "@/lib/supabase";
 import {
   collabActivityLabel,
   collabActivityPreview,
+  ensureCollaborationReadsLoaded,
   isCollaborationUnread,
   markCollaborationRead,
+  resetCollaborationReadsCache,
 } from "@/lib/collaboration-reads";
 import {
   subscribeToCollabInbox,
@@ -102,12 +104,16 @@ export function CollabProvider({ children }: { children: ReactNode }) {
     if (!user) {
       setUserId(null);
       setCollaborations([]);
+      resetCollaborationReadsCache();
       setLoading(false);
       return;
     }
 
     setUserId(user.id);
-    const result = await loadCollaborationPreviews(user.id, "active");
+    const [result] = await Promise.all([
+      loadCollaborationPreviews(user.id, "active"),
+      ensureCollaborationReadsLoaded(user.id),
+    ]);
     setCollaborations(withUnreadState(result.previews, user.id, openCollaborationId));
     setLoading(false);
   }, [openCollaborationId]);
