@@ -9,7 +9,7 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { IphonePwaHint } from "@/components/IphonePwaHint";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { usePreferences } from "@/components/PreferencesProvider";
-import { fetchNotificationStatus, sendTestNotificationEmail } from "@/lib/notifications/client";
+import { sendTestNotificationEmail } from "@/lib/notifications/client";
 import {
   fetchPushStatus,
   isBrowserPushSupported,
@@ -70,16 +70,8 @@ export default function SettingsPage() {
   const [notifyMessage, setNotifyMessage] = useState<string | null>(null);
   const [testEmailLoading, setTestEmailLoading] = useState(false);
   const [testEmailResult, setTestEmailResult] = useState<{ type: "ok" | "error"; text: string } | null>(null);
-  const [notifyStatus, setNotifyStatus] = useState<{
-    resendKey: boolean;
-    resendFrom: boolean;
-    serviceRole: boolean;
-    siteUrl: string;
-    yourEmail: string | null;
-  } | null>(null);
 
   useEffect(() => {
-    fetchNotificationStatus().then(setNotifyStatus);
     fetchPushStatus().then(setPushStatus);
   }, []);
 
@@ -574,20 +566,6 @@ export default function SettingsPage() {
           <p className="mt-1 text-sm text-muted">
             Gentle emails when someone reaches out — no nudges, no guilt. Turn off anytime.
           </p>
-          {notifyStatus && (
-            <ul className="mt-3 space-y-1 text-xs text-muted">
-              <li>{notifyStatus.resendKey ? "✓" : "✗"} Resend API key (Vercel)</li>
-              <li>{notifyStatus.resendFrom ? "✓" : "✗"} Sender address (RESEND_FROM)</li>
-              <li>{notifyStatus.serviceRole ? "✓" : "✗"} Supabase service role key</li>
-            </ul>
-          )}
-          {notifyStatus &&
-            (!notifyStatus.resendKey || !notifyStatus.resendFrom || !notifyStatus.serviceRole) && (
-              <p className="mt-2 text-sm text-red-600">
-                Email can&apos;t send until all three checks above are ✓. Add missing vars in Vercel →
-                redeploy.
-              </p>
-            )}
         </div>
 
         <SettingsToggle
@@ -644,21 +622,6 @@ export default function SettingsPage() {
             Optional alerts for messages and collab workspace activity — even if Angel Island isn&apos;t
             open. Off by default.
           </p>
-          {pushStatus && (
-            <ul className="mt-3 space-y-1 text-xs text-muted">
-              <li>{pushStatus.supported ? "✓" : "✗"} Browser supports push</li>
-              <li>{pushStatus.configured ? "✓" : "✗"} VAPID keys (Vercel)</li>
-              <li>
-                {pushStatus.permission === "granted"
-                  ? "✓"
-                  : pushStatus.permission === "denied"
-                    ? "✗"
-                    : "—"}{" "}
-                Notification permission
-                {pushStatus.permission === "denied" ? " (blocked in browser settings)" : ""}
-              </li>
-            </ul>
-          )}
           {pushStatus &&
             pushStatus.supported &&
             pushStatus.configured &&

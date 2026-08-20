@@ -56,12 +56,6 @@ export function InviteMusiciansCard() {
           {copied === "message" ? "Copied!" : "Copy message + link"}
         </button>
       </div>
-
-      <p className="text-xs text-muted">
-        Tip: For Google sign-in to work for anyone, publish your Google OAuth app (see{" "}
-        <code className="text-foreground/80">supabase/GOOGLE-AUTH.md</code>) — otherwise only test
-        accounts you add in Google Cloud can use it.
-      </p>
     </section>
   );
 }
