@@ -78,8 +78,8 @@ export function CollaborationPreviewLink({
     <div className={`surface text-foreground ${className}`.trim()}>
       <Link
         href={`/collaborations/${preview.id}`}
-        className={`block px-4 py-3 transition-colors hover:bg-white/40 rounded-[1rem] ${
-          unread ? "bg-white/30" : ""
+        className={`block px-4 py-3 transition-colors rounded-[1rem] hover:bg-white/30 ${
+          unread ? "ring-1 ring-accent/15" : ""
         }`}
       >
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -112,7 +112,7 @@ export function CollaborationPreviewLink({
               type="button"
               onClick={() => changeStatus("active")}
               disabled={acting}
-              className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+              className="btn-primary btn-sm"
             >
               Resume
             </button>
@@ -121,7 +121,7 @@ export function CollaborationPreviewLink({
             <>
               <Link
                 href={`/collaborations/${preview.id}`}
-                className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm font-medium text-foreground hover:bg-foreground/5"
+                className="btn-secondary btn-sm"
               >
                 Pick back up
               </Link>
@@ -129,7 +129,7 @@ export function CollaborationPreviewLink({
                 type="button"
                 onClick={() => changeStatus("paused")}
                 disabled={acting}
-                className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50"
+                className="btn-secondary btn-sm"
               >
                 Pause
               </button>

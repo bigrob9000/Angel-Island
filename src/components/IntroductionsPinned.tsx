@@ -2,7 +2,7 @@ import { INTRODUCTIONS_PINNED } from "@/lib/introductions";
 
 export function IntroductionsPinned() {
   return (
-    <aside className="rounded-lg border border-accent/25 bg-white/60 p-5 space-y-4">
+    <aside className="surface p-5 space-y-4 ring-1 ring-accent/15">
       <p className="text-sm font-medium text-foreground">{INTRODUCTIONS_PINNED.title}</p>
       <p className="text-sm text-muted leading-relaxed">{INTRODUCTIONS_PINNED.welcome}</p>
       <p className="text-sm text-muted leading-relaxed">{INTRODUCTIONS_PINNED.lead}</p>

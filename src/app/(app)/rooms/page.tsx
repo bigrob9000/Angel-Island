@@ -104,7 +104,7 @@ export default function RoomsPage() {
   if (loading) {
     return (
       <div>
-        <h1 className="font-serif text-2xl font-medium text-foreground">Rooms</h1>
+        <h1 className="page-lead">Rooms</h1>
         <p className="mt-2 text-muted">Loading…</p>
       </div>
     );
@@ -112,8 +112,8 @@ export default function RoomsPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-2xl font-medium text-foreground">Explore Rooms</h1>
-      <p className="mt-2 text-muted">
+      <h1 className="page-lead">Explore Rooms</h1>
+      <p className="section-copy">
         Click a cloud to enter. Read posts, visit profiles, and invite someone to chat when it
         feels right — no obligation to post.
       </p>

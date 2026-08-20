@@ -83,7 +83,7 @@ export function PostCommentSection({
 
   return (
     <div className="mt-4 border-t border-foreground/10 pt-4">
-      <p className="text-xs font-medium text-muted uppercase tracking-wide">Comments</p>
+      <p className="profile-section-label">Comments</p>
 
       {tableMissing ? (
         <p className="mt-2 text-sm text-muted">
@@ -159,7 +159,7 @@ export function PostCommentSection({
               <button
                 type="submit"
                 disabled={submitting || !body.trim()}
-                className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm text-foreground hover:bg-foreground/5 disabled:opacity-50"
+                className="btn-secondary btn-sm"
               >
                 {submitting ? "Posting…" : "Add comment"}
               </button>

@@ -275,19 +275,19 @@ export default function CollaborationWorkspacePage() {
         </Link>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="font-serif text-2xl font-medium text-foreground">Collaboration</h1>
+            <h1 className="page-lead">Collaboration</h1>
             <p className="mt-1 text-sm text-muted">with {otherName}</p>
           </div>
           <div className="relative">
             <button
               type="button"
               onClick={() => setMenuOpen((open) => !open)}
-              className="rounded-md border border-foreground/20 px-3 py-1.5 text-sm text-muted hover:text-foreground"
+              className="btn-secondary btn-sm"
             >
               Options
             </button>
             {menuOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-52 rounded-lg border border-foreground/10 bg-ethereal py-1 shadow-lg">
+              <div className="surface absolute right-0 z-10 mt-2 w-52 py-1 shadow-lg">
                 {detail.status === "active" && (
                   <button
                     type="button"
@@ -349,7 +349,7 @@ export default function CollaborationWorkspacePage() {
         onDialogChange={setSafetyDialog}
       />
 
-      <div className="rounded-lg border border-foreground/10 bg-white/50 p-4">
+      <div className="surface p-4">
         <button
           type="button"
           onClick={() => setContextOpen((open) => !open)}
@@ -389,7 +389,7 @@ export default function CollaborationWorkspacePage() {
       )}
 
       {quietLine && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-foreground/10 bg-white/40 px-4 py-3">
+        <div className="surface flex flex-wrap items-center justify-between gap-3 px-4 py-3">
           <p className="text-sm text-muted italic">{quietLine}</p>
           <div className="flex flex-wrap gap-2">
             {detail.status === "paused" && (
@@ -397,7 +397,7 @@ export default function CollaborationWorkspacePage() {
                 type="button"
                 onClick={() => handleStatusChange("active")}
                 disabled={acting}
-                className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                className="btn-primary btn-sm"
               >
                 Resume
               </button>
@@ -406,7 +406,7 @@ export default function CollaborationWorkspacePage() {
               <button
                 type="button"
                 onClick={() => setModal("pause")}
-                className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm text-muted hover:text-foreground"
+                className="btn-secondary btn-sm"
               >
                 Pause
               </button>
@@ -416,14 +416,14 @@ export default function CollaborationWorkspacePage() {
       )}
 
       {detail.status === "paused" && (
-        <div className="rounded-lg border border-foreground/10 bg-white/50 px-4 py-3 text-sm text-muted">
+        <div className="surface px-4 py-3 text-sm text-muted">
           <p>This collaboration is paused. Notes and chat are on hold until someone resumes it.</p>
           {!quietLine && (
             <button
               type="button"
               onClick={() => handleStatusChange("active")}
               disabled={acting}
-              className="mt-3 rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+              className="btn-primary btn-sm mt-3"
             >
               Resume
             </button>
@@ -432,7 +432,7 @@ export default function CollaborationWorkspacePage() {
       )}
 
       {detail.status === "ended" && (
-        <div className="rounded-lg border border-foreground/10 bg-white/50 px-4 py-3 text-sm text-muted">
+        <div className="surface px-4 py-3 text-sm text-muted">
           This collaboration is closed. You can still read what you shared here.
         </div>
       )}
@@ -440,22 +440,22 @@ export default function CollaborationWorkspacePage() {
       {detail.chat_invite_id && (
         <Link
           href={`/messages/${detail.chat_invite_id}`}
-          className="inline-flex rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+          className="btn-secondary"
         >
           Open conversation with {otherName}
         </Link>
       )}
 
       <div>
-        <div className="flex flex-wrap gap-2 border-b border-foreground/10 pb-2">
+        <div className="flex flex-wrap gap-2 pb-2">
           {TABS.map(({ id, label }) => (
             <button
               key={id}
               type="button"
               onClick={() => setTab(id)}
-              className={`rounded-md px-3 py-1.5 text-sm ${
+              className={`nav-pill text-sm ${
                 tab === id
-                  ? "bg-foreground/10 text-foreground font-medium"
+                  ? "nav-pill-active font-medium text-foreground"
                   : "text-muted hover:text-foreground"
               }`}
             >
@@ -472,7 +472,7 @@ export default function CollaborationWorkspacePage() {
               {tabEntries.map((entry) => (
                 <li
                   key={entry.id}
-                  className="rounded-lg border border-foreground/10 bg-white/40 px-4 py-3"
+                  className="surface px-4 py-3"
                 >
                   {entry.entry_type === "step" ? (
                     <label className="flex items-start gap-3">
@@ -519,7 +519,7 @@ export default function CollaborationWorkspacePage() {
           )}
 
           {isActive && (
-            <form onSubmit={handleAddEntry} className="rounded-lg border border-foreground/10 bg-white/60 p-4 space-y-3">
+            <form onSubmit={handleAddEntry} className="surface p-4 space-y-3">
               {tab === "note" && (
                 <label className="block">
                   <span className="text-sm text-muted">Shared note</span>
@@ -572,7 +572,7 @@ export default function CollaborationWorkspacePage() {
               <button
                 type="submit"
                 disabled={acting}
-                className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                className="btn-primary"
               >
                 {acting ? "Adding…" : tab === "note" ? "Add note" : tab === "reference" ? "Add link" : "Add step"}
               </button>
@@ -594,10 +594,10 @@ export default function CollaborationWorkspacePage() {
 
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30" role="dialog" aria-modal="true">
-          <div className="bg-ethereal border border-foreground/10 rounded-lg shadow-lg max-w-md w-full p-6">
+          <div className="surface max-w-md w-full p-6 shadow-lg">
             {modal === "pause" ? (
               <>
-                <h2 className="font-serif text-lg font-medium text-foreground">Pause collaboration</h2>
+                <h2 className="section-heading">Pause collaboration</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Pausing keeps this space without pressure. Notes and chat pause for both of you until
                   someone resumes.
@@ -607,14 +607,14 @@ export default function CollaborationWorkspacePage() {
                     type="button"
                     onClick={() => handleStatusChange("paused")}
                     disabled={acting}
-                    className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                    className="btn-primary"
                   >
                     Pause
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
-                    className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                    className="btn-secondary"
                   >
                     Cancel
                   </button>
@@ -622,7 +622,7 @@ export default function CollaborationWorkspacePage() {
               </>
             ) : (
               <>
-                <h2 className="font-serif text-lg font-medium text-foreground">End collaboration</h2>
+                <h2 className="section-heading">End collaboration</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Ending closes this space respectfully. No explanation is required.
                 </p>
@@ -631,14 +631,14 @@ export default function CollaborationWorkspacePage() {
                     type="button"
                     onClick={() => handleStatusChange("ended")}
                     disabled={acting}
-                    className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                    className="btn-primary"
                   >
                     End
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
-                    className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                    className="btn-secondary"
                   >
                     Cancel
                   </button>

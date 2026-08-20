@@ -325,7 +325,7 @@ export default function ConversationPage() {
           <button
             type="button"
             onClick={() => setMenuOpen((o) => !o)}
-            className="rounded-md border border-foreground/25 px-3 py-1.5 text-sm text-muted hover:text-foreground"
+            className="btn-secondary btn-sm"
             aria-expanded={menuOpen}
             aria-haspopup="menu"
           >
@@ -334,7 +334,7 @@ export default function ConversationPage() {
           {menuOpen && (
             <div
               role="menu"
-              className="absolute right-0 mt-2 w-48 rounded-md border border-foreground/10 bg-white shadow-sm z-10 py-1"
+              className="surface absolute right-0 mt-2 w-48 z-10 py-1 shadow-lg"
             >
               {invite.conversation_status === "paused" ? (
                 <>
@@ -459,7 +459,7 @@ export default function ConversationPage() {
       )}
 
       {invite.conversation_status === "paused" && (
-        <div className="mt-4 rounded-lg border border-foreground/10 bg-white/50 px-4 py-3 text-sm">
+        <div className="mt-4 surface px-4 py-3 text-sm">
           <p className="font-medium text-foreground">This conversation is paused.</p>
           <p className="mt-1 text-muted">
             {userPaused
@@ -511,7 +511,7 @@ export default function ConversationPage() {
         </p>
       )}
 
-      <div className="mt-4 rounded-lg border border-foreground/10 bg-white/40 p-4 flex-1 overflow-y-auto space-y-4">
+      <div className="mt-4 surface p-4 flex-1 overflow-y-auto space-y-4">
         <p className="text-sm text-muted italic">
           This is a private space for conversation. There&apos;s no rush to start.
         </p>
@@ -526,10 +526,10 @@ export default function ConversationPage() {
               className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}
             >
               <p
-                className={`text-sm whitespace-pre-wrap inline-block rounded-lg px-3 py-2 max-w-[85%] text-left ${
+                className={`text-sm whitespace-pre-wrap inline-block rounded-2xl px-3 py-2 max-w-[85%] text-left ${
                   isMine
-                    ? "bg-foreground/90 text-background"
-                    : "border border-foreground/10 bg-white/70 text-foreground"
+                    ? "bg-accent text-[#faf8f5]"
+                    : "border border-foreground/10 bg-white/60 text-foreground"
                 }`}
               >
                 {msg.body}
@@ -567,7 +567,7 @@ export default function ConversationPage() {
           <button
             type="submit"
             disabled={sending || !newBody.trim()}
-            className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50 shrink-0"
+            className="btn-primary shrink-0"
           >
             Send
           </button>
@@ -582,10 +582,10 @@ export default function ConversationPage() {
           aria-modal="true"
           role="dialog"
         >
-          <div className="bg-ethereal border border-foreground/10 rounded-lg shadow-lg max-w-md w-full p-6">
+          <div className="surface max-w-md w-full p-6 shadow-lg">
             {modal === "pause" ? (
               <>
-                <h2 className="font-serif text-lg font-medium text-foreground">Pause conversation</h2>
+                <h2 className="section-heading">Pause conversation</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Pausing means this conversation won&apos;t be active for now. Messages will be
                   disabled for both of you. Only you can resume when you&apos;re ready.
@@ -595,14 +595,14 @@ export default function ConversationPage() {
                     type="button"
                     onClick={handlePause}
                     disabled={acting}
-                    className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                    className="btn-primary"
                   >
                     {acting ? "Pausing…" : "Pause"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
-                    className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                    className="btn-secondary"
                   >
                     Cancel
                   </button>
@@ -610,7 +610,7 @@ export default function ConversationPage() {
               </>
             ) : modal === "end" ? (
               <>
-                <h2 className="font-serif text-lg font-medium text-foreground">End conversation</h2>
+                <h2 className="section-heading">End conversation</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Ending will close this conversation permanently. This can&apos;t be undone, and no
                   explanation is required. You can remove it from your Messages list afterward.
@@ -620,14 +620,14 @@ export default function ConversationPage() {
                     type="button"
                     onClick={handleEnd}
                     disabled={acting}
-                    className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                    className="btn-primary"
                   >
                     {acting ? "Ending…" : "End"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
-                    className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                    className="btn-secondary"
                   >
                     Cancel
                   </button>
@@ -635,7 +635,7 @@ export default function ConversationPage() {
               </>
             ) : modal === "remove" ? (
               <>
-                <h2 className="font-serif text-lg font-medium text-foreground">Remove from list</h2>
+                <h2 className="section-heading">Remove from list</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   This hides the conversation from your Messages list and Home. The other person
                   still has access, and you can open this thread again from a direct link if you
@@ -646,14 +646,14 @@ export default function ConversationPage() {
                     type="button"
                     onClick={handleRemoveFromList}
                     disabled={acting}
-                    className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                    className="btn-primary"
                   >
                     {acting ? "Removing…" : "Remove from list"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
-                    className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                    className="btn-secondary"
                   >
                     Cancel
                   </button>
@@ -661,7 +661,7 @@ export default function ConversationPage() {
               </>
             ) : (
               <>
-                <h2 className="font-serif text-lg font-medium text-foreground">Delete permanently</h2>
+                <h2 className="section-heading">Delete permanently</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   This deletes the entire conversation and all messages for both of you. It cannot
                   be undone. The other person will no longer see this thread either.
@@ -678,7 +678,7 @@ export default function ConversationPage() {
                   <button
                     type="button"
                     onClick={() => setModal(null)}
-                    className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                    className="btn-secondary"
                   >
                     Cancel
                   </button>

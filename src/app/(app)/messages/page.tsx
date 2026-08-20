@@ -210,8 +210,8 @@ export default function MessagesPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="font-serif text-2xl font-medium text-foreground">Messages</h1>
-        <p className="mt-2 text-sm text-muted">
+        <h1 className="page-lead">Messages</h1>
+        <p className="section-copy">
           Invites and conversations — all by choice, no pressure to reply.
         </p>
       </div>
@@ -221,24 +221,18 @@ export default function MessagesPage() {
           title="Nothing here yet."
           description="When someone invites you to chat, it shows up here. You can also reach out from Explore when you're ready."
         >
-          <Link
-            href="/explore"
-            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-          >
+          <Link href="/explore" className="btn-secondary">
             Explore people
           </Link>
-          <Link
-            href="/rooms"
-            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-          >
+          <Link href="/rooms" className="btn-secondary">
             Visit a room
           </Link>
         </EmptyState>
       )}
 
       <section>
-        <h2 className="font-serif text-lg font-medium text-foreground">Invites you received</h2>
-        <p className="mt-1 text-sm text-muted">Accept to start a conversation. No obligation.</p>
+        <h2 className="section-heading">Invites you received</h2>
+        <p className="section-copy">Accept to start a conversation. No obligation.</p>
         {receivedInvites.length === 0 ? (
           <p className="mt-4 text-sm text-muted">No pending chat invites.</p>
         ) : (
@@ -252,7 +246,7 @@ export default function MessagesPage() {
                     type="button"
                     onClick={() => acceptInvite(inv.id)}
                     disabled={actingId === inv.id}
-                    className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                    className="btn-primary btn-sm"
                   >
                     Accept
                   </button>
@@ -260,7 +254,7 @@ export default function MessagesPage() {
                     type="button"
                     onClick={() => declineInvite(inv.id)}
                     disabled={actingId === inv.id}
-                    className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50"
+                    className="btn-secondary btn-sm"
                   >
                     Not a fit
                   </button>
@@ -273,8 +267,8 @@ export default function MessagesPage() {
 
       {receivedCollabInvites.length > 0 && (
         <section>
-          <h2 className="font-serif text-lg font-medium text-foreground">Collab invites you received</h2>
-          <p className="mt-1 text-sm text-muted">Respond below. If you&apos;re interested, you&apos;ll open a shared collaboration space.</p>
+          <h2 className="section-heading">Collab invites you received</h2>
+          <p className="section-copy">Respond below. If you&apos;re interested, you&apos;ll open a shared collaboration space.</p>
           <ul className="mt-4 space-y-3">
             {receivedCollabInvites.map((c) => (
               <li key={c.id} className="surface p-4">
@@ -284,9 +278,9 @@ export default function MessagesPage() {
                 {c.role && <p className="text-sm text-muted">Their role: {c.role}</p>}
                 {c.pace && <p className="text-sm text-muted">Pace: {PACE_LABELS[c.pace]}</p>}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => respondToCollab(c.id, "interested")} disabled={actingId === c.id} className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50">Interested — let&apos;s talk</button>
-                  <button type="button" onClick={() => respondToCollab(c.id, "maybe")} disabled={actingId === c.id} className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50">Maybe — not right now</button>
-                  <button type="button" onClick={() => respondToCollab(c.id, "not_fit")} disabled={actingId === c.id} className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50">Not a fit</button>
+                  <button type="button" onClick={() => respondToCollab(c.id, "interested")} disabled={actingId === c.id} className="btn-primary btn-sm">Interested — let&apos;s talk</button>
+                  <button type="button" onClick={() => respondToCollab(c.id, "maybe")} disabled={actingId === c.id} className="btn-secondary btn-sm">Maybe — not right now</button>
+                  <button type="button" onClick={() => respondToCollab(c.id, "not_fit")} disabled={actingId === c.id} className="btn-secondary btn-sm">Not a fit</button>
                 </div>
               </li>
             ))}
@@ -295,8 +289,8 @@ export default function MessagesPage() {
       )}
 
       <section>
-        <h2 className="font-serif text-lg font-medium text-foreground">Invites you sent</h2>
-        <p className="mt-1 text-sm text-muted">Waiting for a response. Pending invites can be cancelled.</p>
+        <h2 className="section-heading">Invites you sent</h2>
+        <p className="section-copy">Waiting for a response. Pending invites can be cancelled.</p>
         {!hasSentInvites ? (
           <p className="mt-4 text-sm text-muted">No pending invites out.</p>
         ) : (
@@ -317,7 +311,7 @@ export default function MessagesPage() {
                   type="button"
                   onClick={() => cancelInvite(inv.id)}
                   disabled={actingId === inv.id}
-                  className="text-sm text-muted hover:text-foreground disabled:opacity-50 shrink-0"
+                  className="btn-secondary btn-sm shrink-0"
                 >
                   Cancel invite
                 </button>
@@ -351,7 +345,7 @@ export default function MessagesPage() {
                     type="button"
                     onClick={() => cancelCollabInvite(c.id)}
                     disabled={actingId === c.id}
-                    className="text-sm text-muted hover:text-foreground disabled:opacity-50 shrink-0"
+                    className="btn-secondary btn-sm shrink-0"
                   >
                     Cancel invite
                   </button>
@@ -363,15 +357,15 @@ export default function MessagesPage() {
       </section>
 
       <section>
-        <h2 className="font-serif text-lg font-medium text-foreground">Conversations</h2>
-        <p className="mt-1 text-sm text-muted">Chats you started or accepted.</p>
+        <h2 className="section-heading">Conversations</h2>
+        <p className="section-copy">Chats you started or accepted.</p>
         {conversations.length === 0 ? (
           <p className="mt-4 text-sm text-muted">No conversations yet. Accept an invite to start one.</p>
         ) : (
           <ul className="mt-4 space-y-2">
             {conversations.map((conv) => (
               <li key={conv.id}>
-                <ConversationPreviewLink conversation={conv} className="bg-white/50 hover:bg-white/70" />
+                <ConversationPreviewLink conversation={conv} />
               </li>
             ))}
           </ul>

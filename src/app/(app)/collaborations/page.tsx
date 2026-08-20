@@ -54,8 +54,8 @@ export default function CollaborationsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-serif text-2xl font-medium text-foreground">Collaborations</h1>
-        <p className="mt-2 text-sm text-muted">
+        <h1 className="page-lead">Collaborations</h1>
+        <p className="section-copy">
           Things you&apos;re exploring with other people — shared notes, links, and next steps. No
           deadlines, no pressure.
         </p>
@@ -67,10 +67,10 @@ export default function CollaborationsPage() {
             key={id}
             type="button"
             onClick={() => setFilter(id)}
-            className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+            className={`nav-pill text-sm ${
               filter === id
-                ? "border-foreground/40 bg-foreground/10 text-foreground"
-                : "border-foreground/15 bg-white/50 text-muted hover:text-foreground"
+                ? "nav-pill-active text-foreground"
+                : "text-muted hover:text-foreground"
             }`}
           >
             {label}
@@ -90,16 +90,10 @@ export default function CollaborationsPage() {
             title="No active collaborations yet."
             description="When someone responds interested to a collab invite, a shared workspace opens here for notes, links, and next steps."
           >
-            <Link
-              href="/messages"
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
+            <Link href="/messages" className="btn-secondary">
               Check Messages
             </Link>
-            <Link
-              href="/explore"
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
+            <Link href="/explore" className="btn-secondary">
               Explore people
             </Link>
           </EmptyState>

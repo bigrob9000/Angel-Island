@@ -392,9 +392,9 @@ export default function RoomPage() {
       new Date(post.updated_at).getTime() > new Date(post.created_at).getTime() + 1000;
 
     return (
-      <li id={`post-${post.id}`} key={post.id} className="rounded-lg border border-foreground/10 bg-white/40 p-4 scroll-mt-24">
+      <li id={`post-${post.id}`} key={post.id} className="surface p-4 scroll-mt-24">
         <div className="flex flex-wrap items-baseline gap-2 text-xs text-muted">
-          <span className="rounded bg-foreground/10 px-1.5 py-0.5 font-medium text-foreground">
+          <span className="chip chip-muted text-xs">
             {postIntentLabel(post)}
           </span>
           <ProfileAttribution profile={author} />
@@ -468,7 +468,7 @@ export default function RoomPage() {
         <Link href="/rooms" className="text-sm text-muted hover:text-foreground">
           ← Rooms
         </Link>
-        <h1 className="font-serif text-2xl font-medium text-foreground mt-2">{room.name}</h1>
+        <h1 className="page-lead mt-2">{room.name}</h1>
         {room.description && <p className="mt-1 text-muted">{room.description}</p>}
         {!isIntroductions && room.purpose_norms && (
           <p className="mt-2 text-sm text-muted border-l-2 border-foreground/20 pl-3">{room.purpose_norms}</p>
@@ -496,7 +496,7 @@ export default function RoomPage() {
                   setComposeIntent("conversation");
                   setShowCompose(true);
                 }}
-                className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+                className="btn-secondary"
               >
                 Share your introduction (optional)
               </button>
@@ -508,22 +508,22 @@ export default function RoomPage() {
                 setComposeIntent("share_work");
                 setShowCompose(true);
               }}
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
+              className="btn-secondary"
+              >
               Share something you&apos;re working on (optional)
             </button>
           ) : (
             <button
               type="button"
               onClick={() => setShowCompose(true)}
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+              className="btn-secondary"
             >
               Want to add something?
             </button>
           )}
         </div>
       ) : (
-        <div id="room-compose" className="rounded-lg border border-foreground/10 bg-white/60 p-4 scroll-mt-24">
+        <div id="room-compose" className="surface p-4 scroll-mt-24">
           {!isIntroductions && !composeIntent ? (
             <div>
               <p className="text-sm text-muted mb-3">Choose what you&apos;re adding:</p>
@@ -533,7 +533,7 @@ export default function RoomPage() {
                     key={intent}
                     type="button"
                     onClick={() => setComposeIntent(intent)}
-                    className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm text-foreground hover:bg-foreground/5"
+                    className="chip chip-muted"
                   >
                     {POST_INTENT_LABELS[intent]}
                   </button>
@@ -542,7 +542,7 @@ export default function RoomPage() {
               <button
                 type="button"
                 onClick={resetCompose}
-                className="mt-4 text-sm text-muted hover:text-foreground"
+                className="mt-4 btn-secondary btn-sm"
               >
                 Cancel
               </button>
@@ -618,7 +618,7 @@ export default function RoomPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                  className="btn-primary"
                 >
                   {submitting
                     ? "Saving…"
@@ -639,7 +639,7 @@ export default function RoomPage() {
                       setComposeBody("");
                       setComposeMediaUrl("");
                     }}
-                    className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                    className="btn-secondary"
                   >
                     Back
                   </button>
@@ -647,7 +647,7 @@ export default function RoomPage() {
                 <button
                   type="button"
                   onClick={resetCompose}
-                  className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
+                  className="btn-secondary"
                 >
                   Cancel
                 </button>
@@ -658,7 +658,7 @@ export default function RoomPage() {
       )}
 
       <section>
-        <h2 className="font-serif text-lg font-medium text-foreground">
+        <h2 className="section-heading">
           {isSearching
             ? "Results"
             : isIntroductions
@@ -676,7 +676,7 @@ export default function RoomPage() {
                 : "No posts yet. Start a conversation, ask a question, or invite collaborators."}
           </p>
         ) : isSearching && displayedPosts.length === 0 ? (
-          <div className="mt-4 rounded-lg border border-foreground/10 bg-white/40 px-4 py-8 text-center text-sm text-muted">
+          <div className="mt-4 surface px-4 py-8 text-center text-sm text-muted">
             <p>Nothing like that turned up in this room.</p>
             <p className="mt-2">Try a different word — or clear the search to browse everything.</p>
           </div>

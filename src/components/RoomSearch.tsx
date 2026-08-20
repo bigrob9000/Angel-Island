@@ -11,8 +11,8 @@ type Props = {
 export function RoomSearch({ value, onChange }: Props) {
   return (
     <label className="block">
-      <span className="text-sm font-medium text-foreground">Search this room</span>
-      <p className="mt-1 text-sm text-muted">Search conversations in this room.</p>
+      <span className="section-heading text-base">Search this room</span>
+      <p className="section-copy">Search conversations in this room.</p>
       <input
         type="search"
         value={value}
