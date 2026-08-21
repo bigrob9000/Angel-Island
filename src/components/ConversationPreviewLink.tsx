@@ -11,10 +11,13 @@ export function ConversationPreviewLink({ conversation, className = "" }: Props)
   const name =
     conversation.other?.first_name ?? conversation.other?.username ?? "Someone";
   const statusLabel = conversationStatusLabel(conversation.conversation_status);
+  const href = conversation.collaborationId
+    ? `/collaborations/${conversation.collaborationId}`
+    : `/messages/${conversation.id}`;
 
   return (
     <Link
-      href={`/messages/${conversation.id}`}
+      href={href}
       className={`surface-interactive flex items-start gap-3 px-4 py-3 text-foreground ${
         conversation.unread ? "ring-1 ring-accent/15" : ""
       } ${className}`.trim()}

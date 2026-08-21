@@ -15,16 +15,14 @@ function activityLabel(lastAt: string | null): string {
   return "Quiet";
 }
 
-/* Positions for room clouds (left %, top %) — well spaced so clouds and labels don’t overlap */
-/* Symmetrical: top left/right, middle left/right, bottom center — spaced so no cloud covers another's Add button */
-/* Rows spaced so each add button (just under its cloud) sits in clear gap above the next row */
-const ROOM_POSITIONS: Array<[number, number]> = [
-  [20, 8],    /* top-left */
-  [80, 8],    /* top-right */
-  [20, 50],   /* middle-left */
-  [80, 50],   /* middle-right */
-  [50, 92],   /* bottom center */
-];
+/* Positions for room clouds — desktop sky layout; mobile overrides in globals.css */
+const ROOM_POSITION_CLASSES = [
+  "room-cloud-pos-0",
+  "room-cloud-pos-1",
+  "room-cloud-pos-2",
+  "room-cloud-pos-3",
+  "room-cloud-pos-4",
+] as const;
 
 export default function RoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -119,15 +117,13 @@ export default function RoomsPage() {
       </p>
 
       <div className="rooms-web mt-10">
-        {rooms.slice(0, ROOM_POSITIONS.length).map((room, i) => {
-          const [left, top] = ROOM_POSITIONS[i];
+        {rooms.slice(0, ROOM_POSITION_CLASSES.length).map((room, i) => {
           const isMember = memberRoomIds.has(room.id);
           return (
             <Link
               key={room.id}
               href={`/rooms/${room.slug}`}
-              className="room-cloud"
-              style={{ left: `${left}%`, top: `${top}%` }}
+              className={`room-cloud ${ROOM_POSITION_CLASSES[i]}`}
             >
               <div className="room-cloud-shape" aria-hidden>
                 <div className="room-cloud-blob" style={{ width: 110, height: 70, top: 18, left: 32 }} />

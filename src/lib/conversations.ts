@@ -13,6 +13,8 @@ export type ConversationPreview = ChatInvite & {
   lastActivityAt: string;
   lastMessageSenderId?: string | null;
   unread?: boolean;
+  /** When set, this chat invite backs a collaboration workspace. */
+  collaborationId?: string | null;
 };
 
 type InviteWithMessages = ChatInvite & {
@@ -103,10 +105,18 @@ export async function loadConversationPreviews(
     ...new Set(convs.map((c) => (c.sender_id === userId ? c.receiver_id : c.sender_id))),
   ];
 
-  const [{ data: profiles }, latestByInvite] = await Promise.all([
+  const inviteIds = convs.map((c) => c.id);
+
+  const [{ data: profiles }, latestByInvite, { data: collabRows }] = await Promise.all([
     supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", otherIds),
-    latestMessagesByInvite(convs.map((c) => c.id)),
+    latestMessagesByInvite(inviteIds),
+    supabase.from("collaborations").select("id, chat_invite_id").in("chat_invite_id", inviteIds),
   ]);
+
+  const collabByChatInvite: Record<string, string> = {};
+  (collabRows ?? []).forEach((row) => {
+    if (row.chat_invite_id) collabByChatInvite[row.chat_invite_id] = row.id;
+  });
 
   const profilesById: Record<string, Profile> = {};
   (profiles ?? []).forEach((row) => {
@@ -136,6 +146,7 @@ export async function loadConversationPreviews(
       preview: conversationPreviewText(latest?.body, inv.optional_message),
       lastActivityAt: latest?.created_at ?? inv.created_at,
       lastMessageSenderId: latest?.sender_id ?? null,
+      collaborationId: collabByChatInvite[inv.id] ?? null,
     };
   });
 
