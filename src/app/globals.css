@@ -275,48 +275,28 @@ body {
 
 @media (max-width: 639px) {
   .rooms-web {
-    min-height: 480px;
-    height: 72vh;
-    padding-top: 0.5rem;
-    padding-bottom: 2rem;
+    /* Use full viewport width so clouds aren’t clipped by main padding */
+    width: calc(100% + 2rem);
+    margin-left: -1rem;
+    overflow: visible;
   }
 
   .room-cloud {
-    width: 210px;
-    height: 140px;
-    margin-left: -105px;
-    margin-top: -70px;
+    width: 245px;
+    height: 152px;
+    margin-left: -122.5px;
+    margin-top: -76px;
   }
 
   .room-cloud-shape {
-    width: 210px;
-    height: 140px;
+    width: 245px;
+    height: 152px;
   }
 
-  /* Pull side clouds inward so Collaborate and Jam stay on screen */
-  .room-cloud-pos-0 {
-    left: 34%;
-    top: 12%;
-  }
-
-  .room-cloud-pos-1 {
-    left: 66%;
-    top: 12%;
-  }
-
+  /* Nudge left column only — Collaborate & Jam were slightly off-screen */
+  .room-cloud-pos-0,
   .room-cloud-pos-2 {
-    left: 34%;
-    top: 48%;
-  }
-
-  .room-cloud-pos-3 {
-    left: 66%;
-    top: 48%;
-  }
-
-  .room-cloud-pos-4 {
-    left: 50%;
-    top: 86%;
+    left: 28%;
   }
 }
 
