@@ -279,6 +279,8 @@ body {
     width: calc(100% + 2rem);
     margin-left: -1rem;
     overflow: visible;
+    height: 72vh;
+    min-height: 360px;
   }
 
   .room-cloud {
@@ -297,6 +299,11 @@ body {
   .room-cloud-pos-0,
   .room-cloud-pos-2 {
     left: 28%;
+  }
+
+  /* Listen & Share — keep bottom cloud in view without scrolling */
+  .room-cloud-pos-4 {
+    top: 78%;
   }
 }
 
