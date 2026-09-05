@@ -136,7 +136,8 @@ export type CollaborationEntryType = "note" | "reference" | "step";
 
 export interface Collaboration {
   id: string;
-  collab_invite_id: string;
+  collab_invite_id: string | null;
+  group_collab_invite_id: string | null;
   chat_invite_id: string | null;
   status: CollaborationStatus;
   paused_at: string | null;
@@ -144,6 +145,57 @@ export interface Collaboration {
   ended_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface CollaborationMessage {
+  id: string;
+  collaboration_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+}
+
+export type GroupCollabInviteStatus = "pending" | "open" | "expired" | "cancelled";
+
+export interface GroupCollabInvite {
+  id: string;
+  creator_id: string;
+  about: string;
+  message: string | null;
+  role: string | null;
+  pace: CollabPace | null;
+  status: GroupCollabInviteStatus;
+  expires_at: string;
+  created_at: string;
+}
+
+export type GroupCollabRecipientStatus = "pending" | "interested" | "maybe" | "not_fit";
+
+export interface GroupCollabInviteRecipient {
+  id: string;
+  group_invite_id: string;
+  user_id: string;
+  status: GroupCollabRecipientStatus;
+  responded_at: string | null;
+  created_at: string;
+}
+
+export interface CollaborationMember {
+  collaboration_id: string;
+  user_id: string;
+  is_creator: boolean;
+  joined_at: string;
+}
+
+export interface GroupCollabMemberInvite {
+  id: string;
+  collaboration_id: string;
+  inviter_id: string;
+  user_id: string;
+  status: GroupCollabRecipientStatus | "expired" | "cancelled";
+  expires_at: string;
+  responded_at: string | null;
+  created_at: string;
 }
 
 export interface CollaborationEntry {

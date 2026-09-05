@@ -8,9 +8,13 @@ import {
   loadCollaborationPreviews,
   type CollaborationPreview,
 } from "@/lib/collaborations";
+import { loadPendingGroupCollabInvitesForUser, loadPendingGroupMemberInvitesForUser } from "@/lib/group-collaborations";
 import { EmptyState } from "@/components/EmptyState";
 import { CollaborationPreviewLink } from "@/components/CollaborationPreviewLink";
+import { GroupCollabInvitesSection } from "@/components/GroupCollabInvitesSection";
+import { GroupMemberInvitesSection } from "@/components/GroupMemberInvitesSection";
 import { useCollab } from "@/components/CollabProvider";
+import type { GroupCollabInviteWithMeta } from "@/lib/group-collaborations";
 
 type Filter = "active" | "paused" | "past";
 
@@ -23,6 +27,10 @@ const FILTERS: Array<{ id: Filter; label: string }> = [
 export default function CollaborationsPage() {
   const [filter, setFilter] = useState<Filter>("active");
   const [previews, setPreviews] = useState<CollaborationPreview[]>([]);
+  const [groupReceived, setGroupReceived] = useState<GroupCollabInviteWithMeta[]>([]);
+  const [memberInvites, setMemberInvites] = useState<
+    Awaited<ReturnType<typeof loadPendingGroupMemberInvitesForUser>>["invites"]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [tableMissing, setTableMissing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -45,8 +53,12 @@ export default function CollaborationsPage() {
         return;
       }
       const result = await loadCollaborationPreviews(user.id, filter);
+      const groupInvites = await loadPendingGroupCollabInvitesForUser(user.id);
+      const memberInviteResult = await loadPendingGroupMemberInvitesForUser(user.id);
       setPreviews(result.previews);
-      setTableMissing(result.tableMissing);
+      setGroupReceived(groupInvites.received);
+      setMemberInvites(memberInviteResult.invites);
+      setTableMissing(result.tableMissing || groupInvites.tableMissing || memberInviteResult.tableMissing);
       setLoading(false);
     });
   }, [filter, refreshKey]);
@@ -62,6 +74,9 @@ export default function CollaborationsPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
+        <Link href="/collaborations/group/new" className="btn-primary">
+          Start group collab
+        </Link>
         {FILTERS.map(({ id, label }) => (
           <button
             key={id}
@@ -81,6 +96,16 @@ export default function CollaborationsPage() {
       {tableMissing && (
         <p className="text-sm text-muted">{collaborationsSetupError()}</p>
       )}
+
+      <GroupMemberInvitesSection
+        invites={memberInvites}
+        onResponded={() => setRefreshKey((key) => key + 1)}
+      />
+
+      <GroupCollabInvitesSection
+        received={groupReceived}
+        onResponded={() => setRefreshKey((key) => key + 1)}
+      />
 
       {loading ? (
         <p className="text-muted">Loading…</p>

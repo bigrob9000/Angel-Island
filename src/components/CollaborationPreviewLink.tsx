@@ -13,6 +13,8 @@ import {
   updateCollaborationStatus,
   type CollaborationPreview,
 } from "@/lib/collaborations";
+import type { Profile } from "@/lib/types";
+import { formatMemberNames } from "@/lib/group-collaborations";
 
 type Props = {
   preview: CollaborationPreview;
@@ -33,7 +35,7 @@ export function CollaborationPreviewLink({
 }: Props) {
   const router = useRouter();
   const [acting, setActing] = useState(false);
-  const tone = collaborationToneLine(preview.invite);
+  const tone = collaborationToneLine(preview);
   const quietLine =
     showQuiet && preview.status !== "ended"
       ? collaborationQuietLine(preview.lastActivityAt)
@@ -83,7 +85,13 @@ export function CollaborationPreviewLink({
         }`}
       >
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <ProfileAttribution profile={preview.other} className="font-medium" />
+          {preview.isGroup ? (
+            <span className="font-medium text-foreground">
+              Group · {formatMemberNames((preview.members ?? []) as Profile[])}
+            </span>
+          ) : (
+            <ProfileAttribution profile={preview.other} className="font-medium" />
+          )}
           <div className="flex items-center gap-2">
             {unread && (
               <span className="h-2 w-2 rounded-full bg-accent" aria-hidden />
@@ -92,7 +100,7 @@ export function CollaborationPreviewLink({
           </div>
         </div>
         <p className={`mt-2 text-sm ${unread ? "font-medium text-foreground" : "text-foreground"}`}>
-          {collaborationFocusLine(preview.invite)}
+          {collaborationFocusLine(preview)}
         </p>
         {tone && <p className="mt-1 text-sm text-muted">{tone}</p>}
         {quietLine && <p className="mt-2 text-xs text-muted italic">{quietLine}</p>}

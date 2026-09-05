@@ -21,6 +21,12 @@ import {
   type CollaborationDetail,
 } from "@/lib/collaborations";
 import {
+  formatMemberNames,
+  GROUP_COLLAB_MAX_MEMBERS,
+  inviteGroupCollabMember,
+} from "@/lib/group-collaborations";
+import { GroupCollabChat } from "@/components/GroupCollabChat";
+import {
   subscribeToCollaboration,
   unsubscribeFromCollaboration,
 } from "@/lib/collaboration-realtime";
@@ -28,7 +34,7 @@ import { useCollab } from "@/components/CollabProvider";
 import { NotFoundPanel } from "@/components/NotFoundPanel";
 import { PageLoading } from "@/components/PageLoading";
 
-type Tab = CollaborationEntryType;
+type Tab = CollaborationEntryType | "chat";
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: "note", label: "Notes" },
@@ -62,7 +68,18 @@ export default function CollaborationWorkspacePage() {
   const [safetyDialog, setSafetyDialog] = useState<SafetyDialog>(null);
   const [contextOpen, setContextOpen] = useState(true);
 
+  const [inviteUserId, setInviteUserId] = useState("");
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [isCreator, setIsCreator] = useState(false);
+
   const isActive = detail?.status === "active";
+  const isGroup = detail?.isGroup ?? false;
+
+  const workspaceTabs = useMemo(() => {
+    const base = [...TABS];
+    if (isGroup) base.unshift({ id: "chat" as const, label: "Group chat" });
+    return base;
+  }, [isGroup]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -75,6 +92,17 @@ export default function CollaborationWorkspacePage() {
       const result = await loadCollaborationDetail(collaborationId, user.id);
       setDetail(result.detail);
       setTableMissing(result.tableMissing);
+      if (result.detail?.isGroup) {
+        setTab("chat");
+        const supabase = createClient();
+        const { data: member } = await supabase
+          .from("collaboration_members")
+          .select("is_creator")
+          .eq("collaboration_id", collaborationId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setIsCreator(Boolean(member?.is_creator));
+      }
       setLoading(false);
     });
   }, [collaborationId, router]);
@@ -134,7 +162,7 @@ export default function CollaborationWorkspacePage() {
   }, [detail?.id, detail?.lastActivityAt, userId, markCollabRead]);
 
   const tabEntries = useMemo(() => {
-    if (!detail) return [];
+    if (!detail || tab === "chat") return [];
     return detail.entries.filter((entry) => entry.entry_type === tab);
   }, [detail, tab]);
 
@@ -147,7 +175,7 @@ export default function CollaborationWorkspacePage() {
 
   async function handleAddEntry(e: React.FormEvent) {
     e.preventDefault();
-    if (!detail || !userId || !isActive) return;
+    if (!detail || !userId || !isActive || tab === "chat") return;
     setActing(true);
     setFormError(null);
 
@@ -260,8 +288,19 @@ export default function CollaborationWorkspacePage() {
   }
 
   const otherName = detail.other?.first_name ?? detail.other?.username ?? "your collaborator";
-  const otherId = detail.invite.sender_id === userId ? detail.invite.receiver_id : detail.invite.sender_id;
-  const paceLabel = detail.invite.pace ? COLLAB_PACE_LABELS[detail.invite.pace] : null;
+  const otherId =
+    detail.isGroup || !detail.invite
+      ? detail.members?.[0]?.id ?? ""
+      : detail.invite.sender_id === userId
+        ? detail.invite.receiver_id
+        : detail.invite.sender_id;
+  const paceLabel = detail.isGroup
+    ? detail.groupInvite?.pace
+      ? COLLAB_PACE_LABELS[detail.groupInvite.pace]
+      : null
+    : detail.invite?.pace
+      ? COLLAB_PACE_LABELS[detail.invite.pace]
+      : null;
   const quietLine =
     detail.status !== "ended" ? collaborationQuietLine(detail.lastActivityAt) : null;
   const isNewWorkspace = detail.status === "active" && detail.entries.length === 0;
@@ -274,8 +313,12 @@ export default function CollaborationWorkspacePage() {
         </Link>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="page-lead">Collaboration</h1>
-            <p className="mt-1 text-sm text-muted">with {otherName}</p>
+            <h1 className="page-lead">{detail.isGroup ? "Group collaboration" : "Collaboration"}</h1>
+            <p className="mt-1 text-sm text-muted">
+              {detail.isGroup
+                ? `with ${formatMemberNames(detail.members ?? [])}`
+                : `with ${otherName}`}
+            </p>
           </div>
           <div className="relative">
             <button
@@ -360,13 +403,26 @@ export default function CollaborationWorkspacePage() {
         {contextOpen && (
           <div className="mt-3 space-y-2 text-sm text-muted">
             <p>
-              <span className="text-foreground">Focus:</span> {collaborationFocusLine(detail.invite)}
+              <span className="text-foreground">Focus:</span> {collaborationFocusLine(detail)}
             </p>
-            {detail.invite.message && <p>{detail.invite.message}</p>}
-            {detail.invite.role && (
-              <p>
-                <span className="text-foreground">Role:</span> {detail.invite.role}
-              </p>
+            {detail.isGroup ? (
+              <>
+                {detail.groupInvite?.message && <p>{detail.groupInvite.message}</p>}
+                {detail.groupInvite?.role && (
+                  <p>
+                    <span className="text-foreground">Role:</span> {detail.groupInvite.role}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                {detail.invite?.message && <p>{detail.invite.message}</p>}
+                {detail.invite?.role && (
+                  <p>
+                    <span className="text-foreground">Role:</span> {detail.invite.role}
+                  </p>
+                )}
+              </>
             )}
             {paceLabel && (
               <p>
@@ -374,7 +430,9 @@ export default function CollaborationWorkspacePage() {
               </p>
             )}
             <p className="italic">
-              You both chose to explore this collaboration. There&apos;s no rush.
+              {detail.isGroup
+                ? "You chose to explore this together. There's no rush."
+                : "You both chose to explore this collaboration. There's no rush."}
             </p>
           </div>
         )}
@@ -436,7 +494,7 @@ export default function CollaborationWorkspacePage() {
         </div>
       )}
 
-      {detail.chat_invite_id && (
+      {detail.chat_invite_id && !detail.isGroup && (
         <Link
           href={`/messages/${detail.chat_invite_id}`}
           className="btn-secondary"
@@ -445,9 +503,45 @@ export default function CollaborationWorkspacePage() {
         </Link>
       )}
 
+      {detail.isGroup && isCreator && isActive && (detail.members?.length ?? 0) < GROUP_COLLAB_MAX_MEMBERS - 1 && (
+        <div className="surface p-4 space-y-2">
+          <p className="text-sm font-medium text-foreground">Invite someone else</p>
+          <p className="text-xs text-muted">
+            Paste a profile user ID from Explore (up to {GROUP_COLLAB_MAX_MEMBERS} members total). They
+            have 14 days to respond.
+          </p>
+          <form
+            className="flex flex-wrap gap-2"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setInviteError(null);
+              const trimmed = inviteUserId.trim();
+              if (!trimmed) return;
+              setActing(true);
+              const result = await inviteGroupCollabMember(detail.id, trimmed);
+              setActing(false);
+              if (result.error) setInviteError(result.error);
+              else setInviteUserId("");
+            }}
+          >
+            <input
+              type="text"
+              value={inviteUserId}
+              onChange={(e) => setInviteUserId(e.target.value)}
+              className={inputClass}
+              placeholder="User ID"
+            />
+            <button type="submit" disabled={acting} className="btn-secondary btn-sm">
+              Send invite
+            </button>
+          </form>
+          {inviteError && <p className="text-sm text-red-600">{inviteError}</p>}
+        </div>
+      )}
+
       <div>
         <div className="flex flex-wrap gap-2 pb-2">
-          {TABS.map(({ id, label }) => (
+          {workspaceTabs.map(({ id, label }) => (
             <button
               key={id}
               type="button"
@@ -464,7 +558,14 @@ export default function CollaborationWorkspacePage() {
         </div>
 
         <div className="mt-4 space-y-4">
-          {tabEntries.length === 0 ? (
+          {tab === "chat" && detail.isGroup && userId ? (
+            <GroupCollabChat
+              collaborationId={detail.id}
+              userId={userId}
+              initialMessages={detail.messages ?? []}
+              disabled={!isActive}
+            />
+          ) : tabEntries.length === 0 ? (
             <p className="text-sm text-muted">Nothing here yet.</p>
           ) : (
             <ul className="space-y-3">
@@ -517,7 +618,7 @@ export default function CollaborationWorkspacePage() {
             </ul>
           )}
 
-          {isActive && (
+          {isActive && tab !== "chat" && (
             <form onSubmit={handleAddEntry} className="surface p-4 space-y-3">
               {tab === "note" && (
                 <label className="block">

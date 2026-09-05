@@ -204,6 +204,30 @@ async function searchCollaborations(
   const results: CollaborationSearchResult[] = [];
 
   for (const preview of previewMap.values()) {
+    if (preview.isGroup) {
+      const haystack = [
+        preview.groupInvite?.about,
+        preview.groupInvite?.message,
+        preview.groupInvite?.role,
+        ...(preview.members ?? []).map((m) => m.first_name ?? m.username ?? ""),
+      ].filter(Boolean) as string[];
+      const entryPreview = entryPreviewByCollab[preview.id];
+      const matched = haystack.some((value) => value.toLowerCase().includes(needle)) || Boolean(entryPreview);
+      if (!matched) continue;
+      results.push({
+        id: preview.id,
+        otherName: "Group",
+        focus: collaborationFocusLine(preview),
+        preview: entryPreview ?? preview.groupInvite?.message ?? preview.groupInvite?.about ?? "",
+        reason: entryPreview
+          ? `Matches "${needle}" in workspace notes or links`
+          : `Matches "${needle}" in collaboration details`,
+        status: preview.status,
+      });
+      continue;
+    }
+
+    if (!preview.invite) continue;
     const otherId =
       preview.invite.sender_id === userId ? preview.invite.receiver_id : preview.invite.sender_id;
     if (blockedIds.has(otherId)) continue;
@@ -224,7 +248,7 @@ async function searchCollaborations(
     results.push({
       id: preview.id,
       otherName,
-      focus: collaborationFocusLine(preview.invite),
+      focus: collaborationFocusLine(preview),
       preview: entryPreview ?? preview.invite.message ?? preview.invite.about,
       reason: entryPreview
         ? `Matches "${needle}" in workspace notes or links`

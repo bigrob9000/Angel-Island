@@ -3,17 +3,23 @@ import type {
   CollabInvite,
   Collaboration,
   CollaborationEntry,
+  CollaborationMessage,
   CollaborationStatus,
   CollaborationEntryType,
+  GroupCollabInvite,
   Profile,
 } from "@/lib/types";
 import { COLLAB_PACE_LABELS } from "@/lib/types";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 import { normalizeProfile } from "@/lib/types";
+import { formatMemberNames } from "@/lib/group-collaborations";
 
 export type CollaborationPreview = Collaboration & {
-  invite: CollabInvite;
+  isGroup: boolean;
+  invite?: CollabInvite;
+  groupInvite?: GroupCollabInvite;
   other?: Profile;
+  members?: Profile[];
   lastActivityAt: string;
   lastEntryAuthorId?: string | null;
   unread?: boolean;
@@ -21,6 +27,7 @@ export type CollaborationPreview = Collaboration & {
 
 export type CollaborationDetail = CollaborationPreview & {
   entries: CollaborationEntry[];
+  messages?: CollaborationMessage[];
 };
 
 function isCollabWorkspaceMissing(message: string, code?: string): boolean {
@@ -37,11 +44,25 @@ export function collaborationStatusLabel(status: CollaborationStatus): string {
   return "Active";
 }
 
-export function collaborationFocusLine(invite: CollabInvite): string {
+export function collaborationFocusLine(preview: CollaborationPreview): string {
+  if (preview.isGroup && preview.groupInvite) return preview.groupInvite.about;
+  if (preview.invite) return preview.invite.about;
+  return "Collaboration";
+}
+
+export function collaborationToneLine(preview: CollaborationPreview): string | null {
+  const pace = preview.isGroup ? preview.groupInvite?.pace : preview.invite?.pace;
+  if (!pace) return null;
+  return COLLAB_PACE_LABELS[pace];
+}
+
+/** @deprecated use collaborationFocusLine(preview) */
+export function collaborationFocusLineFromInvite(invite: CollabInvite): string {
   return invite.about;
 }
 
-export function collaborationToneLine(invite: CollabInvite): string | null {
+/** @deprecated use collaborationToneLine(preview) */
+export function collaborationToneLineFromInvite(invite: CollabInvite): string | null {
   if (!invite.pace) return null;
   return COLLAB_PACE_LABELS[invite.pace];
 }
@@ -140,15 +161,11 @@ export async function loadCollaborationPreviews(
   }
 
   const interestedInvites = (invites ?? []) as CollabInvite[];
-  if (interestedInvites.length === 0) {
-    return { previews: [], tableMissing: false };
-  }
 
   const inviteIds = interestedInvites.map((invite) => invite.id);
-  const { data: collabs, error } = await supabase
-    .from("collaborations")
-    .select("*")
-    .in("collab_invite_id", inviteIds);
+  const { data: collabs, error } = inviteIds.length
+    ? await supabase.from("collaborations").select("*").in("collab_invite_id", inviteIds)
+    : { data: [], error: null };
 
   if (error) {
     if (isCollabWorkspaceMissing(error.message, error.code)) {
@@ -170,7 +187,7 @@ export async function loadCollaborationPreviews(
   );
 
   const otherIds = filtered.map((collab) =>
-    otherUserId(inviteById[collab.collab_invite_id], userId)
+    otherUserId(inviteById[collab.collab_invite_id!], userId)
   );
 
   const { data: profiles } = await supabase
@@ -206,10 +223,11 @@ export async function loadCollaborationPreviews(
   });
 
   const previews: CollaborationPreview[] = filtered.map((collab) => {
-    const invite = inviteById[collab.collab_invite_id];
+    const invite = inviteById[collab.collab_invite_id!];
     const otherId = otherUserId(invite, userId);
     return {
       ...collab,
+      isGroup: false,
       invite,
       other: profilesById[otherId],
       lastActivityAt: lastActivity[collab.id] ?? collab.created_at,
@@ -217,11 +235,120 @@ export async function loadCollaborationPreviews(
     };
   });
 
-  previews.sort(
+  const { data: memberRows } = await supabase
+    .from("collaboration_members")
+    .select("collaboration_id")
+    .eq("user_id", userId);
+
+  const groupCollabIds = (memberRows ?? []).map((row) => row.collaboration_id);
+  let groupPreviews: CollaborationPreview[] = [];
+
+  if (groupCollabIds.length > 0) {
+    const { data: groupCollabs, error: groupError } = await supabase
+      .from("collaborations")
+      .select("*")
+      .in("id", groupCollabIds)
+      .not("group_collab_invite_id", "is", null);
+
+    if (!groupError && groupCollabs?.length) {
+      const filteredGroup = (groupCollabs as Collaboration[]).filter((collab) =>
+        statuses.has(collab.status),
+      );
+      const groupInviteIds = filteredGroup
+        .map((c) => c.group_collab_invite_id)
+        .filter(Boolean) as string[];
+
+      const { data: groupInvites } = groupInviteIds.length
+        ? await supabase.from("group_collab_invites").select("*").in("id", groupInviteIds)
+        : { data: [] };
+
+      const groupInviteById = Object.fromEntries(
+        ((groupInvites ?? []) as GroupCollabInvite[]).map((g) => [g.id, g]),
+      );
+
+      const gCollabIds = filteredGroup.map((c) => c.id);
+      const { data: allMembers } = gCollabIds.length
+        ? await supabase
+            .from("collaboration_members")
+            .select("collaboration_id, user_id")
+            .in("collaboration_id", gCollabIds)
+        : { data: [] };
+
+      const memberUserIds = [...new Set((allMembers ?? []).map((m) => m.user_id))];
+      const { data: memberProfiles } = memberUserIds.length
+        ? await supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", memberUserIds)
+        : { data: [] };
+
+      const memberProfilesById: Record<string, Profile> = {};
+      (memberProfiles ?? []).forEach((row) => {
+        memberProfilesById[row.id] = normalizeProfile(row as Profile);
+      });
+
+      const membersByCollab: Record<string, Profile[]> = {};
+      (allMembers ?? []).forEach((m) => {
+        if (!membersByCollab[m.collaboration_id]) membersByCollab[m.collaboration_id] = [];
+        const profile = memberProfilesById[m.user_id];
+        if (profile) membersByCollab[m.collaboration_id].push(profile);
+      });
+
+      const { data: groupEntryRows } = gCollabIds.length
+        ? await supabase
+            .from("collaboration_entries")
+            .select("collaboration_id, author_id, created_at, updated_at")
+            .in("collaboration_id", gCollabIds)
+            .order("updated_at", { ascending: false })
+        : { data: [] };
+
+      const { data: groupMessageRows } = gCollabIds.length
+        ? await supabase
+            .from("collaboration_messages")
+            .select("collaboration_id, sender_id, created_at")
+            .in("collaboration_id", gCollabIds)
+            .order("created_at", { ascending: false })
+        : { data: [] };
+
+      const groupLastActivity: Record<string, string> = {};
+      const groupLastAuthor: Record<string, string | null> = {};
+      filteredGroup.forEach((collab) => {
+        groupLastActivity[collab.id] = collab.updated_at ?? collab.created_at;
+        groupLastAuthor[collab.id] = null;
+      });
+      (groupEntryRows ?? []).forEach((row) => {
+        if (groupLastAuthor[row.collaboration_id] != null) return;
+        const at = row.updated_at ?? row.created_at;
+        groupLastActivity[row.collaboration_id] = at;
+        groupLastAuthor[row.collaboration_id] = row.author_id;
+      });
+      (groupMessageRows ?? []).forEach((row) => {
+        const cur = groupLastActivity[row.collaboration_id];
+        if (!cur || row.created_at > cur) {
+          groupLastActivity[row.collaboration_id] = row.created_at;
+          groupLastAuthor[row.collaboration_id] = row.sender_id;
+        }
+      });
+
+      groupPreviews = filteredGroup.map((collab) => {
+        const groupInvite = groupInviteById[collab.group_collab_invite_id!];
+        const members = (membersByCollab[collab.id] ?? []).filter((p) => p.id !== userId);
+        return {
+          ...collab,
+          isGroup: true,
+          groupInvite,
+          members,
+          other: members[0],
+          lastActivityAt: groupLastActivity[collab.id] ?? collab.created_at,
+          lastEntryAuthorId: groupLastAuthor[collab.id] ?? null,
+        };
+      });
+    }
+  }
+
+  const combined = [...previews, ...groupPreviews];
+  combined.sort(
     (a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime()
   );
 
-  return { previews, tableMissing: false };
+  return { previews: combined, tableMissing: false };
 }
 
 export async function loadCollaborationDetail(
@@ -244,8 +371,76 @@ export async function loadCollaborationDetail(
   }
   if (!collab) return { detail: null, tableMissing: false };
 
-  const inviteMap = await loadInviteMap([(collab as Collaboration).collab_invite_id]);
-  const invite = inviteMap[(collab as Collaboration).collab_invite_id];
+  const row = collab as Collaboration;
+
+  if (row.group_collab_invite_id) {
+    const { data: membership } = await supabase
+      .from("collaboration_members")
+      .select("user_id")
+      .eq("collaboration_id", collaborationId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!membership) return { detail: null, tableMissing: false };
+
+    const [{ data: groupInvite }, { data: members }, { data: entries }, { data: messages }] =
+      await Promise.all([
+        supabase
+          .from("group_collab_invites")
+          .select("*")
+          .eq("id", row.group_collab_invite_id)
+          .maybeSingle(),
+        supabase.from("collaboration_members").select("user_id, is_creator").eq("collaboration_id", collaborationId),
+        supabase
+          .from("collaboration_entries")
+          .select("*")
+          .eq("collaboration_id", collaborationId)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("collaboration_messages")
+          .select("*")
+          .eq("collaboration_id", collaborationId)
+          .order("created_at", { ascending: true }),
+      ]);
+
+    if (!groupInvite) return { detail: null, tableMissing: false };
+
+    const memberIds = (members ?? []).map((m) => m.user_id);
+    const { data: profiles } = memberIds.length
+      ? await supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", memberIds)
+      : { data: [] };
+
+    const memberProfiles = (profiles ?? []).map((p) => normalizeProfile(p as Profile));
+    const others = memberProfiles.filter((p) => p.id !== userId);
+    const lastEntry = (entries ?? [])[entries!.length - 1] as CollaborationEntry | undefined;
+    const lastMessage = (messages ?? [])[messages!.length - 1] as CollaborationMessage | undefined;
+    const entryAt = lastEntry?.updated_at ?? lastEntry?.created_at;
+    const messageAt = lastMessage?.created_at;
+    const lastActivityAt =
+      entryAt && messageAt
+        ? entryAt > messageAt
+          ? entryAt
+          : messageAt
+        : entryAt ?? messageAt ?? row.updated_at ?? row.created_at;
+
+    return {
+      detail: {
+        ...row,
+        isGroup: true,
+        groupInvite: groupInvite as GroupCollabInvite,
+        members: others,
+        other: others[0],
+        lastActivityAt,
+        lastEntryAuthorId: lastEntry?.author_id ?? lastMessage?.sender_id ?? null,
+        entries: (entries ?? []) as CollaborationEntry[],
+        messages: (messages ?? []) as CollaborationMessage[],
+      },
+      tableMissing: false,
+    };
+  }
+
+  const inviteMap = await loadInviteMap([row.collab_invite_id!]);
+  const invite = inviteMap[row.collab_invite_id!];
   if (!invite) return { detail: null, tableMissing: false };
   if (invite.sender_id !== userId && invite.receiver_id !== userId) {
     return { detail: null, tableMissing: false };
@@ -263,14 +458,15 @@ export async function loadCollaborationDetail(
 
   return {
     detail: {
-      ...(collab as Collaboration),
+      ...(row as Collaboration),
+      isGroup: false,
       invite,
       other: profile ? normalizeProfile(profile as Profile) : undefined,
       lastActivityAt:
         (entries ?? []).length > 0
           ? ((entries as CollaborationEntry[])[entries!.length - 1].updated_at ??
             (entries as CollaborationEntry[])[entries!.length - 1].created_at)
-          : ((collab as Collaboration).updated_at ?? (collab as Collaboration).created_at),
+          : (row.updated_at ?? row.created_at),
       entries: (entries ?? []) as CollaborationEntry[],
     },
     tableMissing: false,

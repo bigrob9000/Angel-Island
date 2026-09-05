@@ -6,6 +6,16 @@ Your app code expects these SQL migrations. Run each in **Supabase Dashboard →
 
 ---
 
+## 029 — Group collaborations
+
+Run the full file: `supabase/migrations/029_group_collaborations.sql`
+
+Group collab invites (max 6 people), workspace group chat, respond-then-open, 14-day expiry, creator-only add-member invites.
+
+**Try it:** Collaborations → **Start group collab**.
+
+---
+
 ## Collab invites — run this now
 
 **File:** `supabase/migrations/003_collab_invites.sql`
