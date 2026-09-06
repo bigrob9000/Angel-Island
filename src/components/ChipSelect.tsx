@@ -3,9 +3,10 @@ type ChipSelectProps = {
   selected: string[];
   onChange: (next: string[]) => void;
   max?: number;
+  formatLabel?: (option: string) => string;
 };
 
-export function ChipSelect({ options, selected, onChange, max }: ChipSelectProps) {
+export function ChipSelect({ options, selected, onChange, max, formatLabel }: ChipSelectProps) {
   function toggle(option: string) {
     if (selected.includes(option)) {
       onChange(selected.filter((x) => x !== option));
@@ -32,7 +33,7 @@ export function ChipSelect({ options, selected, onChange, max }: ChipSelectProps
                 : "border-foreground/30 text-muted hover:border-foreground/50 hover:text-foreground"
             }`}
           >
-            {option}
+            {formatLabel ? formatLabel(option) : option}
           </button>
         );
       })}

@@ -44,13 +44,15 @@ export function GroupMemberInvitesSection({ invites, onResponded }: Props) {
   return (
     <section>
       <h2 className="section-heading">{t("memberInvites")}</h2>
-      <p className="section-copy">Someone invited you to join an existing group workspace.</p>
+      <p className="section-copy">{t("memberInvitesCopy")}</p>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       <ul className="mt-4 space-y-3">
         {invites.map((invite) => (
           <li key={invite.id} className="surface p-4">
             <ProfileAttribution profile={invite.inviter} className="font-medium" />
-            <p className="mt-2 text-sm text-foreground">{invite.collaborationAbout ?? "Group collaboration"}</p>
+            <p className="mt-2 text-sm text-foreground">
+              {invite.collaborationAbout ?? t("groupCollaborationDefault")}
+            </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
@@ -58,7 +60,7 @@ export function GroupMemberInvitesSection({ invites, onResponded }: Props) {
                 disabled={actingId === invite.id}
                 className="btn-primary btn-sm"
               >
-                Join
+                {t("join")}
               </button>
               <button
                 type="button"
@@ -66,7 +68,7 @@ export function GroupMemberInvitesSection({ invites, onResponded }: Props) {
                 disabled={actingId === invite.id}
                 className="btn-secondary btn-sm"
               >
-                Maybe later
+                {t("maybeLater")}
               </button>
               <button
                 type="button"
@@ -74,7 +76,7 @@ export function GroupMemberInvitesSection({ invites, onResponded }: Props) {
                 disabled={actingId === invite.id}
                 className="btn-secondary btn-sm"
               >
-                Not a fit
+                {t("notFit")}
               </button>
             </div>
           </li>

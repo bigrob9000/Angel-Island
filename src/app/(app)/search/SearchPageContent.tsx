@@ -10,13 +10,16 @@ import { EmptyState } from "@/components/EmptyState";
 import { createClient } from "@/lib/supabase";
 import { searchAll, type CollaborationSearchResult, type ConversationSearchResult } from "@/lib/search";
 import { rankProfilesForViewer } from "@/lib/discovery";
-import { collaborationStatusLabel } from "@/lib/collaborations";
-import { conversationStatusLabel } from "@/lib/conversations";
+import {
+  collaborationStatusLabel,
+  conversationStatusLabel,
+} from "@/lib/i18n/labels";
 import type { Profile, Room } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
 
 export default function SearchPageContent() {
   const t = useTranslations("search");
+  const tStatus = useTranslations("status");
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
 
@@ -74,25 +77,23 @@ export default function SearchPageContent() {
     <div className="space-y-8">
       <div>
         <h1 className="page-lead">{t("title")}</h1>
-        <p className="section-copy">
-          Find rooms, people, conversations, and collaborations — no popularity ranking.
-        </p>
+        <p className="section-copy">{t("subtitle")}</p>
       </div>
 
       <SearchBar defaultValue={initialQuery} />
 
-      {loading && <p className="text-sm text-muted">Searching…</p>}
+      {loading && <p className="text-sm text-muted">{t("searching")}</p>}
 
       {searched && !loading && !hasResults && (
         <EmptyState
           title={t("empty")}
-          description="Try a different word — or browse people and rooms instead."
+          description={t("emptyDescription")}
         >
           <Link href="/rooms" className="btn-secondary">
-            Explore rooms
+            {t("exploreRooms")}
           </Link>
           <Link href="/explore" className="btn-secondary">
-            Explore people
+            {t("explorePeople")}
           </Link>
         </EmptyState>
       )}
@@ -111,7 +112,7 @@ export default function SearchPageContent() {
                   {room.description && <p className="mt-1 text-sm text-muted">{room.description}</p>}
                   {submitted && (
                     <p className="mt-2 text-xs text-muted italic">
-                      Matches &ldquo;{submitted}&rdquo; in room name or description
+                      {t("roomMatch", { query: submitted })}
                     </p>
                   )}
                 </Link>
@@ -131,7 +132,7 @@ export default function SearchPageContent() {
                   profile={profile}
                   reason={
                     profile.reason ??
-                    (submitted ? `Matches "${submitted}" in profile` : undefined)
+                    (submitted ? t("profileMatch", { query: submitted }) : undefined)
                   }
                 />
               </li>
@@ -145,7 +146,7 @@ export default function SearchPageContent() {
           <h2 className="section-heading">{t("conversations")}</h2>
           <ul className="mt-4 space-y-2">
             {conversations.map((conv) => {
-              const statusLabel = conversationStatusLabel(conv.conversation_status);
+              const statusLabel = conversationStatusLabel(conv.conversation_status, tStatus);
               return (
                 <li key={conv.id}>
                   <Link
@@ -172,7 +173,7 @@ export default function SearchPageContent() {
           <h2 className="section-heading">{t("collaborations")}</h2>
           <ul className="mt-4 space-y-2">
             {collaborations.map((collab) => {
-              const statusLabel = collaborationStatusLabel(collab.status);
+              const statusLabel = collaborationStatusLabel(collab.status, tStatus);
               return (
                 <li key={collab.id}>
                   <Link

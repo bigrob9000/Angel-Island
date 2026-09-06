@@ -25,6 +25,7 @@ import { TagInput } from "@/components/TagInput";
 import { formatProfileSaveError, validateUsername } from "@/lib/profile-errors";
 import { ProfileAvatarUpload } from "@/components/ProfileAvatarUpload";
 import { PageLoading } from "@/components/PageLoading";
+import { translateOpenToQuestions, translateProfileOption } from "@/lib/i18n/labels";
 
 const STEP_COUNT = 9;
 
@@ -41,6 +42,9 @@ export default function EditProfilePage() {
 
 function EditProfilePageContent() {
   const t = useTranslations("profile");
+  const tc = useTranslations("common");
+  const tOnboarding = useTranslations("onboarding");
+  const tProfileOptions = useTranslations("profileOptions");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [userId, setUserId] = useState<string | null>(null);
@@ -149,17 +153,15 @@ function EditProfilePageContent() {
   return (
     <div className="space-y-8 max-w-lg">
       <Link href="/profile" className="text-sm text-muted hover:text-foreground">
-        ← Profile
+        {tc("backToProfile")}
       </Link>
 
       <div>
         <p className="text-sm text-muted">
-          Step {step + 1} of {STEP_COUNT}
+          {t("stepProgress", { current: step + 1, total: STEP_COUNT })}
         </p>
         <h1 className="font-serif text-2xl font-medium text-foreground mt-1">{t("editTitle")}</h1>
-        <p className="mt-2 text-sm text-muted leading-relaxed">
-          Fill out as much or as little as you want. Your profile can change whenever you do.
-        </p>
+        <p className="mt-2 text-sm text-muted leading-relaxed">{t("editIntro")}</p>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -177,7 +179,7 @@ function EditProfilePageContent() {
             />
           )}
           <label className="block">
-            <span className="text-sm text-muted">First name</span>
+            <span className="text-sm text-muted">{tOnboarding("firstNameLabel")}</span>
             <input
               type="text"
               value={form.first_name ?? ""}
@@ -186,44 +188,45 @@ function EditProfilePageContent() {
             />
           </label>
           <label className="block">
-            <span className="text-sm text-muted">Username (for your profile link)</span>
+            <span className="text-sm text-muted">{t("usernameLabel")}</span>
             <input
               type="text"
               value={form.username ?? ""}
               onChange={(e) =>
                 updateForm({ username: e.target.value.toLowerCase().replace(/\s/g, "") })
               }
-              placeholder="e.g. angelisland"
+              placeholder={t("usernamePlaceholder")}
               className={inputClass}
             />
           </label>
           <label className="block">
-            <span className="text-sm text-muted">Pronouns (optional)</span>
+            <span className="text-sm text-muted">{t("pronounsLabel")}</span>
             <input
               type="text"
               value={form.pronouns ?? ""}
               onChange={(e) => updateForm({ pronouns: e.target.value })}
-              placeholder="e.g. she/her"
+              placeholder={t("pronounsPlaceholder")}
               className={inputClass}
             />
           </label>
           <label className="block">
-            <span className="text-sm text-muted">Location</span>
+            <span className="text-sm text-muted">{tOnboarding("locationLabel")}</span>
             <input
               type="text"
               value={form.location ?? ""}
               onChange={(e) => updateForm({ location: e.target.value })}
-              placeholder="e.g. Remote, or a city"
+              placeholder={t("locationPlaceholder")}
               className={inputClass}
             />
           </label>
           <div className="space-y-3 pt-2">
             <h3 className="text-sm font-medium text-foreground">{t("editHereFor")}</h3>
-            <p className="text-sm text-muted">From onboarding — pick any that fit. Optional.</p>
+            <p className="text-sm text-muted">{t("editHereForCopy")}</p>
             <ChipSelect
               options={HERE_FOR_OPTIONS}
               selected={form.here_for}
               onChange={(here_for) => updateForm({ here_for })}
+              formatLabel={(option) => translateProfileOption(option, tProfileOptions)}
             />
           </div>
         </section>
@@ -232,11 +235,12 @@ function EditProfilePageContent() {
       {step === 1 && (
         <section className="space-y-3">
           <h2 className="font-medium text-foreground">{t("editOpenTo")}</h2>
-          <p className="text-sm text-muted">How do you want to show up right now? Pick any that fit.</p>
+          <p className="text-sm text-muted">{t("editOpenToCopy")}</p>
           <ChipSelect
             options={OPEN_TO_OPTIONS}
             selected={form.open_to}
             onChange={(open_to) => updateForm({ open_to })}
+            formatLabel={(option) => translateProfileOption(option, tProfileOptions)}
           />
         </section>
       )}
@@ -244,15 +248,13 @@ function EditProfilePageContent() {
       {step === 2 && (
         <section className="space-y-3">
           <h2 className="font-medium text-foreground">{t("editAbout")}</h2>
-          <p className="text-sm text-muted">
-            How do you relate to music right now? A few honest sentences is enough.
-          </p>
+          <p className="text-sm text-muted">{t("editAboutCopy")}</p>
           <textarea
             value={form.about ?? ""}
             onChange={(e) => updateForm({ about: e.target.value })}
             rows={6}
             className={inputClass}
-            placeholder="Optional — no minimum length."
+            placeholder={t("editAboutPlaceholder")}
           />
         </section>
       )}
@@ -260,11 +262,12 @@ function EditProfilePageContent() {
       {step === 3 && (
         <section className="space-y-3">
           <h2 className="font-medium text-foreground">{t("editRoles")}</h2>
-          <p className="text-sm text-muted">Select any roles. You don&apos;t have to be an expert.</p>
+          <p className="text-sm text-muted">{t("editRolesCopy")}</p>
           <ChipSelect
             options={ROLE_OPTIONS}
             selected={form.roles}
             onChange={(roles) => updateForm({ roles })}
+            formatLabel={(option) => translateProfileOption(option, tProfileOptions)}
           />
         </section>
       )}
@@ -272,12 +275,13 @@ function EditProfilePageContent() {
       {step === 4 && (
         <section className="space-y-3">
           <h2 className="font-medium text-foreground">{t("editCollaborateAs")}</h2>
-          <p className="text-sm text-muted">Up to two roles. This can change anytime.</p>
+          <p className="text-sm text-muted">{t("editCollaborateAsCopy")}</p>
           <ChipSelect
             options={ROLE_OPTIONS}
             selected={form.collaborate_as}
             onChange={(collaborate_as) => updateForm({ collaborate_as })}
             max={2}
+            formatLabel={(option) => translateProfileOption(option, tProfileOptions)}
           />
         </section>
       )}
@@ -286,12 +290,12 @@ function EditProfilePageContent() {
         <section className="space-y-6">
           <div className="space-y-3">
             <h2 className="font-medium text-foreground">{t("editGenresMake")}</h2>
-            <p className="text-sm text-muted">A few is enough (up to 5).</p>
+            <p className="text-sm text-muted">{t("editGenresMakeCopy")}</p>
             <TagInput
               tags={form.genres_make}
               onChange={(genres_make) => updateForm({ genres_make })}
               max={5}
-              placeholder="e.g. indie, jazz"
+              placeholder={tOnboarding("genresPlaceholder")}
             />
           </div>
           <div className="space-y-3">
@@ -299,7 +303,7 @@ function EditProfilePageContent() {
             <TagInput
               tags={form.genres_love}
               onChange={(genres_love) => updateForm({ genres_love })}
-              placeholder="Add as many as you like"
+              placeholder={t("editGenresLovePlaceholder")}
             />
           </div>
         </section>
@@ -308,11 +312,12 @@ function EditProfilePageContent() {
       {step === 6 && (
         <section className="space-y-3">
           <h2 className="font-medium text-foreground">{t("editWorkingStyle")}</h2>
-          <p className="text-sm text-muted">This helps people reach out respectfully.</p>
+          <p className="text-sm text-muted">{t("editWorkingStyleCopy")}</p>
           <ChipSelect
             options={WORKING_STYLE_OPTIONS}
             selected={form.working_style}
             onChange={(working_style) => updateForm({ working_style })}
+            formatLabel={(option) => translateProfileOption(option, tProfileOptions)}
           />
         </section>
       )}
@@ -320,9 +325,9 @@ function EditProfilePageContent() {
       {step === 7 && (
         <section className="space-y-3">
           <h2 className="font-medium text-foreground">{t("editLearning")}</h2>
-          <p className="text-sm text-muted">Open to answering questions or sharing what you know?</p>
+          <p className="text-sm text-muted">{t("editLearningCopy")}</p>
           <div className="flex flex-wrap gap-2">
-            {OPEN_TO_QUESTIONS_OPTIONS.map(({ value, label }) => (
+            {OPEN_TO_QUESTIONS_OPTIONS.map(({ value }) => (
               <button
                 key={value}
                 type="button"
@@ -333,7 +338,7 @@ function EditProfilePageContent() {
                     : "border-foreground/30 text-muted hover:text-foreground"
                 }`}
               >
-                {label}
+                {translateOpenToQuestions(value as OpenToQuestions, tProfileOptions)}
               </button>
             ))}
           </div>
@@ -343,19 +348,15 @@ function EditProfilePageContent() {
       {step === 8 && (
         <section className="space-y-3">
           <h2 className="font-medium text-foreground">{t("editWorkLinks")}</h2>
-          <p className="text-sm text-muted">
-            Optional links or descriptions — one per line. Not sharing anything is fine.
-          </p>
+          <p className="text-sm text-muted">{t("editWorkLinksCopy")}</p>
           <textarea
             value={form.work_links ?? ""}
             onChange={(e) => updateForm({ work_links: e.target.value })}
             rows={4}
             className={inputClass}
-            placeholder="https://…"
+            placeholder={t("editWorkLinksPlaceholder")}
           />
-          <p className="text-sm text-muted italic">
-            Your profile reflects where you are right now. You can change it anytime.
-          </p>
+          <p className="text-sm text-muted italic">{t("editClosingNote")}</p>
         </section>
       )}
 
@@ -367,7 +368,7 @@ function EditProfilePageContent() {
             disabled={saving}
             className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
           >
-            {saving ? "Saving…" : "Continue"}
+            {saving ? tc("saving") : tc("continue")}
           </button>
         ) : (
           <>
@@ -377,7 +378,7 @@ function EditProfilePageContent() {
               disabled={saving}
               className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
             >
-              {saving ? "Saving…" : "Save & explore"}
+              {saving ? tc("saving") : t("saveAndExplore")}
             </button>
             <button
               type="button"
@@ -385,7 +386,7 @@ function EditProfilePageContent() {
               disabled={saving}
               className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5 disabled:opacity-50"
             >
-              Save
+              {t("save")}
             </button>
           </>
         )}
@@ -395,7 +396,7 @@ function EditProfilePageContent() {
           disabled={saving}
           className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground disabled:opacity-50"
         >
-          Save & exit
+          {t("saveAndExit")}
         </button>
         {step > 0 && (
           <button
@@ -404,7 +405,7 @@ function EditProfilePageContent() {
             disabled={saving}
             className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground disabled:opacity-50"
           >
-            Back
+            {t("back")}
           </button>
         )}
       </div>

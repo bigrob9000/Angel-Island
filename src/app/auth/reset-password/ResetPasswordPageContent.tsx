@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
 
 export default function ResetPasswordPageContent() {
+  const t = useTranslations("auth.resetPassword");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -19,25 +22,24 @@ export default function ResetPasswordPageContent() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         router.replace(
-          "/sign-in?error=" +
-            encodeURIComponent("That reset link expired or already was used. Request a new one."),
+          "/sign-in?error=" + encodeURIComponent(t("linkExpired")),
         );
         return;
       }
       setReady(true);
     });
-  }, [router]);
+  }, [router, t]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMessage(null);
 
     if (password.length < 6) {
-      setMessage({ type: "error", text: "Password must be at least 6 characters." });
+      setMessage({ type: "error", text: t("passwordTooShort") });
       return;
     }
     if (password !== confirm) {
-      setMessage({ type: "error", text: "Passwords do not match." });
+      setMessage({ type: "error", text: t("passwordsMismatch") });
       return;
     }
 
@@ -51,7 +53,7 @@ export default function ResetPasswordPageContent() {
       return;
     }
 
-    setMessage({ type: "ok", text: "Password updated. Redirecting…" });
+    setMessage({ type: "ok", text: t("passwordUpdated") });
     window.setTimeout(() => {
       window.location.href = "/home";
     }, 800);
@@ -60,7 +62,7 @@ export default function ResetPasswordPageContent() {
   if (!ready) {
     return (
       <div className="relative min-h-screen bg-ethereal text-foreground flex flex-col items-center justify-center px-6">
-        <p className="text-muted text-sm">Loading…</p>
+        <p className="text-muted text-sm">{tc("loading")}</p>
       </div>
     );
   }
@@ -73,14 +75,14 @@ export default function ResetPasswordPageContent() {
             <AngelIslandLogo asLink={false} variant="mark" size="nav" />
           </Link>
           <div className="min-w-0">
-            <h1 className="font-serif text-2xl font-medium">Choose a new password</h1>
-            <p className="text-muted mt-2 text-sm">Enter a new password for your account.</p>
+            <h1 className="font-serif text-2xl font-medium">{t("title")}</h1>
+            <p className="text-muted mt-2 text-sm">{t("subtitle")}</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <label className="block">
-            <span className="text-sm text-muted">New password</span>
+            <span className="text-sm text-muted">{t("newPasswordLabel")}</span>
             <input
               type="password"
               value={password}
@@ -92,7 +94,7 @@ export default function ResetPasswordPageContent() {
             />
           </label>
           <label className="block">
-            <span className="text-sm text-muted">Confirm password</span>
+            <span className="text-sm text-muted">{t("confirmPasswordLabel")}</span>
             <input
               type="password"
               value={confirm}
@@ -113,13 +115,13 @@ export default function ResetPasswordPageContent() {
             disabled={loading}
             className="w-full rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
-            {loading ? "Saving…" : "Update password"}
+            {loading ? tc("saving") : t("updatePassword")}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted">
           <Link href="/sign-in" className="hover:text-foreground underline underline-offset-2">
-            Back to sign in
+            {t("backToSignIn")}
           </Link>
         </p>
       </div>

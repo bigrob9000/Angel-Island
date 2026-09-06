@@ -8,6 +8,33 @@ function isAppLocale(value: string): value is AppLocale {
   return (locales as readonly string[]).includes(value);
 }
 
+function deepMerge(
+  base: Record<string, unknown>,
+  override: Record<string, unknown>,
+): Record<string, unknown> {
+  const result = { ...base };
+  for (const key of Object.keys(override)) {
+    const baseVal = base[key];
+    const overrideVal = override[key];
+    if (
+      overrideVal &&
+      typeof overrideVal === "object" &&
+      !Array.isArray(overrideVal) &&
+      baseVal &&
+      typeof baseVal === "object" &&
+      !Array.isArray(baseVal)
+    ) {
+      result[key] = deepMerge(
+        baseVal as Record<string, unknown>,
+        overrideVal as Record<string, unknown>,
+      );
+    } else {
+      result[key] = overrideVal;
+    }
+  }
+  return result;
+}
+
 async function resolveLocale(): Promise<AppLocale> {
   const cookieStore = await cookies();
   const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
@@ -33,9 +60,17 @@ async function resolveLocale(): Promise<AppLocale> {
 
 export default getRequestConfig(async () => {
   const locale = await resolveLocale();
+  const enMessages = (await import("../../messages/en.json")).default;
 
-  return {
-    locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
-  };
+  if (locale === defaultLocale) {
+    return { locale, messages: enMessages };
+  }
+
+  const localeMessages = (await import(`../../messages/${locale}.json`)).default;
+  const messages = deepMerge(
+    enMessages as Record<string, unknown>,
+    localeMessages as Record<string, unknown>,
+  );
+
+  return { locale, messages };
 });

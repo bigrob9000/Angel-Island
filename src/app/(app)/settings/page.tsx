@@ -117,7 +117,7 @@ export default function SettingsPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("email_updated") !== "1") return;
 
-    setEmailMessage({ type: "ok", text: "Your email address was updated." });
+    setEmailMessage({ type: "ok", text: t("emailUpdated") });
     window.history.replaceState({}, "", "/settings");
 
     const supabase = createClient();
@@ -133,19 +133,19 @@ export default function SettingsPage() {
 
     const trimmed = newEmail.trim();
     if (!trimmed) {
-      setEmailMessage({ type: "error", text: "Enter a new email address." });
+      setEmailMessage({ type: "error", text: t("errors.enterNewEmail") });
       return;
     }
     if (!isValidEmailAddress(trimmed)) {
-      setEmailMessage({ type: "error", text: "Enter a valid email address." });
+      setEmailMessage({ type: "error", text: t("errors.invalidEmail") });
       return;
     }
     if (email && trimmed.toLowerCase() === email.toLowerCase()) {
-      setEmailMessage({ type: "error", text: "That's already your email address." });
+      setEmailMessage({ type: "error", text: t("errors.sameEmail") });
       return;
     }
     if (!emailChangePassword) {
-      setEmailMessage({ type: "error", text: "Enter your current password to confirm this change." });
+      setEmailMessage({ type: "error", text: t("errors.confirmPasswordForEmail") });
       return;
     }
 
@@ -158,7 +158,7 @@ export default function SettingsPage() {
     });
     if (signInError) {
       setEmailSaving(false);
-      setEmailMessage({ type: "error", text: "Current password is incorrect." });
+      setEmailMessage({ type: "error", text: t("errors.incorrectPassword") });
       return;
     }
 
@@ -179,7 +179,7 @@ export default function SettingsPage() {
     setPendingEmail(data.user?.new_email ?? trimmed);
     setEmailMessage({
       type: "ok",
-      text: "Confirmation sent. Check your new inbox for a link — Supabase may also email your current address to confirm the change.",
+      text: t("emailConfirmationSent"),
     });
   }
 
@@ -188,11 +188,11 @@ export default function SettingsPage() {
     setAccountMessage(null);
 
     if (newPassword.length < 6) {
-      setAccountMessage({ type: "error", text: "Password must be at least 6 characters." });
+      setAccountMessage({ type: "error", text: t("errors.passwordTooShort") });
       return;
     }
     if (newPassword !== confirmPassword) {
-      setAccountMessage({ type: "error", text: "Passwords do not match." });
+      setAccountMessage({ type: "error", text: t("errors.passwordsMismatch") });
       return;
     }
 
@@ -208,7 +208,7 @@ export default function SettingsPage() {
 
     setNewPassword("");
     setConfirmPassword("");
-    setAccountMessage({ type: "ok", text: "Password updated." });
+    setAccountMessage({ type: "ok", text: t("passwordUpdated") });
   }
 
   async function handleDeleteAccount(e: React.FormEvent) {
@@ -216,7 +216,7 @@ export default function SettingsPage() {
     setDeleteMessage(null);
 
     if (deleteConfirmation.trim().toUpperCase() !== "DELETE") {
-      setDeleteMessage({ type: "error", text: "Type DELETE to confirm." });
+      setDeleteMessage({ type: "error", text: t("errors.typeDelete") });
       return;
     }
 
@@ -231,7 +231,7 @@ export default function SettingsPage() {
     setDeleteSaving(false);
 
     if (!response.ok) {
-      setDeleteMessage({ type: "error", text: data.error ?? "Could not delete account." });
+      setDeleteMessage({ type: "error", text: data.error ?? t("errors.deleteFailed") });
       return;
     }
 
@@ -271,7 +271,7 @@ export default function SettingsPage() {
     if (error) {
       setNotifyMessage(
         error.message.includes("notify_email")
-          ? "Email settings aren't set up yet. Run migration 017_email_notifications.sql in Supabase."
+          ? t("errors.emailNotificationsNotSetup")
           : error.message,
       );
       if (field === "notify_email_messages") setNotifyMessages(!checked);
@@ -282,17 +282,17 @@ export default function SettingsPage() {
   async function enableBrowserPush(): Promise<boolean> {
     const status = pushStatus ?? (await fetchPushStatus());
     if (!status.supported) {
-      setPushMessage("This browser doesn't support push notifications.");
+      setPushMessage(t("errors.pushNotSupported"));
       return false;
     }
     if (!status.configured || !status.publicKey) {
-      setPushMessage("Push isn't set up on the server yet. Add VAPID keys in Vercel and redeploy.");
+      setPushMessage(t("errors.pushNotConfigured"));
       return false;
     }
 
     const subscribeResult = await subscribeToPush(status.publicKey);
     if (!subscribeResult.ok) {
-      setPushMessage(subscribeResult.error ?? "Could not enable browser notifications.");
+      setPushMessage(subscribeResult.error ?? t("errors.pushEnableFailed"));
       return false;
     }
 
@@ -326,7 +326,7 @@ export default function SettingsPage() {
     if (error) {
       setPushMessage(
         error.message.includes("notify_push")
-          ? "Browser notification settings aren't set up yet. Run migration 018_browser_push.sql in Supabase."
+          ? t("errors.pushSettingsNotSetup")
           : error.message,
       );
       setNotifyPush(!checked);
@@ -360,7 +360,7 @@ export default function SettingsPage() {
     if (error) {
       setPushMessage(
         error.message.includes("notify_push_collab")
-          ? "Collab push settings aren't set up yet. Run migration 021_notify_push_collab.sql in Supabase."
+          ? t("errors.pushCollabNotSetup")
           : error.message,
       );
       setNotifyPushCollab(!checked);
@@ -373,11 +373,11 @@ export default function SettingsPage() {
     const result = await sendTestNotificationEmail();
     setTestEmailLoading(false);
     if (result.ok) {
-      setTestEmailResult({ type: "ok", text: result.message ?? "Test email sent." });
+      setTestEmailResult({ type: "ok", text: result.message ?? t("testEmailSent") });
     } else {
       setTestEmailResult({
         type: "error",
-        text: result.error ?? "Could not send test email.",
+        text: result.error ?? t("errors.testEmailFailed"),
       });
     }
   }
@@ -414,7 +414,7 @@ export default function SettingsPage() {
           <p className="mt-1 text-foreground">{email ?? "—"}</p>
           {pendingEmail && pendingEmail !== email && (
             <p className="mt-2 text-sm text-muted">
-              Waiting for confirmation:{" "}
+              {t("pendingEmailConfirmation")}{" "}
               <span className="text-foreground">{pendingEmail}</span>
             </p>
           )}
@@ -422,13 +422,10 @@ export default function SettingsPage() {
 
         {hasPassword ? (
           <form onSubmit={handleEmailChange} className="space-y-4 border-t border-foreground/10 pt-5">
-            <p className="text-sm font-medium text-foreground">Change email</p>
-            <p className="text-sm text-muted">
-              We&apos;ll send a confirmation link to your new address. You may need to confirm from
-              both your old and new inbox.
-            </p>
+            <p className="text-sm font-medium text-foreground">{t("changeEmailTitle")}</p>
+            <p className="text-sm text-muted">{t("changeEmailCopy")}</p>
             <label className="block">
-              <span className="text-sm text-muted">New email</span>
+              <span className="text-sm text-muted">{t("newEmailLabel")}</span>
               <input
                 type="email"
                 value={newEmail}
@@ -438,7 +435,7 @@ export default function SettingsPage() {
               />
             </label>
             <label className="block">
-              <span className="text-sm text-muted">Current password</span>
+              <span className="text-sm text-muted">{t("currentPasswordLabel")}</span>
               <input
                 type="password"
                 value={emailChangePassword}
@@ -460,20 +457,20 @@ export default function SettingsPage() {
               disabled={emailSaving || !newEmail.trim() || !emailChangePassword}
               className="btn-secondary disabled:opacity-50"
             >
-              {emailSaving ? "Sending…" : "Update email"}
+              {emailSaving ? tc("sending") : t("updateEmail")}
             </button>
           </form>
         ) : hasGoogle ? (
           <p className="border-t border-foreground/10 pt-5 text-sm text-muted">
-            You sign in with Google — your email and password are managed by your Google account.
+            {t("googleAccountCopy")}
           </p>
         ) : null}
 
         {hasPassword ? (
         <form onSubmit={handlePasswordChange} className="space-y-4 border-t border-foreground/10 pt-5">
-          <p className="text-sm font-medium text-foreground">Change password</p>
+          <p className="text-sm font-medium text-foreground">{t("changePasswordTitle")}</p>
           <label className="block">
-            <span className="text-sm text-muted">New password</span>
+            <span className="text-sm text-muted">{t("newPasswordLabel")}</span>
             <input
               type="password"
               value={newPassword}
@@ -483,7 +480,7 @@ export default function SettingsPage() {
             />
           </label>
           <label className="block">
-            <span className="text-sm text-muted">Confirm new password</span>
+            <span className="text-sm text-muted">{t("confirmPasswordLabel")}</span>
             <input
               type="password"
               value={confirmPassword}
@@ -505,18 +502,16 @@ export default function SettingsPage() {
             disabled={accountSaving || !newPassword}
             className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5 disabled:opacity-50"
           >
-            {accountSaving ? "Saving…" : "Update password"}
+            {accountSaving ? tc("saving") : t("updatePassword")}
           </button>
         </form>
         ) : null}
 
         <form onSubmit={handleDeleteAccount} className="space-y-4 border-t border-foreground/10 pt-5">
-          <p className="text-sm font-medium text-foreground">Delete account</p>
-          <p className="text-sm text-muted">
-            Permanently remove your profile, messages, and collaboration data. This cannot be undone.
-          </p>
+          <p className="text-sm font-medium text-foreground">{t("deleteAccountTitle")}</p>
+          <p className="text-sm text-muted">{t("deleteAccountCopy")}</p>
           <label className="block">
-            <span className="text-sm text-muted">Type DELETE to confirm</span>
+            <span className="text-sm text-muted">{t("deleteConfirmLabel")}</span>
             <input
               type="text"
               value={deleteConfirmation}
@@ -538,7 +533,7 @@ export default function SettingsPage() {
             disabled={deleteSaving || deleteConfirmation.trim().toUpperCase() !== "DELETE"}
             className="rounded-md border border-red-600/40 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
           >
-            {deleteSaving ? "Deleting…" : "Delete my account"}
+            {deleteSaving ? t("deleting") : t("deleteAccountButton")}
           </button>
         </form>
       </section>
@@ -573,15 +568,13 @@ export default function SettingsPage() {
       <section className="surface p-5 space-y-6">
         <div>
           <h2 className="font-medium text-foreground">{t("emailUpdatesTitle")}</h2>
-          <p className="mt-1 text-sm text-muted">
-            Gentle emails when someone reaches out — no nudges, no guilt. Turn off anytime.
-          </p>
+          <p className="mt-1 text-sm text-muted">{t("emailUpdatesCopy")}</p>
         </div>
 
         <SettingsToggle
           id="notify-messages"
-          label="New messages"
-          description="Email when someone sends you a message (at most once every 30 minutes per conversation)."
+          label={t("notifyMessagesLabel")}
+          description={t("notifyMessagesDescription")}
           checked={notifyMessages}
           disabled={notifySaving === "notify_email_messages"}
           onChange={(checked) => updateNotifyPref("notify_email_messages", checked)}
@@ -589,8 +582,8 @@ export default function SettingsPage() {
 
         <SettingsToggle
           id="notify-collab"
-          label="Collab updates"
-          description="Email when someone responds to a collab invite or adds something to a shared workspace (at most once every 30 minutes per collaboration)."
+          label={t("notifyCollabLabel")}
+          description={t("notifyCollabDescription")}
           checked={notifyCollab}
           disabled={notifySaving === "notify_email_collab"}
           onChange={(checked) => updateNotifyPref("notify_email_collab", checked)}
@@ -609,10 +602,10 @@ export default function SettingsPage() {
             disabled={testEmailLoading}
             className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5 disabled:opacity-50"
           >
-            {testEmailLoading ? "Sending…" : "Send test email to me"}
+            {testEmailLoading ? tc("sending") : t("sendTestEmail")}
           </button>
           <p className="mt-2 text-xs text-muted">
-            Uses your account email ({email ?? "—"}). With Resend testing, only verified addresses receive mail until your domain is set up.
+            {t("testEmailHint", { email: email ?? "—" })}
           </p>
           {testEmailResult && (
             <p
@@ -628,17 +621,12 @@ export default function SettingsPage() {
       <section className="surface p-5 space-y-6">
         <div>
           <h2 className="font-medium text-foreground">{t("browserNotificationsTitle")}</h2>
-          <p className="mt-1 text-sm text-muted">
-            Optional alerts for messages and collab workspace activity — even if Angel Island isn&apos;t
-            open. Off by default.
-          </p>
+          <p className="mt-1 text-sm text-muted">{t("browserNotificationsCopy")}</p>
           {pushStatus &&
             pushStatus.supported &&
             pushStatus.configured &&
             pushStatus.permission === "denied" && (
-              <p className="mt-2 text-sm text-red-600">
-                Notifications are blocked for this site. Allow them in your browser&apos;s site settings, then try again.
-              </p>
+              <p className="mt-2 text-sm text-red-600">{t("notificationsBlocked")}</p>
             )}
           {pushStatus && !pushStatus.supported && pushStatus.mobileHint && (
             <p className="mt-2 text-sm text-muted">{pushStatus.mobileHint}</p>
@@ -651,8 +639,8 @@ export default function SettingsPage() {
 
         <SettingsToggle
           id="notify-push"
-          label="New messages"
-          description="Browser alert when someone sends you a message (at most once every 30 minutes per conversation)."
+          label={t("pushMessagesLabel")}
+          description={t("pushMessagesDescription")}
           checked={notifyPush}
           disabled={
             pushSaving ||
@@ -665,8 +653,8 @@ export default function SettingsPage() {
 
         <SettingsToggle
           id="notify-push-collab"
-          label="Collab workspace activity"
-          description="Browser alert when someone adds a note, link, or next step to a shared collaboration (at most once every 30 minutes per collaboration)."
+          label={t("pushCollabLabel")}
+          description={t("pushCollabDescription")}
           checked={notifyPushCollab}
           disabled={
             pushCollabSaving ||
@@ -687,26 +675,20 @@ export default function SettingsPage() {
       <section className="surface p-5 space-y-5">
         <div>
           <h2 className="font-medium text-foreground">{t("blockedPeopleTitle")}</h2>
-          <p className="mt-1 text-sm text-muted">
-            People you&apos;ve blocked won&apos;t appear in search or Explore, and you can&apos;t
-            message each other.
-          </p>
+          <p className="mt-1 text-sm text-muted">{t("blockedPeopleCopy")}</p>
         </div>
 
         {blocksLoading ? (
-          <p className="text-sm text-muted">Loading…</p>
+          <p className="text-sm text-muted">{tc("loading")}</p>
         ) : blocksTableMissing ? (
-          <p className="text-sm text-muted">
-            Blocking isn&apos;t set up yet. Run migration{" "}
-            <code className="text-xs">009_user_blocks_and_reports.sql</code> in Supabase.
-          </p>
+          <p className="text-sm text-muted">{t("blockingNotSetup")}</p>
         ) : blockedUsers.length === 0 ? (
-          <p className="text-sm text-muted">You haven&apos;t blocked anyone.</p>
+          <p className="text-sm text-muted">{t("noBlockedUsers")}</p>
         ) : (
           <ul className="space-y-3">
             {blockedUsers.map((block) => {
               const name =
-                block.profile?.first_name ?? block.profile?.username ?? "Someone";
+                block.profile?.first_name ?? block.profile?.username ?? tc("someone");
               const username = block.profile?.username;
               return (
                 <li
@@ -730,7 +712,7 @@ export default function SettingsPage() {
                     disabled={unblockingId === block.blocked_id}
                     className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50"
                   >
-                    {unblockingId === block.blocked_id ? "Unblocking…" : "Unblock"}
+                    {unblockingId === block.blocked_id ? tc("unblocking") : tc("unblock")}
                   </button>
                 </li>
               );

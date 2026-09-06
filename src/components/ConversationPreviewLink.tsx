@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { conversationStatusLabel } from "@/lib/conversations";
+import { useTranslations } from "next-intl";
+import { conversationStatusLabel } from "@/lib/i18n/labels";
 import type { ConversationPreview } from "@/lib/conversations";
 
 type Props = {
@@ -8,9 +11,11 @@ type Props = {
 };
 
 export function ConversationPreviewLink({ conversation, className = "" }: Props) {
+  const t = useTranslations("messages");
+  const tStatus = useTranslations("status");
   const name =
-    conversation.other?.first_name ?? conversation.other?.username ?? "Someone";
-  const statusLabel = conversationStatusLabel(conversation.conversation_status);
+    conversation.other?.first_name ?? conversation.other?.username ?? t("someone");
+  const statusLabel = conversationStatusLabel(conversation.conversation_status, tStatus);
   const href = conversation.collaborationId
     ? `/collaborations/${conversation.collaborationId}`
     : `/messages/${conversation.id}`;
@@ -34,7 +39,7 @@ export function ConversationPreviewLink({ conversation, className = "" }: Props)
         <span className="block font-medium text-foreground">
           {name}
           {conversation.unread && (
-            <span className="sr-only">, unread</span>
+            <span className="sr-only">{t("unread")}</span>
           )}
           {statusLabel && (
             <span className="ml-2 text-xs font-normal text-muted">· {statusLabel}</span>

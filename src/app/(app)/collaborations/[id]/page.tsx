@@ -8,12 +8,10 @@ import { createClient } from "@/lib/supabase";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
 import type { CollaborationEntry, CollaborationEntryType } from "@/lib/types";
-import { COLLAB_PACE_LABELS } from "@/lib/types";
 import {
   addCollaborationEntry,
   collaborationFocusLine,
   collaborationQuietLine,
-  collaborationStatusLabel,
   collaborationsSetupError,
   deleteCollaborationEntry,
   loadCollaborationDetail,
@@ -21,6 +19,7 @@ import {
   updateCollaborationStatus,
   type CollaborationDetail,
 } from "@/lib/collaborations";
+import { collaborationStatusLabel, translatePace } from "@/lib/i18n/labels";
 import {
   formatMemberNames,
   GROUP_COLLAB_MAX_MEMBERS,
@@ -42,6 +41,8 @@ const inputClass =
 
 export default function CollaborationWorkspacePage() {
   const t = useTranslations("collaborations");
+  const tStatus = useTranslations("status");
+  const tPace = useTranslations("pace");
   const params = useParams();
   const router = useRouter();
   const collaborationId = params.id as string;
@@ -296,10 +297,10 @@ export default function CollaborationWorkspacePage() {
         : detail.invite.sender_id;
   const paceLabel = detail.isGroup
     ? detail.groupInvite?.pace
-      ? COLLAB_PACE_LABELS[detail.groupInvite.pace]
+      ? translatePace(detail.groupInvite.pace, tPace)
       : null
     : detail.invite?.pace
-      ? COLLAB_PACE_LABELS[detail.invite.pace]
+      ? translatePace(detail.invite.pace, tPace)
       : null;
   const quietLine =
     detail.status !== "ended" ? collaborationQuietLine(detail.lastActivityAt) : null;
@@ -688,7 +689,7 @@ export default function CollaborationWorkspacePage() {
       )}
 
       <p className="text-xs text-muted">
-        Status: {collaborationStatusLabel(detail.status)} ·{" "}
+        Status: {collaborationStatusLabel(detail.status, tStatus)} ·{" "}
         <ProfileAttribution profile={detail.other} />
       </p>
 

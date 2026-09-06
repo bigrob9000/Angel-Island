@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { Profile } from "@/lib/types";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { isFullProfileComplete } from "@/lib/profile-completeness";
@@ -20,6 +23,7 @@ function profileChips(profile: Profile): string[] {
 }
 
 export function ProfileCard({ profile, reason, showCompletenessBadge = true }: ProfileCardProps) {
+  const t = useTranslations("profile");
   const name = profile.first_name || profile.username;
   if (!name) return null;
 
@@ -37,7 +41,7 @@ export function ProfileCard({ profile, reason, showCompletenessBadge = true }: P
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-medium text-foreground">{name}</p>
-            {fullProfile && <span className="chip-muted">Complete</span>}
+            {fullProfile && <span className="chip-muted">{t("completeBadge")}</span>}
           </div>
           {profile.username && <p className="text-sm text-muted">@{profile.username}</p>}
           {profile.location && <p className="mt-0.5 text-sm text-muted">{profile.location}</p>}
@@ -57,7 +61,7 @@ export function ProfileCard({ profile, reason, showCompletenessBadge = true }: P
       {excerpt && <p className="mt-3 text-sm text-muted leading-relaxed">{excerpt}</p>}
       {reason && <p className="mt-2 text-xs text-muted/90 italic">{reason}</p>}
       {!profile.username && (
-        <p className="mt-2 text-xs text-muted">No username yet — profile link unavailable.</p>
+        <p className="mt-2 text-xs text-muted">{t("noUsernameYet")}</p>
       )}
     </>
   );

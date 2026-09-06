@@ -53,9 +53,7 @@ export default function NotificationsPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-serif text-2xl font-medium text-foreground">{t("title")}</h1>
-          <p className="mt-2 text-sm text-muted">
-            Unread messages and collaboration updates in one place.
-          </p>
+          <p className="mt-2 text-sm text-muted">{t("subtitle")}</p>
         </div>
         {totalUnread > 0 && (
           <button
@@ -63,7 +61,7 @@ export default function NotificationsPage() {
             onClick={markAllRead}
             className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
           >
-            Mark all read
+            {t("markAllRead")}
           </button>
         )}
       </div>
@@ -71,19 +69,19 @@ export default function NotificationsPage() {
       {totalUnread === 0 ? (
         <EmptyState
           title={t("empty")}
-          description="New messages and collab activity will show up here."
+          description={t("emptyDescription")}
         >
           <Link
             href="/messages"
             className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
           >
-            Messages
+            {t("messagesLink")}
           </Link>
           <Link
             href="/collaborations"
             className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
           >
-            Collaborations
+            {t("collaborationsLink")}
           </Link>
         </EmptyState>
       ) : (

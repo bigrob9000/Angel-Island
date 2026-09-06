@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { createClient } from "@/lib/supabase";
 import {
   collaborationFocusLine,
-  collaborationQuietLine,
-  collaborationStatusLabel,
-  collaborationToneLine,
+  isCollaborationQuiet,
   updateCollaborationStatus,
   type CollaborationPreview,
 } from "@/lib/collaborations";
+import { collaborationStatusLabel, translatePace } from "@/lib/i18n/labels";
 import type { Profile } from "@/lib/types";
 import { formatMemberNames } from "@/lib/group-collaborations";
 
@@ -34,12 +34,19 @@ export function CollaborationPreviewLink({
   onUpdated,
 }: Props) {
   const router = useRouter();
+  const t = useTranslations("collaborations");
+  const tPace = useTranslations("pace");
+  const tStatus = useTranslations("status");
   const [acting, setActing] = useState(false);
-  const tone = collaborationToneLine(preview);
+  const pace = preview.isGroup ? preview.groupInvite?.pace : preview.invite?.pace;
+  const tone = pace ? translatePace(pace, tPace) : null;
   const quietLine =
-    showQuiet && preview.status !== "ended"
-      ? collaborationQuietLine(preview.lastActivityAt)
+    showQuiet && preview.status !== "ended" && isCollaborationQuiet(preview.lastActivityAt)
+      ? t("quietHint")
       : null;
+  const focusLine = collaborationFocusLine(preview);
+  const displayFocus =
+    focusLine === "Collaboration" ? t("detailTitle") : focusLine;
 
   const showActionRow =
     showActions &&
@@ -52,10 +59,7 @@ export function CollaborationPreviewLink({
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    if (
-      status === "paused" &&
-      !window.confirm("Pause this collaboration? You can resume anytime — no explanation needed.")
-    ) {
+    if (status === "paused" && !window.confirm(t("pauseConfirm"))) {
       return;
     }
 
@@ -87,7 +91,9 @@ export function CollaborationPreviewLink({
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           {preview.isGroup ? (
             <span className="font-medium text-foreground">
-              Group · {formatMemberNames((preview.members ?? []) as Profile[])}
+              {t("groupWithMembers", {
+                names: formatMemberNames((preview.members ?? []) as Profile[]),
+              })}
             </span>
           ) : (
             <ProfileAttribution profile={preview.other} className="font-medium" />
@@ -96,19 +102,22 @@ export function CollaborationPreviewLink({
             {unread && (
               <span className="h-2 w-2 rounded-full bg-accent" aria-hidden />
             )}
-            <span className="text-xs text-muted">{collaborationStatusLabel(preview.status)}</span>
+            <span className="text-xs text-muted">
+              {collaborationStatusLabel(preview.status, tStatus)}
+            </span>
           </div>
         </div>
         <p className={`mt-2 text-sm ${unread ? "font-medium text-foreground" : "text-foreground"}`}>
-          {collaborationFocusLine(preview)}
+          {displayFocus}
         </p>
         {tone && <p className="mt-1 text-sm text-muted">{tone}</p>}
         {quietLine && <p className="mt-2 text-xs text-muted italic">{quietLine}</p>}
         <p className="mt-2 text-xs text-muted">
-          Last activity{" "}
-          {new Date(preview.lastActivityAt).toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
+          {t("lastActivity", {
+            date: new Date(preview.lastActivityAt).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            }),
           })}
         </p>
       </Link>
@@ -122,7 +131,7 @@ export function CollaborationPreviewLink({
               disabled={acting}
               className="btn-primary btn-sm"
             >
-              Resume
+              {t("resume")}
             </button>
           )}
           {preview.status === "active" && quietLine && (
@@ -131,7 +140,7 @@ export function CollaborationPreviewLink({
                 href={`/collaborations/${preview.id}`}
                 className="btn-secondary btn-sm"
               >
-                Pick back up
+                {t("pickBackUp")}
               </Link>
               <button
                 type="button"
@@ -139,7 +148,7 @@ export function CollaborationPreviewLink({
                 disabled={acting}
                 className="btn-secondary btn-sm"
               >
-                Pause
+                {t("pause")}
               </button>
             </>
           )}

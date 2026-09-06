@@ -96,15 +96,12 @@ export default function ExplorePage() {
     <div className="space-y-8">
       <div>
         <h1 className="font-serif text-2xl font-medium text-foreground">{t("title")}</h1>
-        <p className="mt-2 text-sm text-muted">
-          Musicians on Angel Island right now. Suggested order uses overlap with your profile — not
-          popularity or clout.
-        </p>
+        <p className="mt-2 text-sm text-muted">{t("subtitle")}</p>
       </div>
 
       {viewerProfile && quickFilters.length > 0 && !hasActiveDiscoveryFilters(filters) && (
         <section>
-          <p className="text-sm text-muted">From your profile</p>
+          <p className="text-sm text-muted">{t("fromProfile")}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {quickFilters.map((item) => (
               <button
@@ -121,12 +118,12 @@ export default function ExplorePage() {
       )}
 
       <label className="block">
-        <span className="text-sm text-muted">Search this list</span>
+        <span className="text-sm text-muted">{t("searchLabel")}</span>
         <input
           type="search"
           value={filters.query}
           onChange={(e) => setFilters((prev) => ({ ...prev, query: e.target.value }))}
-          placeholder="Name, username, location, or keywords"
+          placeholder={t("searchPlaceholder")}
           className="mt-1 block w-full rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
         />
       </label>
@@ -158,9 +155,9 @@ export default function ExplorePage() {
       )}
 
       <p className="text-sm text-muted">
-        Looking for rooms too?{" "}
+        {t("searchRoomsHint")}{" "}
         <Link href="/search" className="text-foreground underline hover:no-underline">
-          Search Angel Island
+          {t("searchRoomsLink")}
         </Link>
       </p>
 
@@ -171,10 +168,10 @@ export default function ExplorePage() {
           title={profiles.length === 0 ? t("emptyAlone") : t("emptyNoMatch")}
           description={
             profiles.length === 0
-              ? "When others join, they'll show up here. You can also meet people in Introductions."
+              ? t("emptyAloneDescription")
               : hasActiveDiscoveryFilters(filters)
-                ? "Try clearing a filter or a different word."
-                : "Try a different search word."
+                ? t("emptyNoMatchFilters")
+                : t("emptyNoMatchSearch")
           }
         >
           {profiles.length === 0 ? (
@@ -182,7 +179,7 @@ export default function ExplorePage() {
               href="/rooms/introductions"
               className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
             >
-              Visit Introductions
+              {t("visitIntroductions")}
             </Link>
           ) : (
             <button
@@ -190,14 +187,14 @@ export default function ExplorePage() {
               onClick={() => setFilters(EMPTY_DISCOVERY_FILTERS)}
               className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
             >
-              Clear all
+              {t("clearAll")}
             </button>
           )}
         </EmptyState>
       ) : (
         <div className="space-y-8">
           <p className="text-sm text-muted">
-            Showing {shown.length} {shown.length === 1 ? "person" : "people"}
+            {t("showingCount", { count: shown.length })}
           </p>
 
           {grouped.useGroups ? (
@@ -206,16 +203,14 @@ export default function ExplorePage() {
                 <h2 className="font-serif text-lg font-medium text-foreground">
                   {t("suggestedGroup")}
                 </h2>
-                <p className="mt-1 text-sm text-muted">
-                  Shared location, genres, roles, or collaboration fit with your profile.
-                </p>
+                <p className="mt-1 text-sm text-muted">{t("suggestedGroupCopy")}</p>
                 <div className="mt-4">
                   <ExploreProfileList profiles={grouped.suggested} />
                 </div>
               </section>
               <section>
                 <h2 className="font-serif text-lg font-medium text-foreground">{t("moreMusicians")}</h2>
-                <p className="mt-1 text-sm text-muted">Everyone else on Angel Island right now.</p>
+                <p className="mt-1 text-sm text-muted">{t("moreMusiciansCopy")}</p>
                 <div className="mt-4">
                   <ExploreProfileList profiles={grouped.others} />
                 </div>

@@ -6,6 +6,7 @@ import { getInviteSignInUrl, INVITE_MESSAGE_TEMPLATE } from "@/lib/invite";
 
 export function InviteMusiciansCard() {
   const t = useTranslations("settings");
+  const tc = useTranslations("common");
   const [copied, setCopied] = useState<"link" | "message" | null>(null);
   const inviteUrl = getInviteSignInUrl(
     typeof window !== "undefined" ? window.location.origin : undefined,
@@ -25,14 +26,11 @@ export function InviteMusiciansCard() {
     <section className="surface p-5">
       <div>
         <h2 className="font-medium text-foreground">{t("inviteMusiciansTitle")}</h2>
-        <p className="mt-1 text-sm text-muted">
-          Share this link with people you&apos;d actually want to play or collaborate with. They&apos;ll
-          read about Angel Island first, then create an account when they&apos;re ready.
-        </p>
+        <p className="mt-1 text-sm text-muted">{t("inviteMusiciansCopy")}</p>
       </div>
 
       <label className="block">
-        <span className="text-sm text-muted">Invite link</span>
+        <span className="text-sm text-muted">{t("inviteLinkLabel")}</span>
         <input
           type="text"
           readOnly
@@ -48,14 +46,14 @@ export function InviteMusiciansCard() {
           onClick={() => copy(inviteUrl, "link")}
           className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
         >
-          {copied === "link" ? "Copied!" : "Copy link"}
+          {copied === "link" ? tc("copied") : t("copyLink")}
         </button>
         <button
           type="button"
           onClick={() => copy(`${INVITE_MESSAGE_TEMPLATE}${inviteUrl}`, "message")}
           className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
         >
-          {copied === "message" ? "Copied!" : "Copy message + link"}
+          {copied === "message" ? tc("copied") : t("copyMessageLink")}
         </button>
       </div>
     </section>

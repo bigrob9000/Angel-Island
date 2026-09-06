@@ -17,8 +17,21 @@ import { subscribeToConversation, unsubscribeFromConversation } from "@/lib/mess
 import { useInbox } from "@/components/InboxProvider";
 import { NotFoundPanel } from "@/components/NotFoundPanel";
 import { PageLoading } from "@/components/PageLoading";
+import type { TranslateFn } from "@/lib/i18n/labels";
 
 type ModalKind = "pause" | "end" | "remove" | "delete" | null;
+
+function conversationActionError(message: string, t: TranslateFn): string {
+  if (
+    message.includes("conversation_status") ||
+    message.includes("paused_at") ||
+    message.includes("paused_by") ||
+    message.includes("ended_at")
+  ) {
+    return t("errors.pauseEndNotSetup");
+  }
+  return message;
+}
 
 function normalizeInvite(row: ChatInvite): ChatInvite {
   return {
@@ -43,20 +56,9 @@ function showPacingCue(messages: Message[], userId: string | null): boolean {
   return allFromOther;
 }
 
-function conversationActionError(message: string): string {
-  if (
-    message.includes("conversation_status") ||
-    message.includes("paused_at") ||
-    message.includes("paused_by") ||
-    message.includes("ended_at")
-  ) {
-    return "Pause and end aren't set up yet. Run migration 006_conversation_state.sql in Supabase (see supabase/RUN-PENDING-MIGRATIONS.md).";
-  }
-  return message;
-}
-
 export default function ConversationPage() {
   const t = useTranslations("messages");
+  const tc = useTranslations("common");
   const params = useParams();
   const router = useRouter();
   const inviteId = params.id as string;
@@ -206,7 +208,7 @@ export default function ConversationPage() {
     if (conversation_status === "active") {
       if (!canResumeConversation(invite, userId)) {
         setActing(false);
-        setActionError("Only the person who paused can resume this conversation.");
+        setActionError(t("errors.onlyPauserCanResume"));
         return;
       }
       patch.paused_at = null;
@@ -230,7 +232,7 @@ export default function ConversationPage() {
 
     if (error || !data) {
       setActionError(
-        conversationActionError(error?.message ?? "Could not update this conversation.")
+        conversationActionError(error?.message ?? t("errors.couldNotUpdate"), t)
       );
       return;
     }
@@ -247,7 +249,7 @@ export default function ConversationPage() {
 
   async function handleResume() {
     await updateConversationStatus("active");
-    setResumeMessage("Conversation resumed.");
+    setResumeMessage(t("conversationResumed"));
     setTimeout(() => setResumeMessage(null), 4000);
   }
 
@@ -314,14 +316,14 @@ export default function ConversationPage() {
     return (
       <NotFoundPanel
         title={t("notFound")}
-        description="This conversation may have ended, or you may not have access to it."
+        description={t("notFoundDescription")}
         backHref="/messages"
-        backLabel="← Messages"
+        backLabel={t("backToMessages")}
       />
     );
   }
 
-  const otherName = invite.other?.first_name ?? invite.other?.username ?? "Someone";
+  const otherName = invite.other?.first_name ?? invite.other?.username ?? t("someone");
   const otherId = invite.sender_id === userId ? invite.receiver_id : invite.sender_id;
   const pacingCue = canMessage && showPacingCue(messages, userId);
   const userPaused = invite.conversation_status === "paused" && invite.paused_by === userId;
@@ -336,12 +338,12 @@ export default function ConversationPage() {
       <div className="shrink-0 flex items-start justify-between gap-4">
         <div>
           <Link href="/messages" className="text-sm text-muted hover:text-foreground">
-            ← Messages
+            {t("backToMessages")}
           </Link>
           <h1 className="font-serif text-xl font-medium text-foreground mt-2">{otherName}</h1>
           {invite.optional_message && (
             <p className="mt-1 text-sm text-muted">
-              {userId === invite.sender_id ? "You said" : "They said"}: &ldquo;
+              {userId === invite.sender_id ? t("youSaid") : t("theySaid")}: &ldquo;
               {invite.optional_message}&rdquo;
             </p>
           )}
@@ -371,7 +373,7 @@ export default function ConversationPage() {
                       disabled={acting}
                       className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5 disabled:opacity-50"
                     >
-                      Resume conversation
+                      {t("resumeConversation")}
                     </button>
                   )}
                   <button
@@ -383,7 +385,7 @@ export default function ConversationPage() {
                     }}
                     className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
                   >
-                    End conversation
+                    {t("endConversation")}
                   </button>
                 </>
               ) : invite.conversation_status === "active" ? (
@@ -397,7 +399,7 @@ export default function ConversationPage() {
                     }}
                     className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
                   >
-                    Pause conversation
+                    {t("pauseConversation")}
                   </button>
                   <button
                     type="button"
@@ -408,7 +410,7 @@ export default function ConversationPage() {
                     }}
                     className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
                   >
-                    End conversation
+                    {t("endConversation")}
                   </button>
                 </>
               ) : invite.conversation_status === "ended" ? (
@@ -422,7 +424,7 @@ export default function ConversationPage() {
                     }}
                     className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
                   >
-                    Remove from list
+                    {t("removeFromList")}
                   </button>
                   <button
                     type="button"
@@ -433,7 +435,7 @@ export default function ConversationPage() {
                     }}
                     className="block w-full px-4 py-2 text-left text-sm text-red-700 hover:bg-red-50"
                   >
-                    Delete permanently
+                    {t("deletePermanently")}
                   </button>
                 </>
               ) : null}
@@ -449,7 +451,7 @@ export default function ConversationPage() {
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
                   >
-                    Block {otherName}
+                    {t("blockUser", { name: otherName })}
                   </button>
                   <button
                     type="button"
@@ -460,7 +462,7 @@ export default function ConversationPage() {
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
                   >
-                    Report
+                    {tc("report")}
                   </button>
                 </>
               )}
@@ -485,41 +487,36 @@ export default function ConversationPage() {
 
       {isArchived && (
         <div className="mt-4 surface px-4 py-3 text-sm">
-          <p className="font-medium text-foreground">Hidden from your Messages list.</p>
-          <p className="mt-1 text-muted">
-            You can still read it here. Restore it to show up on Messages and Home again.
-          </p>
+          <p className="font-medium text-foreground">{t("hiddenFromListTitle")}</p>
+          <p className="mt-1 text-muted">{t("hiddenFromListCopy")}</p>
           <button
             type="button"
             onClick={handleRestoreToList}
             disabled={acting}
             className="btn-secondary btn-sm mt-3"
           >
-            {acting ? "Restoring…" : "Restore to list"}
+            {acting ? tc("restoring") : t("restoreToList")}
           </button>
         </div>
       )}
 
       {invite.conversation_status === "paused" && (
         <div className="mt-4 surface px-4 py-3 text-sm">
-          <p className="font-medium text-foreground">This conversation is paused.</p>
+          <p className="font-medium text-foreground">{t("pausedTitle")}</p>
           <p className="mt-1 text-muted">
             {userPaused
-              ? "Messaging is disabled for both of you. You can resume when you're ready."
+              ? t("pausedByYou")
               : otherPaused
-                ? `${otherName} paused this conversation. They'll resume when they're ready.`
-                : "Messaging is disabled for now."}
+                ? t("pausedByOther", { name: otherName })
+                : t("pausedGeneric")}
           </p>
         </div>
       )}
 
       {invite.conversation_status === "ended" && (
         <div className="mt-4 surface px-4 py-3 text-sm">
-          <p className="font-medium text-foreground">This conversation is closed.</p>
-          <p className="mt-1 text-muted">
-            Remove it from your list, or delete it permanently — that erases all messages for both
-            of you.
-          </p>
+          <p className="font-medium text-foreground">{t("closedTitle")}</p>
+          <p className="mt-1 text-muted">{t("closedCopy")}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
@@ -527,7 +524,7 @@ export default function ConversationPage() {
               disabled={acting}
               className="btn-secondary"
             >
-              Remove from list
+              {t("removeFromList")}
             </button>
             <button
               type="button"
@@ -535,7 +532,7 @@ export default function ConversationPage() {
               disabled={acting}
               className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-100 disabled:opacity-50"
             >
-              Delete permanently
+              {t("deletePermanently")}
             </button>
           </div>
         </div>
@@ -554,11 +551,9 @@ export default function ConversationPage() {
       )}
 
       <div className="mt-4 surface p-4 flex-1 overflow-y-auto space-y-4">
-        <p className="text-sm text-muted italic">
-          This is a private space for conversation. There&apos;s no rush to start.
-        </p>
+        <p className="text-sm text-muted italic">{t("privateSpaceCue")}</p>
         {messages.length === 0 && canMessage && (
-          <p className="text-sm text-muted">Say hello, share a thought, or take your time.</p>
+          <p className="text-sm text-muted">{t("sayHello")}</p>
         )}
         {messages.map((msg) => {
           const isMine = msg.sender_id === userId;
@@ -586,7 +581,7 @@ export default function ConversationPage() {
           );
         })}
         {pacingCue && (
-          <p className="text-sm text-muted italic pt-2">This space is quiet right now.</p>
+          <p className="text-sm text-muted italic pt-2">{t("quietSpaceCue")}</p>
         )}
         <div ref={bottomRef} />
       </div>
@@ -596,7 +591,7 @@ export default function ConversationPage() {
           <textarea
             value={newBody}
             onChange={(e) => setNewBody(e.target.value)}
-            placeholder="Say hello, share a thought, or take your time."
+            placeholder={t("sayHello")}
             rows={1}
             className="flex-1 rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none resize-none"
             onKeyDown={(e) => {
@@ -611,11 +606,11 @@ export default function ConversationPage() {
             disabled={sending || !newBody.trim()}
             className="btn-primary shrink-0"
           >
-            Send
+            {tc("send")}
           </button>
         </form>
       ) : (
-        <p className="mt-4 text-sm text-muted shrink-0">Messaging is disabled in this conversation.</p>
+        <p className="mt-4 text-sm text-muted shrink-0">{t("messagingDisabled")}</p>
       )}
 
       {modal && (
@@ -628,10 +623,7 @@ export default function ConversationPage() {
             {modal === "pause" ? (
               <>
                 <h2 className="section-heading">{t("pauseTitle")}</h2>
-                <p className="mt-3 text-sm text-muted leading-relaxed">
-                  Pausing means this conversation won&apos;t be active for now. Messages will be
-                  disabled for both of you. Only you can resume when you&apos;re ready.
-                </p>
+                <p className="mt-3 text-sm text-muted leading-relaxed">{t("pauseCopy")}</p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button
                     type="button"
@@ -639,24 +631,21 @@ export default function ConversationPage() {
                     disabled={acting}
                     className="btn-primary"
                   >
-                    {acting ? "Pausing…" : "Pause"}
+                    {acting ? t("pausing") : tc("pause")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
                     className="btn-secondary"
                   >
-                    Cancel
+                    {tc("cancel")}
                   </button>
                 </div>
               </>
             ) : modal === "end" ? (
               <>
                 <h2 className="section-heading">{t("endTitle")}</h2>
-                <p className="mt-3 text-sm text-muted leading-relaxed">
-                  Ending will close this conversation permanently. This can&apos;t be undone, and no
-                  explanation is required. You can remove it from your Messages list afterward.
-                </p>
+                <p className="mt-3 text-sm text-muted leading-relaxed">{t("endCopy")}</p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button
                     type="button"
@@ -664,25 +653,21 @@ export default function ConversationPage() {
                     disabled={acting}
                     className="btn-primary"
                   >
-                    {acting ? "Ending…" : "End"}
+                    {acting ? t("ending") : tc("end")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
                     className="btn-secondary"
                   >
-                    Cancel
+                    {tc("cancel")}
                   </button>
                 </div>
               </>
             ) : modal === "remove" ? (
               <>
                 <h2 className="section-heading">{t("removeTitle")}</h2>
-                <p className="mt-3 text-sm text-muted leading-relaxed">
-                  This hides the conversation from your Messages list and Home. The other person
-                  still has access, and you can open this thread again from a direct link if you
-                  need it.
-                </p>
+                <p className="mt-3 text-sm text-muted leading-relaxed">{t("removeCopy")}</p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button
                     type="button"
@@ -690,24 +675,21 @@ export default function ConversationPage() {
                     disabled={acting}
                     className="btn-primary"
                   >
-                    {acting ? "Removing…" : "Remove from list"}
+                    {acting ? t("removing") : t("removeFromList")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
                     className="btn-secondary"
                   >
-                    Cancel
+                    {tc("cancel")}
                   </button>
                 </div>
               </>
             ) : (
               <>
                 <h2 className="section-heading">{t("deleteTitle")}</h2>
-                <p className="mt-3 text-sm text-muted leading-relaxed">
-                  This deletes the entire conversation and all messages for both of you. It cannot
-                  be undone. The other person will no longer see this thread either.
-                </p>
+                <p className="mt-3 text-sm text-muted leading-relaxed">{t("deleteCopy")}</p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button
                     type="button"
@@ -715,14 +697,14 @@ export default function ConversationPage() {
                     disabled={acting}
                     className="rounded-md bg-red-800 px-4 py-2 text-sm font-medium text-white hover:bg-red-900 disabled:opacity-50"
                   >
-                    {acting ? "Deleting…" : "Delete permanently"}
+                    {acting ? t("deleting") : t("deletePermanently")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
                     className="btn-secondary"
                   >
-                    Cancel
+                    {tc("cancel")}
                   </button>
                 </div>
               </>

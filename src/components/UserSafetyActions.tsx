@@ -43,6 +43,7 @@ export function UserSafetyActions({
   onUnblocked,
 }: Props) {
   const t = useTranslations("safety");
+  const tc = useTranslations("common");
   const [internalDialog, setInternalDialog] = useState<SafetyDialog>(null);
   const [reason, setReason] = useState<ReportReason>("harassment");
   const [details, setDetails] = useState("");
@@ -78,7 +79,7 @@ export function UserSafetyActions({
       return;
     }
     setDialog(null);
-    setFeedback(`${reportedUserName} has been blocked.`);
+    setFeedback(t("blockedFeedback", { name: reportedUserName }));
     setTimeout(() => setFeedback(null), 5000);
     onBlocked?.();
   }
@@ -92,7 +93,7 @@ export function UserSafetyActions({
       setError(result.error);
       return;
     }
-    setFeedback(`${reportedUserName} has been unblocked.`);
+    setFeedback(t("unblockedFeedback", { name: reportedUserName }));
     setTimeout(() => setFeedback(null), 5000);
     onUnblocked?.();
   }
@@ -116,7 +117,7 @@ export function UserSafetyActions({
     }
     setDialog(null);
     setDetails("");
-    setFeedback("Thanks — we'll review this.");
+    setFeedback(t("reportSubmitted"));
     setTimeout(() => setFeedback(null), 5000);
   }
 
@@ -130,7 +131,7 @@ export function UserSafetyActions({
             onClick={() => setDialog("block")}
             className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
           >
-            Block {reportedUserName}
+            {t("blockUser", { name: reportedUserName })}
           </button>
         )}
         {!blockedByMe && (
@@ -140,7 +141,7 @@ export function UserSafetyActions({
             onClick={() => setDialog("report")}
             className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
           >
-            Report
+            {tc("report")}
           </button>
         )}
       </>
@@ -154,7 +155,7 @@ export function UserSafetyActions({
               disabled={acting}
               className="text-muted hover:text-foreground disabled:opacity-50"
             >
-              {acting ? "Unblocking…" : "Unblock"}
+              {acting ? tc("unblocking") : tc("unblock")}
             </button>
           ) : (
             <button
@@ -162,7 +163,7 @@ export function UserSafetyActions({
               onClick={() => setDialog("block")}
               className="text-muted hover:text-foreground underline-offset-2 hover:underline"
             >
-              Block
+              {tc("block")}
             </button>
           ))}
         {!blockedByMe && (
@@ -171,7 +172,7 @@ export function UserSafetyActions({
             onClick={() => setDialog("report")}
             className="text-muted hover:text-foreground underline-offset-2 hover:underline"
           >
-            Report
+            {tc("report")}
           </button>
         )}
       </div>
@@ -204,10 +205,7 @@ export function UserSafetyActions({
             <h2 className="font-serif text-lg font-medium text-foreground">
               {t("blockTitle", { name: reportedUserName })}
             </h2>
-            <p className="mt-3 text-sm text-muted leading-relaxed">
-              They won&apos;t appear in search or Explore, and you won&apos;t be able to message
-              each other. Any open conversation will be closed. No explanation is required.
-            </p>
+            <p className="mt-3 text-sm text-muted leading-relaxed">{t("blockCopy")}</p>
             {error && (
               <p className="mt-3 text-sm text-red-600" role="alert">
                 {error}
@@ -220,14 +218,14 @@ export function UserSafetyActions({
                 disabled={acting}
                 className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
               >
-                {acting ? "Blocking…" : "Block"}
+                {acting ? tc("blocking") : tc("block")}
               </button>
               <button
                 type="button"
                 onClick={() => setDialog(null)}
                 className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
               >
-                Cancel
+                {tc("cancel")}
               </button>
             </div>
           </div>
@@ -242,12 +240,10 @@ export function UserSafetyActions({
         >
           <div className="bg-ethereal border border-foreground/10 rounded-lg shadow-lg max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
             <h2 className="font-serif text-lg font-medium text-foreground">{t("reportTitle")}</h2>
-            <p className="mt-2 text-sm text-muted">
-              Tell us what happened. You don&apos;t need to explain further unless you want to.
-            </p>
+            <p className="mt-2 text-sm text-muted">{t("reportCopy")}</p>
             <form onSubmit={handleReport} className="mt-4 space-y-4">
               <fieldset className="space-y-2">
-                <legend className="text-sm text-muted">Reason</legend>
+                <legend className="text-sm text-muted">{t("reportReasonLabel")}</legend>
                 {REPORT_REASONS.map((option) => (
                   <label key={option.value} className="flex items-start gap-2 text-sm">
                     <input
@@ -258,18 +254,18 @@ export function UserSafetyActions({
                       onChange={() => setReason(option.value)}
                       className="mt-0.5"
                     />
-                    <span className="text-foreground">{option.label}</span>
+                    <span className="text-foreground">{t(`reportReasons.${option.value}`)}</span>
                   </label>
                 ))}
               </fieldset>
               <label className="block">
-                <span className="text-sm text-muted">Anything else? (optional)</span>
+                <span className="text-sm text-muted">{t("reportDetailsLabel")}</span>
                 <textarea
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
                   rows={3}
                   className="mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none"
-                  placeholder="A sentence is enough, or leave blank."
+                  placeholder={t("reportDetailsPlaceholder")}
                 />
               </label>
               {error && (
@@ -283,14 +279,14 @@ export function UserSafetyActions({
                   disabled={acting}
                   className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
                 >
-                  {acting ? "Sending…" : "Submit report"}
+                  {acting ? tc("sending") : t("submitReport")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setDialog(null)}
                   className="rounded-md border border-foreground/30 px-4 py-2 text-sm text-muted hover:text-foreground"
                 >
-                  Cancel
+                  {tc("cancel")}
                 </button>
               </div>
             </form>

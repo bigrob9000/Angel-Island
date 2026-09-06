@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { Room, Post, Profile, PostIntent } from "@/lib/types";
-import { POST_INTENT_LABELS } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
 import { usePreferences } from "@/components/PreferencesProvider";
 import { emptyProfile, PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
@@ -50,6 +49,7 @@ function parseComposeIntent(value: string | null): PostIntent | null {
 
 export default function RoomPage() {
   const t = useTranslations("rooms");
+  const tc = useTranslations("common");
   const params = useParams();
   const searchParams = useSearchParams();
   const slug = params.slug as string;
@@ -229,6 +229,23 @@ export default function RoomPage() {
     });
   }
 
+  function intentLabel(intent: PostIntent): string {
+    switch (intent) {
+      case "conversation":
+        return t("intentConversation");
+      case "question":
+        return t("intentQuestion");
+      case "collab_invite":
+        return t("intentCollabInvite");
+      case "idea":
+        return t("intentIdea");
+      case "share_work":
+        return t("intentShareWork");
+      default:
+        return intent;
+    }
+  }
+
   async function handleSubmitPost(e: React.FormEvent) {
     e.preventDefault();
     if (!room || !composeIntent) return;
@@ -261,19 +278,19 @@ export default function RoomPage() {
 
       if (isShareWork) {
         if (!composeMediaUrl.trim()) {
-          setComposeError("Add a link to your audio or video.");
+          setComposeError(t("errorMediaRequired"));
           setSubmitting(false);
           return;
         }
         const normalized = normalizeMediaUrl(composeMediaUrl);
         if (!normalized) {
-          setComposeError("That link doesn't look valid. Try a full https:// URL.");
+          setComposeError(t("errorInvalidUrl"));
           setSubmitting(false);
           return;
         }
         patch.media_url = normalized;
       } else if (!body) {
-        setComposeError("Add something to your post before saving.");
+        setComposeError(t("errorBodyRequired"));
         setSubmitting(false);
         return;
       }
@@ -302,13 +319,13 @@ export default function RoomPage() {
 
     if (isShareWork) {
       if (!composeMediaUrl.trim()) {
-        setComposeError("Add a link to your audio or video.");
+        setComposeError(t("errorMediaRequired"));
         setSubmitting(false);
         return;
       }
       mediaUrl = normalizeMediaUrl(composeMediaUrl);
       if (!mediaUrl) {
-        setComposeError("That link doesn't look valid. Try a full https:// URL.");
+        setComposeError(t("errorInvalidUrl"));
         setSubmitting(false);
         return;
       }
@@ -318,7 +335,7 @@ export default function RoomPage() {
     }
 
     if (isIntroductions && myIntroPost) {
-      setComposeError("You already have an introduction here. Edit or delete it to change.");
+      setComposeError(t("errorIntroExists"));
       setSubmitting(false);
       return;
     }
@@ -382,9 +399,9 @@ export default function RoomPage() {
     return (
       <NotFoundPanel
         title={t("notFound")}
-        description="That room may have moved or doesn't exist yet."
+        description={t("notFoundDescription")}
         backHref="/rooms"
-        backLabel="← Back to Rooms"
+        backLabel={t("backToRooms")}
       />
     );
   }
@@ -394,8 +411,8 @@ export default function RoomPage() {
     : ["conversation", "question", "collab_invite", "idea"];
 
   function postIntentLabel(post: Post): string {
-    if (isIntroductions) return "Introduction";
-    return POST_INTENT_LABELS[post.intent];
+    if (isIntroductions) return t("intentIntroduction");
+    return intentLabel(post.intent);
   }
 
   function renderPost(post: Post) {
@@ -421,7 +438,7 @@ export default function RoomPage() {
           <ProfileAttribution profile={author} />
           <span>
             {time}
-            {edited && <span className="text-muted/80"> · edited</span>}
+            {edited && <span className="text-muted/80"> · {t("edited")}</span>}
           </span>
         </div>
         {!isIntroductions && post.title && (
@@ -445,7 +462,7 @@ export default function RoomPage() {
               onClick={() => startEditPost(post)}
               className="text-sm text-foreground underline hover:no-underline"
             >
-              Edit
+              {t("editPost")}
             </button>
             <button
               type="button"
@@ -453,7 +470,7 @@ export default function RoomPage() {
               disabled={deletingId === post.id}
               className="text-sm text-muted hover:text-foreground disabled:opacity-50"
             >
-              {deletingId === post.id ? "Deleting…" : "Delete"}
+              {deletingId === post.id ? t("deleting") : t("deletePost")}
             </button>
           </div>
         )}
@@ -487,7 +504,7 @@ export default function RoomPage() {
     <div className={`space-y-8 ${motionReduced ? "" : "room-enter"}`}>
       <div>
         <Link href="/rooms" className="text-sm text-muted hover:text-foreground">
-          ← Rooms
+          {t("backToRooms")}
         </Link>
         <h1 className="page-lead mt-2">{room.name}</h1>
         {room.description && <p className="mt-1 text-muted">{room.description}</p>}
@@ -507,9 +524,7 @@ export default function RoomPage() {
         <div className="space-y-2">
           {isIntroductions ? (
             myIntroPost ? (
-              <p className="text-sm text-muted">
-                You&apos;ve shared an introduction. You can edit or delete it anytime below.
-              </p>
+              <p className="text-sm text-muted">{t("introAlreadyShared")}</p>
             ) : (
               <button
                 type="button"
@@ -519,7 +534,7 @@ export default function RoomPage() {
                 }}
                 className="btn-secondary"
               >
-                Share your introduction (optional)
+                {t("shareIntroduction")}
               </button>
             )
           ) : isListen ? (
@@ -531,7 +546,7 @@ export default function RoomPage() {
               }}
               className="btn-secondary"
               >
-              Share something you&apos;re working on (optional)
+              {t("shareWorkingOn")}
             </button>
           ) : (
             <button
@@ -539,7 +554,7 @@ export default function RoomPage() {
               onClick={() => setShowCompose(true)}
               className="btn-secondary"
             >
-              Want to add something?
+              {t("addSomething")}
             </button>
           )}
         </div>
@@ -547,7 +562,7 @@ export default function RoomPage() {
         <div id="room-compose" className="surface p-4 scroll-mt-24">
           {!isIntroductions && !composeIntent ? (
             <div>
-              <p className="text-sm text-muted mb-3">Choose what you&apos;re adding:</p>
+              <p className="text-sm text-muted mb-3">{t("chooseIntent")}</p>
               <div className="flex flex-wrap gap-2">
                 {intentOptions.map((intent) => (
                   <button
@@ -556,7 +571,7 @@ export default function RoomPage() {
                     onClick={() => setComposeIntent(intent)}
                     className="chip chip-muted"
                   >
-                    {POST_INTENT_LABELS[intent]}
+                    {intentLabel(intent)}
                   </button>
                 ))}
               </div>
@@ -565,7 +580,7 @@ export default function RoomPage() {
                 onClick={resetCompose}
                 className="mt-4 btn-secondary btn-sm"
               >
-                Cancel
+                {tc("cancel")}
               </button>
             </div>
           ) : (
@@ -573,21 +588,21 @@ export default function RoomPage() {
               <p className="text-sm text-muted">
                 {isIntroductions
                   ? editingPost
-                    ? "Edit your introduction"
-                    : "Your introduction — one post per person, edit or delete anytime."
+                    ? t("editIntroduction")
+                    : t("introComposeCopy")
                   : editingPost
-                    ? "Edit your post"
-                    : POST_INTENT_LABELS[composeIntent!]}
+                    ? t("editPostHeading")
+                    : intentLabel(composeIntent!)}
               </p>
               {!isIntroductions && (
                 <label className="block">
-                  <span className="text-sm text-muted">Title (optional)</span>
+                  <span className="text-sm text-muted">{t("titleOptional")}</span>
                   <input
                     type="text"
                     value={composeTitle}
                     onChange={(e) => setComposeTitle(e.target.value)}
                     placeholder={
-                      composeIntent === "share_work" ? "e.g. Acoustic cover — learning this one" : "Short title"
+                      composeIntent === "share_work" ? t("titleShareWorkPlaceholder") : t("titlePlaceholder")
                     }
                     className={inputClass}
                   />
@@ -596,13 +611,13 @@ export default function RoomPage() {
               {composeIntent === "share_work" && (
                 <>
                   <label className="block">
-                    <span className="text-sm text-muted">Link to audio or video</span>
+                    <span className="text-sm text-muted">{t("mediaUrlLabel")}</span>
                     <input
                       type="url"
                       value={composeMediaUrl}
                       onChange={(e) => setComposeMediaUrl(e.target.value)}
                       required
-                      placeholder="https://youtube.com/… or SoundCloud, TikTok, etc."
+                      placeholder={t("mediaUrlPlaceholder")}
                       className={inputClass}
                     />
                   </label>
@@ -612,10 +627,10 @@ export default function RoomPage() {
               <label className="block">
                 <span className="text-sm text-muted">
                   {isIntroductions
-                    ? "Introduce yourself"
+                    ? t("introduceYourself")
                     : composeIntent === "share_work"
-                      ? "Note (optional)"
-                      : "What do you want to say?"}
+                      ? t("shareWorkNoteLabel")
+                      : t("bodyLabel")}
                 </span>
                 <textarea
                   value={composeBody}
@@ -627,10 +642,10 @@ export default function RoomPage() {
                   className={inputClass}
                   placeholder={
                     isIntroductions
-                      ? "A few honest sentences is enough. No pressure to impress."
+                      ? t("introBodyPlaceholder")
                       : composeIntent === "share_work"
-                        ? "What is this? What are you open to? (optional)"
-                        : "Write your post…"
+                        ? t("shareWorkBodyPlaceholder")
+                        : t("bodyPlaceholder")
                   }
                 />
               </label>
@@ -642,14 +657,14 @@ export default function RoomPage() {
                   className="btn-primary"
                 >
                   {submitting
-                    ? "Saving…"
+                    ? tc("saving")
                     : editingPost
-                      ? "Save changes"
+                      ? t("saveChanges")
                       : isIntroductions
-                        ? "Post introduction"
+                        ? t("postIntroduction")
                         : composeIntent === "share_work"
-                          ? "Share"
-                          : "Post"}
+                          ? t("share")
+                          : t("post")}
                 </button>
                 {!isIntroductions && (
                   <button
@@ -662,7 +677,7 @@ export default function RoomPage() {
                     }}
                     className="btn-secondary"
                   >
-                    Back
+                    {t("back")}
                   </button>
                 )}
                 <button
@@ -670,7 +685,7 @@ export default function RoomPage() {
                   onClick={resetCompose}
                   className="btn-secondary"
                 >
-                  Cancel
+                  {tc("cancel")}
                 </button>
               </div>
             </form>
@@ -691,15 +706,15 @@ export default function RoomPage() {
         {posts.length === 0 ? (
           <p className="mt-4 text-sm text-muted">
             {isIntroductions
-              ? "No introductions yet. You're welcome to listen first — posting is optional."
+              ? t("emptyIntro")
               : isListen
-                ? "Nothing shared yet. You're welcome to listen first — posting is optional."
-                : "No posts yet. Start a conversation, ask a question, or invite collaborators."}
+                ? t("emptyListen")
+                : t("emptyPosts")}
           </p>
         ) : isSearching && displayedPosts.length === 0 ? (
           <div className="mt-4 surface px-4 py-8 text-center text-sm text-muted">
-            <p>Nothing like that turned up in this room.</p>
-            <p className="mt-2">Try a different word — or clear the search to browse everything.</p>
+            <p>{t("searchNoResults")}</p>
+            <p className="mt-2">{t("searchNoResultsHint")}</p>
           </div>
         ) : (
           <div className="mt-4 space-y-8">

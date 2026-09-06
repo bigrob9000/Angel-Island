@@ -37,12 +37,10 @@ export function PostCommentSection({
   const canComment = userId && (isIntroductions ? userId !== postAuthorId : true);
 
   const placeholder = isIntroductions
-    ? "A warm welcome or gentle question — no pressure."
-    : "Add to the conversation — no pressure to be clever.";
+    ? t("commentPlaceholderIntro")
+    : t("commentPlaceholderRoom");
 
-  const authorNote = isIntroductions
-    ? "Others can leave welcome comments here. You don't need to reply."
-    : null;
+  const authorNote = isIntroductions ? t("authorNoteIntro") : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -89,13 +87,13 @@ export function PostCommentSection({
 
       {tableMissing ? (
         <p className="mt-2 text-sm text-muted">
-          Comments will appear here once migration{" "}
-          <code className="text-xs">007_post_comments.sql</code> is run in Supabase.
+          {t("commentsMigration")}{" "}
+          <code className="text-xs">007_post_comments.sql</code> {t("commentsMigrationSuffix")}
         </p>
       ) : (
         <>
           {comments.length === 0 ? (
-            <p className="mt-2 text-sm text-muted">No comments yet.</p>
+            <p className="mt-2 text-sm text-muted">{t("noCommentsYet")}</p>
           ) : (
             <ul className="mt-3 space-y-3">
               {comments.map((comment) => {
@@ -121,7 +119,7 @@ export function PostCommentSection({
                         disabled={deletingId === comment.id}
                         className="mt-1 text-xs text-muted hover:text-foreground disabled:opacity-50"
                       >
-                        {deletingId === comment.id ? "Removing…" : "Remove"}
+                        {deletingId === comment.id ? t("removing") : t("removeComment")}
                       </button>
                     ) : userId ? (
                       <div className="mt-1">
@@ -149,7 +147,7 @@ export function PostCommentSection({
           {canComment ? (
             <form onSubmit={handleSubmit} className="mt-4 space-y-2">
               <label className="block">
-                <span className="sr-only">Add a comment</span>
+                <span className="sr-only">{t("addCommentLabel")}</span>
                 <textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
@@ -163,7 +161,7 @@ export function PostCommentSection({
                 disabled={submitting || !body.trim()}
                 className="btn-secondary btn-sm"
               >
-                {submitting ? "Posting…" : "Add comment"}
+                {submitting ? t("posting") : t("addComment")}
               </button>
             </form>
           ) : authorNote && userId === postAuthorId ? (

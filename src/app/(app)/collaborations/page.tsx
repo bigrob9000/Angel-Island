@@ -80,10 +80,7 @@ export default function CollaborationsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="page-lead">{t("title")}</h1>
-        <p className="section-copy">
-          Things you&apos;re exploring with other people — shared notes, links, and next steps. No
-          deadlines, no pressure.
-        </p>
+        <p className="section-copy">{t("subtitle")}</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -139,13 +136,13 @@ export default function CollaborationsPage() {
         filter === "active" ? (
           <EmptyState
             title={t("emptyActive")}
-            description="When someone responds interested to a collab invite, a shared workspace opens here for notes, links, and next steps."
+            description={t("emptyActiveDescription")}
           >
             <Link href="/messages" className="btn-secondary">
-              Check Messages
+              {t("checkMessages")}
             </Link>
             <Link href="/explore" className="btn-secondary">
-              Explore people
+              {t("explorePeople")}
             </Link>
           </EmptyState>
         ) : (

@@ -14,7 +14,7 @@ import {
   GROUP_COLLAB_MAX_INVITEES,
   groupCollabSetupError,
 } from "@/lib/group-collaborations";
-import { COLLAB_PACE_LABELS } from "@/lib/types";
+import { translatePace } from "@/lib/i18n/labels";
 
 const inputClass =
   "mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none";
@@ -22,6 +22,7 @@ const inputClass =
 export default function NewGroupCollabPage() {
   const t = useTranslations("collaborations");
   const tc = useTranslations("common");
+  const tPace = useTranslations("pace");
   const router = useRouter();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -83,11 +84,11 @@ export default function NewGroupCollabPage() {
     setError(null);
 
     if (!about.trim()) {
-      setError("Describe what you're exploring together.");
+      setError(t("errors.aboutRequired"));
       return;
     }
     if (selected.length < 1) {
-      setError("Pick at least one person to invite.");
+      setError(t("errors.pickAtLeastOne"));
       return;
     }
 
@@ -111,7 +112,7 @@ export default function NewGroupCollabPage() {
       return;
     }
     if (!result.inviteId) {
-      setError("Invite did not save. Run migration 031 in Supabase, then try again.");
+      setError(t("errors.inviteNotSaved"));
       return;
     }
 
@@ -124,58 +125,54 @@ export default function NewGroupCollabPage() {
     <div className="space-y-8">
       <div>
         <Link href="/collaborations" className="text-sm text-muted hover:text-foreground">
-          ← Collaborations
+          {t("backToCollaborations")}
         </Link>
         <h1 className="page-lead mt-2">{t("groupNewTitle")}</h1>
-        <p className="section-copy">
-          Invite up to {GROUP_COLLAB_MAX_INVITEES} people in one invite. Everyone responds within
-          14 days — the workspace opens when all have answered and at least one person is
-          interested.
-        </p>
+        <p className="section-copy">{t("groupNewCopy", { max: GROUP_COLLAB_MAX_INVITEES })}</p>
       </div>
 
       {tableMissing && <p className="text-sm text-muted">{groupCollabSetupError()}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <label className="block">
-          <span className="text-sm font-medium text-foreground">What are you exploring?</span>
+          <span className="text-sm font-medium text-foreground">{t("aboutLabel")}</span>
           <input
             type="text"
             value={about}
             onChange={(e) => setAbout(e.target.value)}
             className={inputClass}
-            placeholder="e.g. Blues trio for local gigs"
+            placeholder={t("aboutPlaceholder")}
             maxLength={200}
           />
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-foreground">Optional message</span>
+          <span className="text-sm font-medium text-foreground">{t("messageLabel")}</span>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={3}
             className={inputClass}
-            placeholder="A little context for everyone"
+            placeholder={t("messagePlaceholder")}
           />
         </label>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="text-sm font-medium text-foreground">Role (optional)</span>
+            <span className="text-sm font-medium text-foreground">{t("roleLabel")}</span>
             <input type="text" value={role} onChange={(e) => setRole(e.target.value)} className={inputClass} />
           </label>
           <label className="block">
-            <span className="text-sm font-medium text-foreground">Pace (optional)</span>
+            <span className="text-sm font-medium text-foreground">{t("paceLabel")}</span>
             <select
               value={pace}
               onChange={(e) => setPace(e.target.value as CollabPace | "")}
               className={inputClass}
             >
-              <option value="">Choose…</option>
-              {(Object.keys(COLLAB_PACE_LABELS) as CollabPace[]).map((key) => (
+              <option value="">{t("paceChoose")}</option>
+              {(["low-pressure", "structured", "flexible"] as CollabPace[]).map((key) => (
                 <option key={key} value={key}>
-                  {COLLAB_PACE_LABELS[key]}
+                  {translatePace(key, tPace)}
                 </option>
               ))}
             </select>
@@ -184,9 +181,9 @@ export default function NewGroupCollabPage() {
 
         <div>
           <div className="flex items-baseline justify-between gap-2">
-            <span className="text-sm font-medium text-foreground">Invite people</span>
+            <span className="text-sm font-medium text-foreground">{t("invitePeopleLabel")}</span>
             <span className="text-xs text-muted">
-              {selected.length}/{GROUP_COLLAB_MAX_INVITEES} selected
+              {t("selectedCount", { selected: selected.length, max: GROUP_COLLAB_MAX_INVITEES })}
             </span>
           </div>
           <input
@@ -194,7 +191,7 @@ export default function NewGroupCollabPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className={inputClass}
-            placeholder="Search by name, role, location…"
+            placeholder={t("searchPlaceholder")}
           />
           <ul className="mt-3 max-h-64 space-y-1 overflow-y-auto rounded-md border border-foreground/10 bg-white/50 p-2">
             {filtered.map((profile) => {
@@ -214,7 +211,7 @@ export default function NewGroupCollabPage() {
                       onChange={() => toggle(profile.id)}
                     />
                     <span className="text-sm text-foreground">
-                      {profile.first_name ?? profile.username ?? "Musician"}
+                      {profile.first_name ?? profile.username ?? t("defaultMusicianName")}
                       {profile.username ? ` (@${profile.username})` : ""}
                     </span>
                   </label>
@@ -231,7 +228,7 @@ export default function NewGroupCollabPage() {
         )}
 
         <button type="submit" disabled={sending} className="btn-primary">
-          {sending ? "Sending…" : "Send group invite"}
+          {sending ? tc("sending") : t("sendGroupInvite")}
         </button>
       </form>
     </div>

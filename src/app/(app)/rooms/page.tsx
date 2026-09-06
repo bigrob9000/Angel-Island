@@ -6,14 +6,16 @@ import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { Room } from "@/lib/types";
 
-function activityLabel(lastAt: string | null): string {
-  if (!lastAt) return "Quiet";
+import type { TranslateFn } from "@/lib/i18n/labels";
+
+function activityLabel(lastAt: string | null, t: TranslateFn): string {
+  if (!lastAt) return t("activityQuiet");
   const d = new Date(lastAt);
   const now = new Date();
   const days = (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
-  if (days <= 1) return "Active this week";
-  if (days <= 7) return "Some conversation";
-  return "Quiet";
+  if (days <= 1) return t("activityActiveWeek");
+  if (days <= 7) return t("activitySomeConversation");
+  return t("activityQuiet");
 }
 
 /* Positions for room clouds — desktop sky layout; mobile overrides in globals.css */
@@ -114,10 +116,7 @@ export default function RoomsPage() {
   return (
     <div>
       <h1 className="page-lead">{t("exploreTitle")}</h1>
-      <p className="section-copy">
-        Click a cloud to enter. Read posts, visit profiles, and invite someone to chat when it
-        feels right — no obligation to post.
-      </p>
+      <p className="section-copy">{t("exploreCopy")}</p>
 
       <div className="rooms-web mt-10">
         {rooms.slice(0, ROOM_POSITION_CLASSES.length).map((room, i) => {
@@ -142,8 +141,8 @@ export default function RoomsPage() {
                 onClick={(e) => toggleMember(e, room.id)}
                 disabled={togglingId === room.id}
                 className="room-cloud-add disabled:opacity-50"
-                title={isMember ? "In your rooms" : "Add to My Rooms"}
-                aria-label={isMember ? "Added to your rooms" : "Add to My Rooms"}
+                title={isMember ? t("inYourRooms") : t("addToMyRooms")}
+                aria-label={isMember ? t("addedToYourRooms") : t("addToMyRooms")}
               >
                 {togglingId === room.id ? "…" : isMember ? "✓" : "+"}
               </button>
@@ -161,7 +160,7 @@ export default function RoomsPage() {
                 {room.name}
               </Link>
               {" — "}
-              {activityLabel(lastActivity[room.id] ?? null)}
+              {activityLabel(lastActivity[room.id] ?? null, t)}
             </li>
           ))}
         </ul>

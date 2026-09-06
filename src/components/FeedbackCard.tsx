@@ -27,20 +27,15 @@ export function FeedbackCard() {
     <section className="surface p-5 space-y-3">
       <div>
         <h2 className="font-medium text-foreground">{t("feedbackTitle")}</h2>
-        <p className="mt-1 text-sm text-muted">
-          Angel Island is early. If something feels off, confusing, or surprisingly good — tell us.
-          No pressure to be polite; specifics help.
-        </p>
+        <p className="mt-1 text-sm text-muted">{t("feedbackCopy")}</p>
       </div>
       <a
         href={href}
         className="inline-flex rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5 transition-colors"
       >
-        Send feedback
+        {t("sendFeedback")}
       </a>
-      <p className="text-xs text-muted">
-        Opens your email app to {FEEDBACK_EMAIL}. Screenshots welcome.
-      </p>
+      <p className="text-xs text-muted">{t("feedbackHint", { email: FEEDBACK_EMAIL })}</p>
     </section>
   );
 }

@@ -31,6 +31,7 @@ export function GettingStartedGuide({
   hasCollabs,
 }: Props) {
   const t = useTranslations("home");
+  const tg = useTranslations("home.gettingStarted");
   const { dismissed, ready, dismiss } = useDismissStorage(DISMISS_KEY);
 
   if (!ready || !show || dismissed || !profile) {
@@ -46,7 +47,7 @@ export function GettingStartedGuide({
       id: "profile",
       done: profileDone,
       label: profileDone ? (
-        <span className="text-muted line-through">Profile ready for Explore</span>
+        <span className="text-muted line-through">{tg("profileDone")}</span>
       ) : nextProfileItem ? (
         <>
           <Link
@@ -57,15 +58,15 @@ export function GettingStartedGuide({
           </Link>
           <span className="text-muted">
             {" "}
-            — {optional.completeCount} of {optional.items.length} optional details done.
+            — {tg("profileOptionalProgress", { complete: optional.completeCount, total: optional.items.length })}
           </span>
         </>
       ) : (
         <>
           <Link href="/profile/edit" className="text-foreground underline hover:no-underline">
-            Finish your profile
+            {tg("finishProfile")}
           </Link>
-          <span className="text-muted"> — so people know who you are.</span>
+          <span className="text-muted"> — {tg("finishProfileHint")}</span>
         </>
       ),
     },
@@ -73,13 +74,13 @@ export function GettingStartedGuide({
       id: "room",
       done: hasRooms,
       label: hasRooms ? (
-        <span className="text-muted line-through">You&apos;ve joined a room</span>
+        <span className="text-muted line-through">{tg("roomDone")}</span>
       ) : (
         <>
           <Link href="/rooms" className="text-foreground underline hover:no-underline">
-            Visit a room
+            {tg("visitRoom")}
           </Link>
-          <span className="text-muted"> — read, listen, or share when you&apos;re ready.</span>
+          <span className="text-muted"> — {tg("visitRoomHint")}</span>
         </>
       ),
     },
@@ -87,13 +88,13 @@ export function GettingStartedGuide({
       id: "explore",
       done: hasConnected,
       label: hasConnected ? (
-        <span className="text-muted line-through">You&apos;ve started a conversation</span>
+        <span className="text-muted line-through">{tg("exploreDone")}</span>
       ) : (
         <>
           <Link href="/explore" className="text-foreground underline hover:no-underline">
-            Explore people
+            {tg("explorePeople")}
           </Link>
-          <span className="text-muted"> — invite someone to chat when it feels right.</span>
+          <span className="text-muted"> — {tg("explorePeopleHint")}</span>
         </>
       ),
     },
@@ -101,19 +102,19 @@ export function GettingStartedGuide({
       id: "collab",
       done: hasCollabs,
       label: hasCollabs ? (
-        <span className="text-muted line-through">You have a collab space open</span>
+        <span className="text-muted line-through">{tg("collabDone")}</span>
       ) : (
         <>
           <Link href="/explore" className="text-foreground underline hover:no-underline">
-            Invite someone to collaborate
+            {tg("inviteCollab")}
           </Link>
           <span className="text-muted">
             {" "}
-            — from their profile. When they&apos;re interested, a shared workspace opens under{" "}
+            — {tg("inviteCollabHintBefore")}{" "}
             <Link href="/collaborations" className="text-foreground underline hover:no-underline">
-              Collabs
+              {tg("inviteCollabLink")}
             </Link>
-            .
+            {tg("inviteCollabHintAfter")}
           </span>
         </>
       ),
@@ -126,11 +127,11 @@ export function GettingStartedGuide({
     <section className="surface p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="section-heading">{t("gettingStarted")}</h2>
+          <h2 className="section-heading">{t("gettingStarted.title")}</h2>
           <p className="mt-1 text-sm text-muted">
             {doneCount === 0
-              ? "You finished onboarding — here are four gentle next steps."
-              : `${doneCount} of ${steps.length} done — pick up wherever you left off.`}
+              ? tg("subtitleNone")
+              : tg("subtitleProgress", { done: doneCount, total: steps.length })}
           </p>
         </div>
         <button
@@ -138,7 +139,7 @@ export function GettingStartedGuide({
           onClick={dismiss}
           className="shrink-0 text-sm text-muted hover:text-foreground"
         >
-          Dismiss
+          {tg("dismiss")}
         </button>
       </div>
       <ol className="mt-4 space-y-3 text-sm">

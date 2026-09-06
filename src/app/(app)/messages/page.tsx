@@ -14,22 +14,26 @@ import { createCollaborationWorkspace, findCollaborationIdByInvite } from "@/lib
 import { notifyCollabResponse } from "@/lib/notifications/client";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
+import { loadConversationPreviews, type ConversationPreview } from "@/lib/conversations";
 import {
   conversationStatusLabel,
-  loadConversationPreviews,
-  type ConversationPreview,
-} from "@/lib/conversations";
+  inviteResponseLabel,
+  translatePace,
+  translateProfileOption,
+} from "@/lib/i18n/labels";
 import { restoreConversationToList } from "@/lib/conversation-archive";
 import { loadPendingGroupCollabInvitesForUser } from "@/lib/group-collaborations";
 import { GroupCollabInvitesSection } from "@/components/GroupCollabInvitesSection";
 import type { GroupCollabInviteWithMeta } from "@/lib/group-collaborations";
 
-const PACE_LABELS: Record<string, string> = { "low-pressure": "Low-pressure", "structured": "Structured", "flexible": "Flexible" };
-
 export default function MessagesPage() {
   const router = useRouter();
   const t = useTranslations("messages");
   const tc = useTranslations("common");
+  const tInvite = useTranslations("inviteResponses");
+  const tStatus = useTranslations("status");
+  const tProfileOptions = useTranslations("profileOptions");
+  const tPace = useTranslations("pace");
   const { userId, conversations, loading: inboxLoading, refresh: refreshInbox } = useInbox();
   const [receivedInvites, setReceivedInvites] = useState<(ChatInvite & { sender?: Profile })[]>([]);
   const [sentInvites, setSentInvites] = useState<(ChatInvite & { receiver?: Profile })[]>([]);
@@ -207,7 +211,7 @@ export default function MessagesPage() {
     setActingId(null);
     if (error) {
       if (error.message.includes("cancelled") || error.code === "23514") {
-        window.alert("Collab cancel isn't set up yet. Run migration 022_collab_invite_cancel.sql in Supabase.");
+        window.alert(t("errors.collabCancelNotSetup"));
       }
       return;
     }
@@ -228,7 +232,13 @@ export default function MessagesPage() {
     notifyCollabResponse(collabId);
 
     if (response === "interested" && collab) {
-      const context = `Collab: ${collab.about}${collab.role ? `. Role: ${collab.role}` : ""}${collab.pace ? `. Pace: ${PACE_LABELS[collab.pace]}` : ""}`;
+      let context = t("collabContextAbout", { about: collab.about });
+      if (collab.role) {
+        context += t("collabContextRolePart", { role: translateProfileOption(collab.role, tProfileOptions) });
+      }
+      if (collab.pace) {
+        context += t("collabContextPacePart", { pace: translatePace(collab.pace, tPace) });
+      }
       const { data: newChat } = await supabase
         .from("chat_invites")
         .insert({
@@ -264,30 +274,28 @@ export default function MessagesPage() {
     <div className="space-y-10">
       <div>
         <h1 className="page-lead">{t("title")}</h1>
-        <p className="section-copy">
-          Invites and conversations — all by choice, no pressure to reply.
-        </p>
+        <p className="section-copy">{t("subtitle")}</p>
       </div>
 
       {isEmptyInbox && (
         <EmptyState
           title={t("empty")}
-          description="When someone invites you to chat, it shows up here. You can also reach out from Explore when you're ready."
+          description={t("emptyDescription")}
         >
           <Link href="/explore" className="btn-secondary">
-            Explore people
+            {t("explorePeople")}
           </Link>
           <Link href="/rooms" className="btn-secondary">
-            Visit a room
+            {t("visitRoom")}
           </Link>
         </EmptyState>
       )}
 
       <section>
         <h2 className="section-heading">{t("receivedInvites")}</h2>
-        <p className="section-copy">Accept to start a conversation. No obligation.</p>
+        <p className="section-copy">{t("receivedInvitesCopy")}</p>
         {receivedInvites.length === 0 ? (
-          <p className="mt-4 text-sm text-muted">No pending chat invites.</p>
+          <p className="mt-4 text-sm text-muted">{t("noPendingChatInvites")}</p>
         ) : (
           <ul className="mt-4 space-y-3">
             {receivedInvites.map((inv) => (
@@ -301,7 +309,7 @@ export default function MessagesPage() {
                     disabled={actingId === inv.id}
                     className="btn-primary btn-sm"
                   >
-                    Accept
+                    {tc("accept")}
                   </button>
                   <button
                     type="button"
@@ -309,7 +317,7 @@ export default function MessagesPage() {
                     disabled={actingId === inv.id}
                     className="btn-secondary btn-sm"
                   >
-                    Not a fit
+                    {t("notAFit")}
                   </button>
                 </div>
               </li>
@@ -321,19 +329,27 @@ export default function MessagesPage() {
       {receivedCollabInvites.length > 0 && (
         <section>
           <h2 className="section-heading">{t("receivedCollabInvites")}</h2>
-          <p className="section-copy">Respond below. If you&apos;re interested, you&apos;ll open a shared collaboration space.</p>
+          <p className="section-copy">{t("receivedCollabInvitesCopy")}</p>
           <ul className="mt-4 space-y-3">
             {receivedCollabInvites.map((c) => (
               <li key={c.id} className="surface p-4">
                 <ProfileAttribution profile={c.sender} className="font-medium" />
-                <p className="text-sm text-muted mt-1">About: {c.about}</p>
+                <p className="text-sm text-muted mt-1">{t("aboutLabel", { about: c.about })}</p>
                 {c.message && <p className="text-sm text-muted">{c.message}</p>}
-                {c.role && <p className="text-sm text-muted">Their role: {c.role}</p>}
-                {c.pace && <p className="text-sm text-muted">Pace: {PACE_LABELS[c.pace]}</p>}
+                {c.role && (
+                  <p className="text-sm text-muted">
+                    {t("theirRole", { role: translateProfileOption(c.role, tProfileOptions) })}
+                  </p>
+                )}
+                {c.pace && (
+                  <p className="text-sm text-muted">
+                    {t("paceLabel", { pace: translatePace(c.pace, tPace) })}
+                  </p>
+                )}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => respondToCollab(c.id, "interested")} disabled={actingId === c.id} className="btn-primary btn-sm">Interested — let&apos;s talk</button>
-                  <button type="button" onClick={() => respondToCollab(c.id, "maybe")} disabled={actingId === c.id} className="btn-secondary btn-sm">Maybe — not right now</button>
-                  <button type="button" onClick={() => respondToCollab(c.id, "not_fit")} disabled={actingId === c.id} className="btn-secondary btn-sm">Not a fit</button>
+                  <button type="button" onClick={() => respondToCollab(c.id, "interested")} disabled={actingId === c.id} className="btn-primary btn-sm">{t("interestedLetsTalk")}</button>
+                  <button type="button" onClick={() => respondToCollab(c.id, "maybe")} disabled={actingId === c.id} className="btn-secondary btn-sm">{t("maybeNotNow")}</button>
+                  <button type="button" onClick={() => respondToCollab(c.id, "not_fit")} disabled={actingId === c.id} className="btn-secondary btn-sm">{t("notAFit")}</button>
                 </div>
               </li>
             ))}
@@ -349,9 +365,9 @@ export default function MessagesPage() {
 
       <section>
         <h2 className="section-heading">{t("sentInvites")}</h2>
-        <p className="section-copy">Waiting for a response. Pending invites can be cancelled.</p>
+        <p className="section-copy">{t("sentInvitesCopy")}</p>
         {!hasSentInvites ? (
-          <p className="mt-4 text-sm text-muted">No pending invites out.</p>
+          <p className="mt-4 text-sm text-muted">{t("noPendingInvitesOut")}</p>
         ) : (
           <ul className="mt-4 space-y-3">
             {sentInvites.map((inv) => (
@@ -360,7 +376,7 @@ export default function MessagesPage() {
                 className="surface flex flex-wrap items-start justify-between gap-4 px-4 py-3"
               >
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted">Chat invite</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted">{t("chatInviteLabel")}</p>
                   <ProfileAttribution profile={inv.receiver} className="mt-1 font-medium" />
                   {inv.optional_message && (
                     <p className="mt-1 text-sm text-muted">&ldquo;{inv.optional_message}&rdquo;</p>
@@ -372,7 +388,7 @@ export default function MessagesPage() {
                   disabled={actingId === inv.id}
                   className="btn-secondary btn-sm shrink-0"
                 >
-                  Cancel invite
+                  {t("cancelInvite")}
                 </button>
               </li>
             ))}
@@ -382,21 +398,29 @@ export default function MessagesPage() {
                 className="surface flex flex-wrap items-start justify-between gap-4 px-4 py-3"
               >
                 <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted">Collab invite</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted">{t("collabInviteLabel")}</p>
                 <ProfileAttribution profile={c.receiver} className="mt-1 font-medium" />
-                <p className="mt-1 text-sm text-muted">About: {c.about}</p>
+                <p className="mt-1 text-sm text-muted">{t("aboutLabel", { about: c.about })}</p>
                 {c.message && <p className="text-sm text-muted">{c.message}</p>}
-                {c.role && <p className="text-sm text-muted">Your role: {c.role}</p>}
-                {c.pace && <p className="text-sm text-muted">Pace: {PACE_LABELS[c.pace]}</p>}
+                {c.role && (
+                  <p className="text-sm text-muted">
+                    {t("yourRole", { role: translateProfileOption(c.role, tProfileOptions) })}
+                  </p>
+                )}
+                {c.pace && (
+                  <p className="text-sm text-muted">
+                    {t("paceLabel", { pace: translatePace(c.pace, tPace) })}
+                  </p>
+                )}
                 {c.status === "interested" && c.workspaceId ? (
                   <Link
                     href={`/collaborations/${c.workspaceId}`}
                     className="mt-2 inline-block text-sm text-foreground underline hover:no-underline"
                   >
-                    Open collaboration space
+                    {t("openCollaborationSpace")}
                   </Link>
                 ) : (
-                  <p className="mt-2 text-xs text-muted italic">Waiting for their response</p>
+                  <p className="mt-2 text-xs text-muted italic">{inviteResponseLabel("waiting", tInvite)}</p>
                 )}
                 </div>
                 {c.status === "pending" && (
@@ -406,7 +430,7 @@ export default function MessagesPage() {
                     disabled={actingId === c.id}
                     className="btn-secondary btn-sm shrink-0"
                   >
-                    Cancel invite
+                    {t("cancelInvite")}
                   </button>
                 )}
               </li>
@@ -417,9 +441,9 @@ export default function MessagesPage() {
 
       <section>
         <h2 className="section-heading">{t("conversations")}</h2>
-        <p className="section-copy">Chats you started or accepted.</p>
+        <p className="section-copy">{t("conversationsCopy")}</p>
         {conversations.length === 0 ? (
-          <p className="mt-4 text-sm text-muted">No conversations yet. Accept an invite to start one.</p>
+          <p className="mt-4 text-sm text-muted">{t("noConversationsYet")}</p>
         ) : (
           <ul className="mt-4 space-y-2">
             {conversations.map((conv) => (
@@ -434,9 +458,7 @@ export default function MessagesPage() {
       {archivedConversations.length > 0 && (
         <section>
           <h2 className="section-heading">{t("hidden")}</h2>
-          <p className="section-copy">
-            Closed conversations you removed. Restore any time — the other person still has access.
-          </p>
+          <p className="section-copy">{t("hiddenCopy")}</p>
           {restoreError && (
             <p className="mt-3 text-sm text-red-600" role="alert">
               {restoreError}
@@ -444,8 +466,8 @@ export default function MessagesPage() {
           )}
           <ul className="mt-4 space-y-2">
             {archivedConversations.map((conv) => {
-              const name = conv.other?.first_name ?? conv.other?.username ?? "Someone";
-              const statusLabel = conversationStatusLabel(conv.conversation_status);
+              const name = conv.other?.first_name ?? conv.other?.username ?? t("someone");
+              const statusLabel = conversationStatusLabel(conv.conversation_status, tStatus);
               return (
                 <li
                   key={conv.id}
@@ -469,7 +491,7 @@ export default function MessagesPage() {
                     disabled={actingId === conv.id}
                     className="btn-secondary btn-sm shrink-0"
                   >
-                    {actingId === conv.id ? "Restoring…" : "Restore"}
+                    {actingId === conv.id ? tc("restoring") : tc("restore")}
                   </button>
                 </li>
               );

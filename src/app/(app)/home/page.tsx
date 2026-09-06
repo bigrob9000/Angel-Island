@@ -145,17 +145,15 @@ export default function HomePage() {
 
       <section>
         <h2 className="section-heading">{t("yourSpaces")}</h2>
-        <p className="section-copy">
-          Rooms you&apos;ve added. No obligation to post — just a place to return to.
-        </p>
+        <p className="section-copy">{t("yourSpacesCopy")}</p>
         {myRooms.length === 0 ? (
           <EmptyState
             className="mt-4"
             title={t("emptyNoSpaces")}
-            description="Rooms are calm corners for listening, learning, and collab posts. Add one when something catches your eye."
+            description={t("emptyNoSpacesDescription")}
           >
             <Link href="/rooms" className="btn-secondary">
-              Explore rooms
+              {t("exploreRooms")}
             </Link>
           </EmptyState>
         ) : (
@@ -184,18 +182,15 @@ export default function HomePage() {
             {tc("seeAll")}
           </Link>
         </div>
-        <p className="section-copy">
-          People you might want to spend time with — shared genres, roles, and interests when we
-          can see them.
-        </p>
+        <p className="section-copy">{t("exploreCopy")}</p>
         {people.length === 0 ? (
           <EmptyState
             className="mt-4"
             title={t("emptyNoPeople")}
-            description="As others join, they'll show up here. You can browse Explore anytime."
+            description={t("emptyNoPeopleDescription")}
           >
             <Link href="/explore" className="btn-secondary">
-              Explore people
+              {t("explorePeople")}
             </Link>
           </EmptyState>
         ) : (
@@ -218,22 +213,20 @@ export default function HomePage() {
             </Link>
           )}
         </div>
-        <p className="section-copy">
-          Chats and collab threads you&apos;re part of.
-        </p>
+        <p className="section-copy">{t("conversationsCopy")}</p>
         {conversationsLoading ? (
           <p className="mt-4 text-sm text-muted">{tc("loading")}</p>
         ) : recentConversations.length === 0 ? (
           <EmptyState
             className="mt-4"
             title={t("emptyNoConversations")}
-            description="Messages start with an invite — send one from someone's profile, or wait for one to arrive."
+            description={t("emptyNoConversationsDescription")}
           >
             <Link href="/explore" className="btn-secondary">
-              Explore people
+              {t("explorePeople")}
             </Link>
             <Link href="/messages" className="btn-secondary">
-              Open Messages
+              {t("openMessages")}
             </Link>
           </EmptyState>
         ) : (
@@ -254,20 +247,18 @@ export default function HomePage() {
             {tc("seeAll")}
           </Link>
         </div>
-        <p className="section-copy">
-          Shared spaces for projects you&apos;re exploring with other people.
-        </p>
+        <p className="section-copy">{t("collaborationsCopy")}</p>
         {activeCollabs.length === 0 ? (
           <EmptyState
             className="mt-4"
             title={t("emptyNoCollabs")}
-            description="When someone responds interested to a collab invite, a shared workspace opens here for notes, links, and next steps."
+            description={t("emptyNoCollabsDescription")}
           >
             <Link href="/explore" className="btn-secondary">
-              Explore people
+              {t("explorePeople")}
             </Link>
             <Link href="/collaborations" className="btn-secondary">
-              View Collabs
+              {t("viewCollabs")}
             </Link>
           </EmptyState>
         ) : (
@@ -286,16 +277,16 @@ export default function HomePage() {
       </section>
 
       <section className="border-t border-foreground/5 pt-8">
-        <p className="text-sm text-muted mb-4">Invitations only — no pressure.</p>
+        <p className="text-sm text-muted mb-4">{t("invitationsFooter")}</p>
         <div className="flex flex-wrap gap-3">
           <Link href="/rooms/collaborate?compose=collab_invite" className="btn-secondary">
-            Start a collab post
+            {t("startCollabPost")}
           </Link>
           <Link href="/rooms/learn?compose=question" className="btn-secondary">
-            Ask a question
+            {t("askQuestion")}
           </Link>
           <Link href="/rooms/listen?compose=share_work" className="btn-secondary">
-            Share what you&apos;re working on
+            {t("shareWorkingOn")}
           </Link>
         </div>
       </section>

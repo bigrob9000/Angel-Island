@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
-  loveCountLabel,
   postLovesSetupError,
   removePostLove,
   sendPostLove,
@@ -31,6 +31,7 @@ export function PostLoveButton({
   tableMissing,
   onLovedChange,
 }: Props) {
+  const t = useTranslations("rooms");
   const [acting, setActing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,11 +68,11 @@ export function PostLoveButton({
         <p className="text-sm text-muted">
           {loveCount > 0 ? (
             <>
-              {loveCountLabel(loveCount)}
-              <span className="italic"> · only you see this</span>
+              {t("loveCount", { count: loveCount })}
+              <span className="italic"> · {t("onlyYouSee")}</span>
             </>
           ) : (
-            <span className="italic">When someone sends love, only you will see it here.</span>
+            <span className="italic">{t("loveEmptyHint")}</span>
           )}
         </p>
       ) : (
@@ -87,7 +88,7 @@ export function PostLoveButton({
             }`}
             aria-pressed={loved}
           >
-            {acting ? "…" : loved ? "Love sent" : "Send love"}
+            {acting ? "…" : loved ? t("loveSent") : t("sendLove")}
           </button>
           {tableMissing && (
             <p className="text-xs text-muted">{postLovesSetupError()}</p>

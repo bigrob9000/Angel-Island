@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { CollaborationMessage, Profile } from "@/lib/types";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
@@ -20,6 +21,8 @@ export function GroupCollabChat({
   initialMessages,
   disabled = false,
 }: Props) {
+  const t = useTranslations("collaborations");
+  const tc = useTranslations("common");
   const [messages, setMessages] = useState(initialMessages);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -99,17 +102,17 @@ export function GroupCollabChat({
     <div className="space-y-4">
       <div className="surface max-h-80 space-y-3 overflow-y-auto px-4 py-3">
         {messages.length === 0 ? (
-          <p className="text-sm text-muted italic">No group messages yet — say hello when you&apos;re ready.</p>
+          <p className="text-sm text-muted italic">{t("groupChatEmpty")}</p>
         ) : (
           messages.map((msg) => {
             const name =
               profilesById[msg.sender_id]?.first_name ??
               profilesById[msg.sender_id]?.username ??
-              (msg.sender_id === userId ? "You" : "Someone");
+              (msg.sender_id === userId ? t("groupChatYou") : tc("someone"));
             const isMine = msg.sender_id === userId;
             return (
               <div key={msg.id} className={`text-sm ${isMine ? "text-right" : ""}`}>
-                <p className="text-xs text-muted">{isMine ? "You" : name}</p>
+                <p className="text-xs text-muted">{isMine ? t("groupChatYou") : name}</p>
                 <p
                   className={`mt-0.5 inline-block rounded-lg px-3 py-2 ${
                     isMine ? "bg-foreground text-background" : "bg-white/70 text-foreground"
@@ -125,7 +128,7 @@ export function GroupCollabChat({
       </div>
 
       {disabled ? (
-        <p className="text-sm text-muted">Group chat is paused while this collaboration is on hold.</p>
+        <p className="text-sm text-muted">{t("groupChatPaused")}</p>
       ) : (
         <form onSubmit={handleSend} className="flex gap-2">
           <input
@@ -133,11 +136,11 @@ export function GroupCollabChat({
             value={body}
             onChange={(e) => setBody(e.target.value)}
             className="flex-1 rounded-md border border-foreground/20 bg-white px-3 py-2 text-sm text-foreground"
-            placeholder="Message the group…"
+            placeholder={t("groupChatPlaceholder")}
             maxLength={2000}
           />
           <button type="submit" disabled={sending || !body.trim()} className="btn-primary btn-sm shrink-0">
-            Send
+            {tc("send")}
           </button>
         </form>
       )}

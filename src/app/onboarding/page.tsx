@@ -13,10 +13,13 @@ import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
 import { formatProfileSaveError, validateUsername } from "@/lib/profile-errors";
 import { hasFinishedOnboarding, markOnboardingCompleteLocal } from "@/lib/onboarding";
 import { PageLoading } from "@/components/PageLoading";
+import { translateProfileOption } from "@/lib/i18n/labels";
 
 const REASONS = [...HERE_FOR_OPTIONS];
 
-const LOCATIONS = ["Remote", "Prefer not to say"];
+const LOCATION_KEYS = ["remote", "preferNotToSay"] as const;
+const LOCATION_VALUES: string[] = ["Remote", "Prefer not to say"];
+const LOCATIONS = LOCATION_VALUES;
 
 const STEP_KEYS = ["stepWelcome", "stepHereFor", "stepBasics", "stepYourMusic", "stepHowItWorks"] as const;
 
@@ -24,6 +27,8 @@ const TOTAL_STEPS = STEP_KEYS.length;
 
 export default function OnboardingPage() {
   const t = useTranslations("onboarding");
+  const tc = useTranslations("common");
+  const tProfileOptions = useTranslations("profileOptions");
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -201,7 +206,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-md">
         {step > 0 && (
           <p className="mb-6 text-sm text-muted">
-            Step {step + 1} of {TOTAL_STEPS} · {t(STEP_KEYS[step])}
+            {t("stepProgress", { current: step + 1, total: TOTAL_STEPS, step: t(STEP_KEYS[step]) })}
           </p>
         )}
 
@@ -216,15 +221,13 @@ export default function OnboardingPage() {
             <h1 className="brand-font text-2xl font-semibold text-foreground sm:text-3xl">
               {t("welcomeTitle")}
             </h1>
-            <p className="mt-4 text-muted leading-relaxed">
-              A calm space for musicians and creatives. No pressure — we&apos;ll take it one step at a time.
-            </p>
+            <p className="mt-4 text-muted leading-relaxed">{t("welcomeCopy")}</p>
             <button
               type="button"
               onClick={() => setStep(1)}
               className="mt-8 w-full rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90"
             >
-              Continue
+              {tc("continue")}
             </button>
           </>
         )}
@@ -234,7 +237,7 @@ export default function OnboardingPage() {
             <h1 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
               {t("hereForTitle")}
             </h1>
-            <p className="mt-2 text-sm text-muted">Pick any that fit. Optional — you can skip.</p>
+            <p className="mt-2 text-sm text-muted">{t("hereForCopy")}</p>
             <div className="mt-6 flex flex-wrap gap-2">
               {REASONS.map((r) => (
                 <button
@@ -247,7 +250,7 @@ export default function OnboardingPage() {
                       : "border-foreground/30 text-muted hover:border-foreground/50"
                   }`}
                 >
-                  {r}
+                  {translateProfileOption(r, tProfileOptions)}
                 </button>
               ))}
             </div>
@@ -257,14 +260,14 @@ export default function OnboardingPage() {
                 onClick={() => setStep(2)}
                 className="flex-1 rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90"
               >
-                Continue
+                {tc("continue")}
               </button>
               <button
                 type="button"
                 onClick={() => setStep(2)}
                 className="rounded-md border border-foreground/30 py-2.5 px-4 text-sm text-muted hover:text-foreground"
               >
-                Skip
+                {tc("skip")}
               </button>
             </div>
           </>
@@ -275,54 +278,52 @@ export default function OnboardingPage() {
             <h1 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
               {t("basicsTitle")}
             </h1>
-            <p className="mt-2 text-sm text-muted">
-              First name and username are required before others can find you on Angel Island.
-            </p>
+            <p className="mt-2 text-sm text-muted">{t("basicsCopy")}</p>
             <div className="mt-6 space-y-4">
               <label className="block">
-                <span className="text-sm text-muted">First name</span>
+                <span className="text-sm text-muted">{t("firstNameLabel")}</span>
                 <input
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="e.g. Alex"
+                  placeholder={t("firstNamePlaceholder")}
                   required
                   className="mt-1 block w-full rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
                 />
               </label>
               <label className="block">
-                <span className="text-sm text-muted">Username (for your profile link)</span>
+                <span className="text-sm text-muted">{t("usernameLabel")}</span>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))}
-                  placeholder="e.g. angelisland"
+                  placeholder={t("usernamePlaceholder")}
                   required
                   minLength={2}
                   className="mt-1 block w-full rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
                 />
               </label>
               <label className="block">
-                <span className="text-sm text-muted">Location (optional)</span>
+                <span className="text-sm text-muted">{t("locationLabel")}</span>
                 <select
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="mt-1 block w-full rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
                 >
-                  <option value="">Choose one…</option>
-                  {LOCATIONS.map((loc) => (
+                  <option value="">{t("locationChoose")}</option>
+                  {LOCATION_VALUES.map((loc, index) => (
                     <option key={loc} value={loc}>
-                      {loc}
+                      {t(`locations.${LOCATION_KEYS[index]}`)}
                     </option>
                   ))}
-                  <option value="other">Other (type below)</option>
+                  <option value="other">{t("locationOther")}</option>
                 </select>
                 {location === "other" && (
                   <input
                     type="text"
                     value={locationCustom}
                     onChange={(e) => setLocationCustom(e.target.value)}
-                    placeholder="City or region"
+                    placeholder={t("locationCustomPlaceholder")}
                     className="mt-2 block w-full rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none"
                   />
                 )}
@@ -334,7 +335,7 @@ export default function OnboardingPage() {
               onClick={() => void continueFromBasics()}
               className="mt-8 w-full rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
             >
-              {saving ? "Saving…" : "Continue"}
+              {saving ? tc("saving") : tc("continue")}
             </button>
           </>
         )}
@@ -344,39 +345,40 @@ export default function OnboardingPage() {
             <h1 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
               {t("yourMusicTitle")}
             </h1>
-            <p className="mt-2 text-sm text-muted">
-              Optional — makes Explore and rooms more useful. Skip anything that doesn&apos;t fit.
-            </p>
+            <p className="mt-2 text-sm text-muted">{t("yourMusicCopy")}</p>
             <div className="mt-6 space-y-6">
               <div>
                 <p className="text-sm font-medium text-foreground">{t("yourMusicRoles")}</p>
-                <p className="mt-1 text-sm text-muted">Select any roles. You don&apos;t have to be an expert.</p>
+                <p className="mt-1 text-sm text-muted">{t("yourMusicRolesCopy")}</p>
                 <div className="mt-3">
-                  <ChipSelect options={ROLE_OPTIONS} selected={roles} onChange={setRoles} />
+                  <ChipSelect
+                    options={ROLE_OPTIONS}
+                    selected={roles}
+                    onChange={setRoles}
+                    formatLabel={(option) => translateProfileOption(option, tProfileOptions)}
+                  />
                 </div>
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">{t("yourMusicGenres")}</p>
-                <p className="mt-1 text-sm text-muted">A few is enough (up to 5).</p>
+                <p className="mt-1 text-sm text-muted">{t("yourMusicGenresCopy")}</p>
                 <div className="mt-3">
                   <TagInput
                     tags={genresMake}
                     onChange={setGenresMake}
                     max={5}
-                    placeholder="e.g. indie, jazz"
+                    placeholder={t("genresPlaceholder")}
                   />
                 </div>
               </div>
               <label className="block">
                 <span className="text-sm font-medium text-foreground">{t("yourMusicAbout")}</span>
-                <span className="mt-1 block text-sm text-muted">
-                  A few honest sentences — how you relate to music right now.
-                </span>
+                <span className="mt-1 block text-sm text-muted">{t("yourMusicAboutCopy")}</span>
                 <textarea
                   value={about}
                   onChange={(e) => setAbout(e.target.value)}
                   rows={4}
-                  placeholder="Optional — no minimum length."
+                  placeholder={t("aboutPlaceholder")}
                   className="mt-2 block w-full rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
                 />
               </label>
@@ -388,7 +390,7 @@ export default function OnboardingPage() {
                 onClick={() => void continueFromOptional()}
                 className="flex-1 rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
               >
-                {saving ? "Saving…" : "Continue"}
+                {saving ? tc("saving") : tc("continue")}
               </button>
               <button
                 type="button"
@@ -399,7 +401,7 @@ export default function OnboardingPage() {
                 }}
                 className="rounded-md border border-foreground/30 py-2.5 px-4 text-sm text-muted hover:text-foreground disabled:opacity-50"
               >
-                Skip
+                {tc("skip")}
               </button>
             </div>
           </>
@@ -411,32 +413,25 @@ export default function OnboardingPage() {
               {t("howItWorksTitle")}
             </h1>
             <ul className="mt-6 space-y-4 text-muted leading-relaxed">
-              <li>
-                <strong className="text-foreground">Rooms hold intention.</strong> Each space has a
-                purpose — jam, learn, collaborate — so you know what to expect.
-              </li>
-              <li>
-                <strong className="text-foreground">Conversation over reaction.</strong> No likes or
-                counts. Just posts, questions, and real replies.
-              </li>
-              <li>
-                <strong className="text-foreground">You can listen first.</strong> Explore quietly. Jump
-                in when you&apos;re ready. There&apos;s no rush.
-              </li>
+              <li>{t("howItWorks1")}</li>
+              <li>{t("howItWorks2")}</li>
+              <li>{t("howItWorks3")}</li>
             </ul>
             {optionalPreview.completeCount < optionalPreview.items.length && (
               <p className="mt-6 text-sm text-muted">
-                You can always add more to your profile later ({optionalPreview.completeCount} of{" "}
-                {optionalPreview.items.length} optional details so far).{" "}
+                {t("optionalProfileProgress", {
+                  complete: optionalPreview.completeCount,
+                  total: optionalPreview.items.length,
+                })}{" "}
                 <Link href="/profile/edit" className="text-foreground underline hover:no-underline">
-                  Edit profile
+                  {t("editProfile")}
                 </Link>
               </p>
             )}
             <p className="mt-4 text-sm text-muted">
-              Adjust the space anytime in{" "}
+              {t("settingsHint")}{" "}
               <Link href="/settings" className="text-foreground underline hover:no-underline">
-                Settings
+                {t("settingsLink")}
               </Link>
               .
             </p>
@@ -446,7 +441,7 @@ export default function OnboardingPage() {
               onClick={() => void finishOnboarding()}
               className="brand-font mt-8 w-full rounded-md bg-foreground py-2.5 text-sm font-semibold text-background hover:opacity-90 disabled:opacity-50"
             >
-              {saving ? "Saving…" : "Enter Angel Island"}
+              {saving ? tc("saving") : t("enterAngelIsland")}
             </button>
           </>
         )}

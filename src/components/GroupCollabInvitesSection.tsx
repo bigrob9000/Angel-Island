@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
+import { inviteResponseLabel } from "@/lib/i18n/labels";
 import {
   cancelGroupCollabInvite,
   formatMemberNames,
@@ -17,15 +18,9 @@ type Props = {
   onResponded?: () => void;
 };
 
-function recipientStatusLabel(status: string): string {
-  if (status === "interested") return "Interested";
-  if (status === "maybe") return "Maybe later";
-  if (status === "not_fit") return "Not a fit";
-  return "Waiting";
-}
-
 export function GroupCollabInvitesSection({ received = [], sent = [], onResponded }: Props) {
   const t = useTranslations("collaborations");
+  const tInvite = useTranslations("inviteResponses");
   const router = useRouter();
   const [actingId, setActingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,9 +63,7 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
       {received.length > 0 && (
         <section>
           <h2 className="section-heading">{t("groupInvites")}</h2>
-          <p className="section-copy">
-            One invite, several people — everyone responds before the workspace opens.
-          </p>
+          <p className="section-copy">{t("groupInvitesCopy")}</p>
           {error && (
             <p className="mt-2 text-sm text-red-600" role="alert">
               {error}
@@ -94,8 +87,8 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
                   <p className="mt-2 text-sm font-medium text-foreground">{invite.about}</p>
                   {invite.message && <p className="mt-1 text-sm text-muted">{invite.message}</p>}
                   <p className="mt-2 text-xs text-muted">
-                    With {formatMemberNames(others)} · responds by {expires}
-                    {pendingCount > 0 ? ` · ${pendingCount} still deciding` : ""}
+                    {t("withMembers", { names: formatMemberNames(others), expires })}
+                    {pendingCount > 0 ? ` · ${t("stillDeciding", { count: pendingCount })}` : ""}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
@@ -104,7 +97,7 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
                       disabled={actingId === invite.id}
                       className="btn-primary btn-sm"
                     >
-                      Interested
+                      {tInvite("interested")}
                     </button>
                     <button
                       type="button"
@@ -112,7 +105,7 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
                       disabled={actingId === invite.id}
                       className="btn-secondary btn-sm"
                     >
-                      Maybe later
+                      {tInvite("maybeLater")}
                     </button>
                     <button
                       type="button"
@@ -120,7 +113,7 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
                       disabled={actingId === invite.id}
                       className="btn-secondary btn-sm"
                     >
-                      Not a fit
+                      {tInvite("notFit")}
                     </button>
                   </div>
                 </li>
@@ -152,16 +145,18 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium uppercase tracking-wide text-muted">
-                        Group collab invite
+                        {t("groupInviteLabel")}
                       </p>
                       <p className="mt-1 text-sm font-medium text-foreground">{invite.about}</p>
                       {invite.message && <p className="mt-1 text-sm text-muted">{invite.message}</p>}
                       <p className="mt-2 text-xs text-muted">
-                        Invited {invite.recipients.length}{" "}
-                        {invite.recipients.length === 1 ? "person" : "people"} · responds by {expires}
+                        {t("invitedPeople", {
+                          count: invite.recipients.length,
+                          expires,
+                        })}
                         {pendingCount > 0
-                          ? ` · ${pendingCount} still deciding`
-                          : " · everyone has responded"}
+                          ? ` · ${t("stillDeciding", { count: pendingCount })}`
+                          : ` · ${t("everyoneResponded")}`}
                       </p>
                     </div>
                     <button
@@ -180,7 +175,12 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
                         className="flex flex-wrap items-center justify-between gap-2 text-sm"
                       >
                         <ProfileAttribution profile={recipient.profile} />
-                        <span className="text-xs text-muted">{recipientStatusLabel(recipient.status)}</span>
+                        <span className="text-xs text-muted">
+                          {inviteResponseLabel(
+                            recipient.status as "interested" | "maybe" | "not_fit" | "pending" | "waiting",
+                            tInvite,
+                          )}
+                        </span>
                       </li>
                     ))}
                   </ul>

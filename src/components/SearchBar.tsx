@@ -30,11 +30,11 @@ export function SearchBar({ className = "", defaultValue = "" }: SearchBarProps)
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search people, rooms, conversations…"
+            placeholder={t("placeholder")}
             className="min-w-0 flex-1 rounded-full border-0 bg-transparent px-3 py-2 text-foreground placeholder:text-muted focus:outline-none"
           />
           <button type="submit" disabled={!query.trim()} className="btn-primary shrink-0 disabled:opacity-50">
-            Search
+            {t("submit")}
           </button>
         </div>
       </label>
