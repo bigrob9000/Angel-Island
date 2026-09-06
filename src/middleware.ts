@@ -1,16 +1,12 @@
-import createMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { routing } from "@/i18n/routing";
 import { isSupabaseConfigured, normalizeSupabaseUrl } from "@/lib/supabase/config";
 
-const handleI18nRouting = createMiddleware(routing);
-
 export async function middleware(request: NextRequest) {
-  const response = handleI18nRouting(request);
+  let supabaseResponse = NextResponse.next({ request });
 
   if (!isSupabaseConfigured()) {
-    return response;
+    return supabaseResponse;
   }
 
   const supabaseUrl = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL!);
@@ -26,8 +22,9 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
+          supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
+            supabaseResponse.cookies.set(name, value, options);
           });
         },
       },
@@ -35,10 +32,10 @@ export async function middleware(request: NextRequest) {
 
     await supabase.auth.getUser();
   } catch {
-    return response;
+    return supabaseResponse;
   }
 
-  return response;
+  return supabaseResponse;
 }
 
 export const config = {
