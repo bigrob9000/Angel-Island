@@ -20,6 +20,9 @@ import {
   type ConversationPreview,
 } from "@/lib/conversations";
 import { restoreConversationToList } from "@/lib/conversation-archive";
+import { loadPendingGroupCollabInvitesForUser } from "@/lib/group-collaborations";
+import { GroupCollabInvitesSection } from "@/components/GroupCollabInvitesSection";
+import type { GroupCollabInviteWithMeta } from "@/lib/group-collaborations";
 
 const PACE_LABELS: Record<string, string> = { "low-pressure": "Low-pressure", "structured": "Structured", "flexible": "Flexible" };
 
@@ -32,6 +35,9 @@ export default function MessagesPage() {
   const [sentInvites, setSentInvites] = useState<(ChatInvite & { receiver?: Profile })[]>([]);
   const [receivedCollabInvites, setReceivedCollabInvites] = useState<(CollabInvite & { sender?: Profile })[]>([]);
   const [sentCollabInvites, setSentCollabInvites] = useState<(CollabInvite & { receiver?: Profile; workspaceId?: string | null })[]>([]);
+  const [groupReceived, setGroupReceived] = useState<GroupCollabInviteWithMeta[]>([]);
+  const [groupSent, setGroupSent] = useState<GroupCollabInviteWithMeta[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [archivedConversations, setArchivedConversations] = useState<ConversationPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [actingId, setActingId] = useState<string | null>(null);
@@ -130,6 +136,18 @@ export default function MessagesPage() {
         } else setSentCollabInvites([]);
       }).finally(() => setLoading(false));
   }, [router, userId, inboxLoading]);
+
+  useEffect(() => {
+    if (!userId) {
+      setGroupReceived([]);
+      setGroupSent([]);
+      return;
+    }
+    loadPendingGroupCollabInvitesForUser(userId).then((result) => {
+      setGroupReceived(result.received);
+      setGroupSent(result.sent);
+    });
+  }, [userId, refreshKey]);
 
   useEffect(() => {
     if (!userId) {
@@ -233,10 +251,12 @@ export default function MessagesPage() {
 
   if (loading || inboxLoading) return <p className="text-muted">{tc("loading")}</p>;
 
-  const hasSentInvites = sentInvites.length > 0 || sentCollabInvites.length > 0;
+  const hasSentInvites =
+    sentInvites.length > 0 || sentCollabInvites.length > 0 || groupSent.length > 0;
   const isEmptyInbox =
     receivedInvites.length === 0 &&
     receivedCollabInvites.length === 0 &&
+    groupReceived.length === 0 &&
     !hasSentInvites &&
     conversations.length === 0;
 
@@ -320,6 +340,12 @@ export default function MessagesPage() {
           </ul>
         </section>
       )}
+
+      <GroupCollabInvitesSection
+        received={groupReceived}
+        sent={groupSent}
+        onResponded={() => setRefreshKey((key) => key + 1)}
+      />
 
       <section>
         <h2 className="section-heading">{t("sentInvites")}</h2>

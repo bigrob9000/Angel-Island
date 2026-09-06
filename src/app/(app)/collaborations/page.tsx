@@ -27,6 +27,9 @@ export default function CollaborationsPage() {
   const [filter, setFilter] = useState<Filter>("active");
   const [previews, setPreviews] = useState<CollaborationPreview[]>([]);
   const [groupReceived, setGroupReceived] = useState<GroupCollabInviteWithMeta[]>([]);
+  const [groupSent, setGroupSent] = useState<GroupCollabInviteWithMeta[]>([]);
+  const [groupInviteError, setGroupInviteError] = useState<string | null>(null);
+  const [showSentSuccess, setShowSentSuccess] = useState(false);
   const [memberInvites, setMemberInvites] = useState<
     Awaited<ReturnType<typeof loadPendingGroupMemberInvitesForUser>>["invites"]
   >([]);
@@ -44,6 +47,15 @@ export default function CollaborationsPage() {
   }, [trackedCollabs]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("sent") === "1") {
+      setShowSentSuccess(true);
+      window.history.replaceState({}, "", "/collaborations");
+    }
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -56,6 +68,8 @@ export default function CollaborationsPage() {
       const memberInviteResult = await loadPendingGroupMemberInvitesForUser(user.id);
       setPreviews(result.previews);
       setGroupReceived(groupInvites.received);
+      setGroupSent(groupInvites.sent);
+      setGroupInviteError(groupInvites.error ?? null);
       setMemberInvites(memberInviteResult.invites);
       setTableMissing(result.tableMissing || groupInvites.tableMissing || memberInviteResult.tableMissing);
       setLoading(false);
@@ -92,6 +106,18 @@ export default function CollaborationsPage() {
         ))}
       </div>
 
+      {showSentSuccess && (
+        <p className="rounded-md border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-foreground" role="status">
+          {t("groupSentSuccess")}
+        </p>
+      )}
+
+      {groupInviteError && !tableMissing && (
+        <p className="text-sm text-red-600" role="alert">
+          {groupInviteError}
+        </p>
+      )}
+
       {tableMissing && (
         <p className="text-sm text-muted">{collaborationsSetupError()}</p>
       )}
@@ -103,6 +129,7 @@ export default function CollaborationsPage() {
 
       <GroupCollabInvitesSection
         received={groupReceived}
+        sent={groupSent}
         onResponded={() => setRefreshKey((key) => key + 1)}
       />
 

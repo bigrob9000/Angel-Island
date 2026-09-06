@@ -133,14 +133,19 @@ export function formatMemberNames(profiles: Profile[], max = 3): string {
 
 export async function loadPendingGroupCollabInvitesForUser(
   userId: string,
-): Promise<{ received: GroupCollabInviteWithMeta[]; sent: GroupCollabInviteWithMeta[]; tableMissing: boolean }> {
+): Promise<{
+  received: GroupCollabInviteWithMeta[];
+  sent: GroupCollabInviteWithMeta[];
+  tableMissing: boolean;
+  error?: string;
+}> {
   await expireStaleGroupCollabInvites();
   const supabase = createClient();
   const { blockedIds } = await loadBlockedUserIds(userId);
 
   const { data: recipientRows, error: recvError } = await supabase
     .from("group_collab_invite_recipients")
-    .select("*, group_collab_invites(*, group_collab_invite_recipients(*))")
+    .select("*")
     .eq("user_id", userId)
     .eq("status", "pending");
 
@@ -149,12 +154,34 @@ export async function loadPendingGroupCollabInvitesForUser(
       received: [],
       sent: [],
       tableMissing: isGroupCollabMissing(recvError.message, recvError.code),
+      error: recvError.message,
+    };
+  }
+
+  const receivedInviteIds = [
+    ...new Set((recipientRows ?? []).map((row) => row.group_invite_id as string)),
+  ];
+
+  const { data: receivedInviteRows, error: receivedInvitesError } = receivedInviteIds.length
+    ? await supabase
+        .from("group_collab_invites")
+        .select("*")
+        .in("id", receivedInviteIds)
+        .eq("status", "pending")
+    : { data: [], error: null };
+
+  if (receivedInvitesError) {
+    return {
+      received: [],
+      sent: [],
+      tableMissing: isGroupCollabMissing(receivedInvitesError.message, receivedInvitesError.code),
+      error: receivedInvitesError.message,
     };
   }
 
   const { data: sentRows, error: sentError } = await supabase
     .from("group_collab_invites")
-    .select("*, group_collab_invite_recipients(*)")
+    .select("*")
     .eq("creator_id", userId)
     .eq("status", "pending");
 
@@ -163,21 +190,49 @@ export async function loadPendingGroupCollabInvitesForUser(
       received: [],
       sent: [],
       tableMissing: isGroupCollabMissing(sentError.message, sentError.code),
+      error: sentError.message,
     };
   }
 
+  const allInviteIds = [
+    ...new Set([
+      ...receivedInviteIds,
+      ...(sentRows ?? []).map((row) => row.id as string),
+    ]),
+  ];
+
+  const { data: allRecipientRows, error: allRecipientsError } = allInviteIds.length
+    ? await supabase
+        .from("group_collab_invite_recipients")
+        .select("*")
+        .in("group_invite_id", allInviteIds)
+    : { data: [], error: null };
+
+  if (allRecipientsError) {
+    return {
+      received: [],
+      sent: [],
+      tableMissing: isGroupCollabMissing(allRecipientsError.message, allRecipientsError.code),
+      error: allRecipientsError.message,
+    };
+  }
+
+  const recipientsByInviteId = new Map<string, GroupCollabInviteRecipient[]>();
+  (allRecipientRows ?? []).forEach((row) => {
+    const inviteId = row.group_invite_id as string;
+    const list = recipientsByInviteId.get(inviteId) ?? [];
+    list.push(row as GroupCollabInviteRecipient);
+    recipientsByInviteId.set(inviteId, list);
+  });
+
   const profileIds = new Set<string>();
-  (recipientRows ?? []).forEach((row) => {
-    const invite = row.group_collab_invites as GroupCollabInvite;
-    if (invite?.creator_id) profileIds.add(invite.creator_id);
-    ((invite as GroupCollabInvite & { group_collab_invite_recipients?: GroupCollabInviteRecipient[] })
-      ?.group_collab_invite_recipients ?? []).forEach((r) => profileIds.add(r.user_id));
+  (receivedInviteRows ?? []).forEach((invite) => {
+    profileIds.add(invite.creator_id);
+    (recipientsByInviteId.get(invite.id) ?? []).forEach((r) => profileIds.add(r.user_id));
   });
   (sentRows ?? []).forEach((invite) => {
     profileIds.add(invite.creator_id);
-    (invite.group_collab_invite_recipients ?? []).forEach((r: GroupCollabInviteRecipient) =>
-      profileIds.add(r.user_id),
-    );
+    (recipientsByInviteId.get(invite.id) ?? []).forEach((r) => profileIds.add(r.user_id));
   });
 
   const { data: profiles } = profileIds.size
@@ -189,31 +244,23 @@ export async function loadPendingGroupCollabInvitesForUser(
     profilesById[row.id] = normalizeProfile(row as Profile);
   });
 
-  const received: GroupCollabInviteWithMeta[] = [];
-  for (const row of recipientRows ?? []) {
-    const invite = row.group_collab_invites as GroupCollabInvite & {
-      group_collab_invite_recipients?: GroupCollabInviteRecipient[];
-    };
-    if (!invite || invite.status !== "pending") continue;
-    if (blockedIds.has(invite.creator_id)) continue;
-    const recipients = (invite.group_collab_invite_recipients ?? []).map((r) => ({
+  const received: GroupCollabInviteWithMeta[] = (receivedInviteRows ?? []).map((invite) => {
+    const recipients = (recipientsByInviteId.get(invite.id) ?? []).map((r) => ({
       ...r,
       profile: profilesById[r.user_id],
     }));
-    received.push({
-      ...invite,
+    return {
+      ...(invite as GroupCollabInvite),
       creator: profilesById[invite.creator_id],
       recipients,
-    });
-  }
+    };
+  }).filter((invite) => !blockedIds.has(invite.creator_id));
 
   const sent: GroupCollabInviteWithMeta[] = (sentRows ?? []).map((invite) => {
-    const recipients = (invite.group_collab_invite_recipients ?? []).map(
-      (r: GroupCollabInviteRecipient) => ({
-        ...r,
-        profile: profilesById[r.user_id],
-      }),
-    );
+    const recipients = (recipientsByInviteId.get(invite.id) ?? []).map((r) => ({
+      ...r,
+      profile: profilesById[r.user_id],
+    }));
     return {
       ...(invite as GroupCollabInvite),
       creator: profilesById[invite.creator_id],

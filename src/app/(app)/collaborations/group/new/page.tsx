@@ -111,7 +111,7 @@ export default function NewGroupCollabPage() {
       return;
     }
 
-    router.push("/collaborations");
+    router.push("/collaborations?sent=1");
   }
 
   if (loading) return <p className="text-muted">{tc("loading")}</p>;

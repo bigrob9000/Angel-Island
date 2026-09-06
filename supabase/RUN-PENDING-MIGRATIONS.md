@@ -16,6 +16,16 @@ Group collab invites (max 6 people), workspace group chat, respond-then-open, 14
 
 ---
 
+## 030 — Group collab read grants (run after 029)
+
+Run the full file: `supabase/migrations/030_group_collab_grants.sql`
+
+Fixes group invites not appearing after send (database read permissions + recipient visibility).
+
+**Try it:** Send a group invite → **Collaborations** should show **Group invites you sent** with each person's response status.
+
+---
+
 ## Collab invites — run this now
 
 **File:** `supabase/migrations/003_collab_invites.sql`
