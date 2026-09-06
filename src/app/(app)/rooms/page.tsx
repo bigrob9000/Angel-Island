@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase";
 import type { Room } from "@/lib/types";
 
 import type { TranslateFn } from "@/lib/i18n/labels";
+import { translateRoomName } from "@/lib/i18n/rooms";
 
 function activityLabel(lastAt: string | null, t: TranslateFn): string {
   if (!lastAt) return t("activityQuiet");
@@ -134,7 +135,7 @@ export default function RoomsPage() {
                 <div className="room-cloud-blob" style={{ width: 65, height: 44, top: 44, left: 62 }} />
               </div>
               <div className="room-cloud-label">
-                <span>{room.name}</span>
+                <span>{translateRoomName(room, t)}</span>
               </div>
               <button
                 type="button"
@@ -157,7 +158,7 @@ export default function RoomsPage() {
           {rooms.map((room) => (
             <li key={room.id}>
               <Link href={`/rooms/${room.slug}`} className="text-foreground hover:underline">
-                {room.name}
+                {translateRoomName(room, t)}
               </Link>
               {" — "}
               {activityLabel(lastActivity[room.id] ?? null, t)}

@@ -367,7 +367,34 @@
     "errorMediaRequired": "Ajoutez un lien vers votre audio ou vidéo.",
     "errorInvalidUrl": "Ce lien ne semble pas valide. Essayez une URL https:// complète.",
     "errorBodyRequired": "Ajoutez quelque chose à votre publication avant d'enregistrer.",
-    "errorIntroExists": "Vous avez déjà une présentation ici. Modifiez-la ou supprimez-la pour changer."
+    "errorIntroExists": "Vous avez déjà une présentation ici. Modifiez-la ou supprimez-la pour changer.",
+    "catalog": {
+      "introductions": {
+        "name": "Présentations",
+        "description": "Dites bonjour. Une intro par personne — modifiez ou supprimez quand vous voulez.",
+        "purposeNorms": "Bienvenue ici. Aucune obligation de répondre."
+      },
+      "jam": {
+        "name": "Jam",
+        "description": "Trouvez des personnes avec qui jouer. Partagez ce que vous jouez et ce que vous cherchez.",
+        "purposeNorms": "Soyez clair·e sur le niveau et le style. Sans pression."
+      },
+      "learn": {
+        "name": "Apprendre",
+        "description": "Questions et conseils. Instruments, production, théorie, pratique.",
+        "purposeNorms": "Posez de vraies questions. Partagez ce qui a fonctionné pour vous."
+      },
+      "collaborate": {
+        "name": "Collaborer",
+        "description": "Trouvez des co-auteur·rices, producteur·rices et partenaires de projet.",
+        "purposeNorms": "Indiquez votre rôle et ce qui vous intéresse."
+      },
+      "listen": {
+        "name": "Écouter et partager",
+        "description": "Partagez des extraits, démos et travaux en cours. Un lieu pour être entendu·e — pas classé.",
+        "purposeNorms": "Publiez un lien audio ou vidéo (YouTube, SoundCloud, TikTok, etc.). Retours seulement si quelqu'un le demande. Écouter compte — pas besoin de commenter."
+      }
+    }
   },
   "messages": {
     "title": "Messages",

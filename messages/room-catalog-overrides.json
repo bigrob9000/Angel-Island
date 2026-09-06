@@ -1,0 +1,53 @@
+{
+  "fr": {
+    "rooms.catalog.introductions.name": "Présentations",
+    "rooms.catalog.introductions.description": "Dites bonjour. Une intro par personne — modifiez ou supprimez quand vous voulez.",
+    "rooms.catalog.introductions.purposeNorms": "Bienvenue ici. Aucune obligation de répondre.",
+    "rooms.catalog.jam.name": "Jam",
+    "rooms.catalog.jam.description": "Trouvez des personnes avec qui jouer. Partagez ce que vous jouez et ce que vous cherchez.",
+    "rooms.catalog.jam.purposeNorms": "Soyez clair·e sur le niveau et le style. Sans pression.",
+    "rooms.catalog.learn.name": "Apprendre",
+    "rooms.catalog.learn.description": "Questions et conseils. Instruments, production, théorie, pratique.",
+    "rooms.catalog.learn.purposeNorms": "Posez de vraies questions. Partagez ce qui a fonctionné pour vous.",
+    "rooms.catalog.collaborate.name": "Collaborer",
+    "rooms.catalog.collaborate.description": "Trouvez des co-auteur·rices, producteur·rices et partenaires de projet.",
+    "rooms.catalog.collaborate.purposeNorms": "Indiquez votre rôle et ce qui vous intéresse.",
+    "rooms.catalog.listen.name": "Écouter et partager",
+    "rooms.catalog.listen.description": "Partagez des extraits, démos et travaux en cours. Un lieu pour être entendu·e — pas classé.",
+    "rooms.catalog.listen.purposeNorms": "Publiez un lien audio ou vidéo (YouTube, SoundCloud, TikTok, etc.). Retours seulement si quelqu'un le demande. Écouter compte — pas besoin de commenter."
+  },
+  "es": {
+    "rooms.catalog.introductions.name": "Presentaciones",
+    "rooms.catalog.introductions.description": "Saluda. Una intro por persona — edita o elimina cuando quieras.",
+    "rooms.catalog.introductions.purposeNorms": "Bienvenido/a aquí. Sin obligación de responder.",
+    "rooms.catalog.jam.name": "Jam",
+    "rooms.catalog.jam.description": "Encuentra personas con quien tocar. Comparte qué tocas y qué buscas.",
+    "rooms.catalog.jam.purposeNorms": "Sé claro/a sobre nivel y estilo. Sin presión.",
+    "rooms.catalog.learn.name": "Aprender",
+    "rooms.catalog.learn.description": "Preguntas y consejos. Instrumentos, producción, teoría, práctica.",
+    "rooms.catalog.learn.purposeNorms": "Haz preguntas reales. Comparte lo que te funcionó.",
+    "rooms.catalog.collaborate.name": "Colaborar",
+    "rooms.catalog.collaborate.description": "Encuentra coautores, productores y compañeros de proyecto.",
+    "rooms.catalog.collaborate.purposeNorms": "Indica tu rol y qué te interesa.",
+    "rooms.catalog.listen.name": "Escuchar y compartir",
+    "rooms.catalog.listen.description": "Comparte clips, demos y trabajos en progreso. Un lugar para ser escuchado/a — sin ranking.",
+    "rooms.catalog.listen.purposeNorms": "Publica un enlace de audio o video (YouTube, SoundCloud, TikTok, etc.). Feedback solo si alguien lo pide. Escuchar cuenta — no tienes que comentar."
+  },
+  "de": {
+    "rooms.catalog.introductions.name": "Vorstellungen",
+    "rooms.catalog.introductions.description": "Sag hallo. Eine Intro pro Person — jederzeit bearbeiten oder löschen.",
+    "rooms.catalog.introductions.purposeNorms": "Willkommen hier. Keine Pflicht zu antworten.",
+    "rooms.catalog.jam.name": "Jam",
+    "rooms.catalog.jam.description": "Finde Leute zum Musizieren. Teile, was du spielst und was du suchst.",
+    "rooms.catalog.jam.purposeNorms": "Sei klar bei Level und Stil. Kein Druck.",
+    "rooms.catalog.learn.name": "Lernen",
+    "rooms.catalog.learn.description": "Fragen und Tipps. Instrumente, Produktion, Theorie, Übung.",
+    "rooms.catalog.learn.purposeNorms": "Stell echte Fragen. Teile, was für dich funktioniert hat.",
+    "rooms.catalog.collaborate.name": "Zusammenarbeiten",
+    "rooms.catalog.collaborate.description": "Finde Co-Writer, Producer und Projektpartner.",
+    "rooms.catalog.collaborate.purposeNorms": "Nenne deine Rolle und wofür du offen bist.",
+    "rooms.catalog.listen.name": "Hören & Teilen",
+    "rooms.catalog.listen.description": "Teile Clips, Demos und Works-in-Progress. Ein Ort, gehört zu werden — nicht gerankt.",
+    "rooms.catalog.listen.purposeNorms": "Poste einen Audio- oder Video-Link (YouTube, SoundCloud, TikTok usw.). Feedback nur auf Anfrage. Zuhören zählt — du musst nicht kommentieren."
+  }
+}

@@ -367,7 +367,34 @@
     "errorMediaRequired": "Füge einen Link zu deinem Audio oder Video hinzu.",
     "errorInvalidUrl": "Dieser Link scheint ungültig. Versuche eine vollständige https:// URL.",
     "errorBodyRequired": "Füge deinem Beitrag etwas hinzu, bevor du speicherst.",
-    "errorIntroExists": "Du hast hier schon eine Vorstellung. Bearbeite oder lösche sie, um etwas zu ändern."
+    "errorIntroExists": "Du hast hier schon eine Vorstellung. Bearbeite oder lösche sie, um etwas zu ändern.",
+    "catalog": {
+      "introductions": {
+        "name": "Vorstellungen",
+        "description": "Sag hallo. Eine Intro pro Person — jederzeit bearbeiten oder löschen.",
+        "purposeNorms": "Willkommen hier. Keine Pflicht zu antworten."
+      },
+      "jam": {
+        "name": "Jam",
+        "description": "Finde Leute zum Musizieren. Teile, was du spielst und was du suchst.",
+        "purposeNorms": "Sei klar bei Level und Stil. Kein Druck."
+      },
+      "learn": {
+        "name": "Lernen",
+        "description": "Fragen und Tipps. Instrumente, Produktion, Theorie, Übung.",
+        "purposeNorms": "Stell echte Fragen. Teile, was für dich funktioniert hat."
+      },
+      "collaborate": {
+        "name": "Zusammenarbeiten",
+        "description": "Finde Co-Writer, Producer und Projektpartner.",
+        "purposeNorms": "Nenne deine Rolle und wofür du offen bist."
+      },
+      "listen": {
+        "name": "Hören & Teilen",
+        "description": "Teile Clips, Demos und Works-in-Progress. Ein Ort, gehört zu werden — nicht gerankt.",
+        "purposeNorms": "Poste einen Audio- oder Video-Link (YouTube, SoundCloud, TikTok usw.). Feedback nur auf Anfrage. Zuhören zählt — du musst nicht kommentieren."
+      }
+    }
   },
   "messages": {
     "title": "Nachrichten",

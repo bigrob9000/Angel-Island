@@ -14,12 +14,13 @@ import {
   collaborationStatusLabel,
   conversationStatusLabel,
 } from "@/lib/i18n/labels";
-import type { Profile, Room } from "@/lib/types";
-import { normalizeProfile } from "@/lib/types";
+import { translateRoomDescription, translateRoomName } from "@/lib/i18n/rooms";
+import { normalizeProfile, type Profile, type Room } from "@/lib/types";
 
 export default function SearchPageContent() {
   const t = useTranslations("search");
   const tStatus = useTranslations("status");
+  const tRooms = useTranslations("rooms");
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
 
@@ -108,8 +109,10 @@ export default function SearchPageContent() {
                   href={`/rooms/${room.slug}`}
                   className="surface-interactive block px-4 py-3"
                 >
-                  <p className="font-medium text-foreground">{room.name}</p>
-                  {room.description && <p className="mt-1 text-sm text-muted">{room.description}</p>}
+                  <p className="font-medium text-foreground">{translateRoomName(room, tRooms)}</p>
+                  {room.description && (
+                    <p className="mt-1 text-sm text-muted">{translateRoomDescription(room, tRooms)}</p>
+                  )}
                   {submitted && (
                     <p className="mt-2 text-xs text-muted italic">
                       {t("roomMatch", { query: submitted })}

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import type { DiscoveryFilters } from "@/lib/discovery";
 import { HERE_FOR_OPTIONS, OPEN_TO_OPTIONS, ROLE_OPTIONS } from "@/lib/profile-options";
+import { translateProfileOption } from "@/lib/i18n/labels";
 
 type Props = {
   filters: DiscoveryFilters;
@@ -52,6 +53,7 @@ function FilterGroup({
 
 export function ExploreFilters({ filters, onChange, locations, genres }: Props) {
   const t = useTranslations("explore");
+  const tProfileOptions = useTranslations("profileOptions");
 
   function toggleFilter<K extends "location" | "hereFor" | "role" | "genre" | "openTo">(
     key: K,
@@ -83,7 +85,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
             }
             className="text-sm text-muted hover:text-foreground"
           >
-            Clear filters
+            {t("clearAll")}
           </button>
         )}
       </div>
@@ -105,7 +107,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
         {HERE_FOR_OPTIONS.map((option) => (
           <Chip
             key={option}
-            label={option}
+            label={translateProfileOption(option, tProfileOptions)}
             active={filters.hereFor === option}
             onClick={() => toggleFilter("hereFor", option)}
           />
@@ -116,7 +118,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
         {OPEN_TO_OPTIONS.map((option) => (
           <Chip
             key={option}
-            label={option}
+            label={translateProfileOption(option, tProfileOptions)}
             active={filters.openTo === option}
             onClick={() => toggleFilter("openTo", option)}
           />
@@ -127,7 +129,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
         {ROLE_OPTIONS.map((option) => (
           <Chip
             key={option}
-            label={option}
+            label={translateProfileOption(option, tProfileOptions)}
             active={filters.role === option}
             onClick={() => toggleFilter("role", option)}
           />

@@ -12,6 +12,7 @@ import { isDiscoverableProfile } from "@/lib/profile";
 import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
 import { isOnboardingCompleteFromProfile } from "@/lib/onboarding";
 import { rankProfilesForViewer } from "@/lib/discovery";
+import { translateRoomDescription, translateRoomName } from "@/lib/i18n/rooms";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
@@ -27,6 +28,7 @@ import { loadCollaborationPreviews, type CollaborationPreview } from "@/lib/coll
 export default function HomePage() {
   const t = useTranslations("home");
   const tc = useTranslations("common");
+  const tRooms = useTranslations("rooms");
   const [firstName, setFirstName] = useState<string | null>(null);
   const [viewerProfile, setViewerProfile] = useState<Profile | null>(null);
   const [myRooms, setMyRooms] = useState<Room[]>([]);
@@ -164,9 +166,11 @@ export default function HomePage() {
                   href={`/rooms/${room.slug}`}
                   className="surface-interactive block px-4 py-3 text-foreground"
                 >
-                  <span className="font-medium">{room.name}</span>
+                  <span className="font-medium">{translateRoomName(room, tRooms)}</span>
                   {room.description && (
-                    <span className="mt-1 block text-sm text-muted">{room.description}</span>
+                    <span className="mt-1 block text-sm text-muted">
+                      {translateRoomDescription(room, tRooms)}
+                    </span>
                   )}
                 </Link>
               </li>

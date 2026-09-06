@@ -367,7 +367,34 @@
     "errorMediaRequired": "Add a link to your audio or video.",
     "errorInvalidUrl": "That link doesn't look valid. Try a full https:// URL.",
     "errorBodyRequired": "Add something to your post before saving.",
-    "errorIntroExists": "You already have an introduction here. Edit or delete it to change."
+    "errorIntroExists": "You already have an introduction here. Edit or delete it to change.",
+    "catalog": {
+      "introductions": {
+        "name": "Introductions",
+        "description": "Say hello. One intro per person — edit or delete anytime.",
+        "purposeNorms": "Welcome here. No obligation to reply."
+      },
+      "jam": {
+        "name": "Jam",
+        "description": "Find people to play with. Share what you play and what you're looking for.",
+        "purposeNorms": "Be clear about level and style. No pressure."
+      },
+      "learn": {
+        "name": "Learn",
+        "description": "Questions and advice. Instruments, production, theory, practice.",
+        "purposeNorms": "Ask real questions. Share what worked for you."
+      },
+      "collaborate": {
+        "name": "Collaborate",
+        "description": "Find co-writers, producers, and project partners.",
+        "purposeNorms": "State your role and what you're open to."
+      },
+      "listen": {
+        "name": "Listen & Share",
+        "description": "Share clips, demos, and works-in-progress. A place to be heard — not ranked.",
+        "purposeNorms": "Post a link to audio or video (YouTube, SoundCloud, TikTok, and more). Feedback only if someone asks. Listening counts — you don't have to comment."
+      }
+    }
   },
   "messages": {
     "title": "संदेश",

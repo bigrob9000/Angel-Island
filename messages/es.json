@@ -367,7 +367,34 @@
     "errorMediaRequired": "Añade un enlace a tu audio o vídeo.",
     "errorInvalidUrl": "Ese enlace no parece válido. Prueba una URL https:// completa.",
     "errorBodyRequired": "Añade algo a tu publicación antes de guardar.",
-    "errorIntroExists": "Ya tienes una presentación aquí. Edítala o elimínala para cambiar."
+    "errorIntroExists": "Ya tienes una presentación aquí. Edítala o elimínala para cambiar.",
+    "catalog": {
+      "introductions": {
+        "name": "Presentaciones",
+        "description": "Saluda. Una intro por persona — edita o elimina cuando quieras.",
+        "purposeNorms": "Bienvenido/a aquí. Sin obligación de responder."
+      },
+      "jam": {
+        "name": "Jam",
+        "description": "Encuentra personas con quien tocar. Comparte qué tocas y qué buscas.",
+        "purposeNorms": "Sé claro/a sobre nivel y estilo. Sin presión."
+      },
+      "learn": {
+        "name": "Aprender",
+        "description": "Preguntas y consejos. Instrumentos, producción, teoría, práctica.",
+        "purposeNorms": "Haz preguntas reales. Comparte lo que te funcionó."
+      },
+      "collaborate": {
+        "name": "Colaborar",
+        "description": "Encuentra coautores, productores y compañeros de proyecto.",
+        "purposeNorms": "Indica tu rol y qué te interesa."
+      },
+      "listen": {
+        "name": "Escuchar y compartir",
+        "description": "Comparte clips, demos y trabajos en progreso. Un lugar para ser escuchado/a — sin ranking.",
+        "purposeNorms": "Publica un enlace de audio o video (YouTube, SoundCloud, TikTok, etc.). Feedback solo si alguien lo pide. Escuchar cuenta — no tienes que comentar."
+      }
+    }
   },
   "messages": {
     "title": "Mensajes",

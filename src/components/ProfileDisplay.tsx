@@ -3,21 +3,9 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import type { Profile } from "@/lib/types";
-import { openToQuestionsLabel } from "@/lib/profile-options";
+import { translateOpenToQuestions } from "@/lib/i18n/labels";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-
-function ChipList({ items }: { items: string[] }) {
-  if (items.length === 0) return null;
-  return (
-    <div className="flex flex-wrap gap-2">
-      {items.map((item) => (
-        <span key={item} className="chip">
-          {item}
-        </span>
-      ))}
-    </div>
-  );
-}
+import { ProfileChipList } from "@/components/ProfileChipList";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -35,8 +23,11 @@ type Props = {
 
 export function ProfileDisplay({ profile, showUsername = true }: Props) {
   const t = useTranslations("profile");
+  const tProfileOptions = useTranslations("profileOptions");
   const name = profile.first_name || "—";
-  const questionsLabel = openToQuestionsLabel(profile.open_to_questions);
+  const questionsLabel = profile.open_to_questions
+    ? translateOpenToQuestions(profile.open_to_questions, tProfileOptions)
+    : null;
   const linkLines = profile.work_links
     ?.split(/\n/)
     .map((l) => l.trim())
@@ -62,13 +53,13 @@ export function ProfileDisplay({ profile, showUsername = true }: Props) {
 
       {profile.here_for.length > 0 && (
         <Section title={t("hereFor")}>
-          <ChipList items={profile.here_for} />
+          <ProfileChipList items={profile.here_for} />
         </Section>
       )}
 
       {profile.open_to.length > 0 && (
         <Section title={t("openTo")}>
-          <ChipList items={profile.open_to} />
+          <ProfileChipList items={profile.open_to} />
         </Section>
       )}
 
@@ -80,31 +71,31 @@ export function ProfileDisplay({ profile, showUsername = true }: Props) {
 
       {profile.roles.length > 0 && (
         <Section title={t("roles")}>
-          <ChipList items={profile.roles} />
+          <ProfileChipList items={profile.roles} />
         </Section>
       )}
 
       {profile.collaborate_as.length > 0 && (
         <Section title={t("collaborateAs")}>
-          <ChipList items={profile.collaborate_as} />
+          <ProfileChipList items={profile.collaborate_as} />
         </Section>
       )}
 
       {profile.genres_make.length > 0 && (
         <Section title={t("genresMake")}>
-          <ChipList items={profile.genres_make} />
+          <ProfileChipList items={profile.genres_make} />
         </Section>
       )}
 
       {profile.genres_love.length > 0 && (
         <Section title={t("genresLove")}>
-          <ChipList items={profile.genres_love} />
+          <ProfileChipList items={profile.genres_love} />
         </Section>
       )}
 
       {profile.working_style.length > 0 && (
         <Section title={t("workingStyle")}>
-          <ChipList items={profile.working_style} />
+          <ProfileChipList items={profile.working_style} />
         </Section>
       )}
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { Profile } from "@/lib/types";
+import { translateProfileOption } from "@/lib/i18n/labels";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { isFullProfileComplete } from "@/lib/profile-completeness";
 
@@ -24,6 +25,7 @@ function profileChips(profile: Profile): string[] {
 
 export function ProfileCard({ profile, reason, showCompletenessBadge = true }: ProfileCardProps) {
   const t = useTranslations("profile");
+  const tProfileOptions = useTranslations("profileOptions");
   const name = profile.first_name || profile.username;
   if (!name) return null;
 
@@ -52,7 +54,7 @@ export function ProfileCard({ profile, reason, showCompletenessBadge = true }: P
         <div className="mt-3 flex flex-wrap gap-1.5">
           {chips.map((chip) => (
             <span key={chip} className="chip">
-              {chip}
+              {translateProfileOption(chip, tProfileOptions)}
             </span>
           ))}
         </div>

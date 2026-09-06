@@ -11,6 +11,7 @@ import { usePreferences } from "@/components/PreferencesProvider";
 import { emptyProfile, PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 import { isIntroductionsRoom } from "@/lib/introductions";
 import { isListenRoom, LISTEN_COMPOSE_INTENTS, MUSIC_SHARING_DISCLAIMER } from "@/lib/listen";
+import { translateRoomDescription, translateRoomName, translateRoomPurposeNorms } from "@/lib/i18n/rooms";
 import { IntroductionsPinned } from "@/components/IntroductionsPinned";
 import { ListenPinned } from "@/components/ListenPinned";
 import { MediaEmbed } from "@/components/MediaEmbed";
@@ -506,10 +507,14 @@ export default function RoomPage() {
         <Link href="/rooms" className="text-sm text-muted hover:text-foreground">
           {t("backToRooms")}
         </Link>
-        <h1 className="page-lead mt-2">{room.name}</h1>
-        {room.description && <p className="mt-1 text-muted">{room.description}</p>}
+        <h1 className="page-lead mt-2">{translateRoomName(room, t)}</h1>
+        {room.description && (
+          <p className="mt-1 text-muted">{translateRoomDescription(room, t)}</p>
+        )}
         {!isIntroductions && room.purpose_norms && (
-          <p className="mt-2 text-sm text-muted border-l-2 border-foreground/20 pl-3">{room.purpose_norms}</p>
+          <p className="mt-2 text-sm text-muted border-l-2 border-foreground/20 pl-3">
+            {translateRoomPurposeNorms(room, t)}
+          </p>
         )}
       </div>
 
