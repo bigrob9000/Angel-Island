@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import {
+  cancelGroupCollabInvite,
   formatMemberNames,
   respondToGroupCollabInvite,
   type GroupCollabInviteWithMeta,
@@ -46,6 +47,20 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
     if (result.collaborationId) {
       router.push(`/collaborations/${result.collaborationId}`);
     }
+  }
+
+  async function cancel(inviteId: string) {
+    setActingId(inviteId);
+    setError(null);
+    const result = await cancelGroupCollabInvite(inviteId);
+    setActingId(null);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    onResponded?.();
   }
 
   return (
@@ -119,6 +134,11 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
         <section>
           <h2 className="section-heading">{t("groupSent")}</h2>
           <p className="section-copy">{t("groupSentCopy")}</p>
+          {error && received.length === 0 && (
+            <p className="mt-2 text-sm text-red-600" role="alert">
+              {error}
+            </p>
+          )}
           <ul className="mt-4 space-y-3">
             {sent.map((invite) => {
               const expires = new Date(invite.expires_at).toLocaleDateString(undefined, {
@@ -129,18 +149,30 @@ export function GroupCollabInvitesSection({ received = [], sent = [], onResponde
 
               return (
                 <li key={invite.id} className="surface p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted">
-                    Group collab invite
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{invite.about}</p>
-                  {invite.message && <p className="mt-1 text-sm text-muted">{invite.message}</p>}
-                  <p className="mt-2 text-xs text-muted">
-                    Invited {invite.recipients.length}{" "}
-                    {invite.recipients.length === 1 ? "person" : "people"} · responds by {expires}
-                    {pendingCount > 0
-                      ? ` · ${pendingCount} still deciding`
-                      : " · everyone has responded"}
-                  </p>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted">
+                        Group collab invite
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-foreground">{invite.about}</p>
+                      {invite.message && <p className="mt-1 text-sm text-muted">{invite.message}</p>}
+                      <p className="mt-2 text-xs text-muted">
+                        Invited {invite.recipients.length}{" "}
+                        {invite.recipients.length === 1 ? "person" : "people"} · responds by {expires}
+                        {pendingCount > 0
+                          ? ` · ${pendingCount} still deciding`
+                          : " · everyone has responded"}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => cancel(invite.id)}
+                      disabled={actingId === invite.id}
+                      className="btn-secondary btn-sm shrink-0"
+                    >
+                      {t("cancelGroupInvite")}
+                    </button>
+                  </div>
                   <ul className="mt-3 space-y-2 border-t border-foreground/10 pt-3">
                     {invite.recipients.map((recipient) => (
                       <li

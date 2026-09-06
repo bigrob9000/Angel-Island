@@ -46,6 +46,16 @@ Fixes `cannot execute UPDATE in a read-only transaction` when loading **Collabor
 
 ---
 
+## 033 — Cancel group collab invites (run after 032)
+
+Run the full file: `supabase/migrations/033_group_collab_invite_cancel.sql`
+
+Lets senders cancel pending group invites from **Collaborations** or **Messages**.
+
+**Try it:** Under **Group invites you sent**, click **Cancel invite** — the invite should disappear for you and invitees.
+
+---
+
 ## Collab invites — run this now
 
 **File:** `supabase/migrations/003_collab_invites.sql`

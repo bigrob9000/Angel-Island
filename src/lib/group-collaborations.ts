@@ -26,7 +26,7 @@ function isGroupCollabMissing(message: string, code?: string): boolean {
 }
 
 export function groupCollabSetupError(): string {
-  return "Group collaborations aren't set up yet. Run migrations 029–031 in Supabase (see supabase/RUN-PENDING-MIGRATIONS.md).";
+  return "Group collaborations aren't set up yet. Run migrations 029–033 in Supabase (see supabase/RUN-PENDING-MIGRATIONS.md).";
 }
 
 export async function expireStaleGroupCollabInvites(): Promise<void> {
@@ -86,6 +86,24 @@ export async function respondToGroupCollabInvite(
 
   const payload = data as { collaboration_id?: string | null } | null;
   return { collaborationId: payload?.collaboration_id ?? null };
+}
+
+export async function cancelGroupCollabInvite(
+  inviteId: string,
+): Promise<{ error?: string; tableMissing?: boolean }> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("cancel_group_collab_invite", {
+    p_invite_id: inviteId,
+  });
+
+  if (error) {
+    if (isGroupCollabMissing(error.message, error.code)) {
+      return { tableMissing: true, error: groupCollabSetupError() };
+    }
+    return { error: error.message };
+  }
+
+  return {};
 }
 
 export async function inviteGroupCollabMember(
