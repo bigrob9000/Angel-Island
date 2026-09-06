@@ -36,6 +36,16 @@ Fixes invites saving but not appearing (RLS recursion + adds a reliable server-s
 
 ---
 
+## 032 — Fix "read-only transaction" on invite load (run after 031)
+
+Run the full file: `supabase/migrations/032_group_collab_list_readonly.sql`
+
+Fixes `cannot execute UPDATE in a read-only transaction` when loading **Collaborations** / **Messages** (migration 031 marked the loader `STABLE` but it tried to expire stale invites).
+
+**Try it:** Open **Collaborations** — pending group invites should load without error.
+
+---
+
 ## Collab invites — run this now
 
 **File:** `supabase/migrations/003_collab_invites.sql`

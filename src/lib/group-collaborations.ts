@@ -146,6 +146,7 @@ export async function loadPendingGroupCollabInvitesForUser(
   tableMissing: boolean;
   error?: string;
 }> {
+  await expireStaleGroupCollabInvites();
   const supabase = createClient();
   const { blockedIds } = await loadBlockedUserIds(userId);
 
