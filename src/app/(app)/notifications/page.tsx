@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { CollaborationPreviewLink } from "@/components/CollaborationPreviewLink";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { EmptyState } from "@/components/EmptyState";
@@ -10,6 +11,7 @@ import { useCollab } from "@/components/CollabProvider";
 import { useInbox } from "@/components/InboxProvider";
 
 export default function NotificationsPage() {
+  const t = useTranslations("notifications");
   const {
     conversations,
     loading: inboxLoading,
@@ -50,7 +52,7 @@ export default function NotificationsPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl font-medium text-foreground">Activity</h1>
+          <h1 className="font-serif text-2xl font-medium text-foreground">{t("title")}</h1>
           <p className="mt-2 text-sm text-muted">
             Unread messages and collaboration updates in one place.
           </p>
@@ -68,7 +70,7 @@ export default function NotificationsPage() {
 
       {totalUnread === 0 ? (
         <EmptyState
-          title="You're all caught up."
+          title={t("empty")}
           description="New messages and collab activity will show up here."
         >
           <Link
@@ -88,7 +90,7 @@ export default function NotificationsPage() {
         <>
           {unreadConversations.length > 0 && (
             <section>
-              <h2 className="font-serif text-lg font-medium text-foreground">Messages</h2>
+              <h2 className="font-serif text-lg font-medium text-foreground">{t("messages")}</h2>
               <ul className="mt-4 space-y-2">
                 {unreadConversations.map((conversation) => (
                   <li key={conversation.id}>
@@ -101,7 +103,7 @@ export default function NotificationsPage() {
 
           {unreadCollaborations.length > 0 && (
             <section>
-              <h2 className="font-serif text-lg font-medium text-foreground">Collaborations</h2>
+              <h2 className="font-serif text-lg font-medium text-foreground">{t("collaborations")}</h2>
               <ul className="mt-4 space-y-2">
                 {unreadCollaborations.map((collaboration) => (
                   <li key={collaboration.id}>

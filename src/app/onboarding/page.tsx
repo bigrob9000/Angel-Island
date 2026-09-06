@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { normalizeProfile } from "@/lib/types";
@@ -17,11 +18,12 @@ const REASONS = [...HERE_FOR_OPTIONS];
 
 const LOCATIONS = ["Remote", "Prefer not to say"];
 
-const STEP_LABELS = ["Welcome", "Here for", "Basics", "Your music", "How it works"];
+const STEP_KEYS = ["stepWelcome", "stepHereFor", "stepBasics", "stepYourMusic", "stepHowItWorks"] as const;
 
-const TOTAL_STEPS = STEP_LABELS.length;
+const TOTAL_STEPS = STEP_KEYS.length;
 
 export default function OnboardingPage() {
+  const t = useTranslations("onboarding");
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -199,7 +201,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-md">
         {step > 0 && (
           <p className="mb-6 text-sm text-muted">
-            Step {step + 1} of {TOTAL_STEPS} · {STEP_LABELS[step]}
+            Step {step + 1} of {TOTAL_STEPS} · {t(STEP_KEYS[step])}
           </p>
         )}
 
@@ -212,7 +214,7 @@ export default function OnboardingPage() {
         {step === 0 && (
           <>
             <h1 className="brand-font text-2xl font-semibold text-foreground sm:text-3xl">
-              Welcome to Angel Island
+              {t("welcomeTitle")}
             </h1>
             <p className="mt-4 text-muted leading-relaxed">
               A calm space for musicians and creatives. No pressure — we&apos;ll take it one step at a time.
@@ -230,7 +232,7 @@ export default function OnboardingPage() {
         {step === 1 && (
           <>
             <h1 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
-              Right now, I&apos;m here to…
+              {t("hereForTitle")}
             </h1>
             <p className="mt-2 text-sm text-muted">Pick any that fit. Optional — you can skip.</p>
             <div className="mt-6 flex flex-wrap gap-2">
@@ -271,7 +273,7 @@ export default function OnboardingPage() {
         {step === 2 && (
           <>
             <h1 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
-              A few basics
+              {t("basicsTitle")}
             </h1>
             <p className="mt-2 text-sm text-muted">
               First name and username are required before others can find you on Angel Island.
@@ -340,21 +342,21 @@ export default function OnboardingPage() {
         {step === 3 && (
           <>
             <h1 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
-              Help people find you
+              {t("yourMusicTitle")}
             </h1>
             <p className="mt-2 text-sm text-muted">
               Optional — makes Explore and rooms more useful. Skip anything that doesn&apos;t fit.
             </p>
             <div className="mt-6 space-y-6">
               <div>
-                <p className="text-sm font-medium text-foreground">What you do</p>
+                <p className="text-sm font-medium text-foreground">{t("yourMusicRoles")}</p>
                 <p className="mt-1 text-sm text-muted">Select any roles. You don&apos;t have to be an expert.</p>
                 <div className="mt-3">
                   <ChipSelect options={ROLE_OPTIONS} selected={roles} onChange={setRoles} />
                 </div>
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">Genres you make</p>
+                <p className="text-sm font-medium text-foreground">{t("yourMusicGenres")}</p>
                 <p className="mt-1 text-sm text-muted">A few is enough (up to 5).</p>
                 <div className="mt-3">
                   <TagInput
@@ -366,7 +368,7 @@ export default function OnboardingPage() {
                 </div>
               </div>
               <label className="block">
-                <span className="text-sm font-medium text-foreground">About you</span>
+                <span className="text-sm font-medium text-foreground">{t("yourMusicAbout")}</span>
                 <span className="mt-1 block text-sm text-muted">
                   A few honest sentences — how you relate to music right now.
                 </span>
@@ -406,7 +408,7 @@ export default function OnboardingPage() {
         {step === 4 && (
           <>
             <h1 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
-              How things work
+              {t("howItWorksTitle")}
             </h1>
             <ul className="mt-6 space-y-4 text-muted leading-relaxed">
               <li>

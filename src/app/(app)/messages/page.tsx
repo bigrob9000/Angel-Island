@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { ChatInvite, Profile, CollabInvite } from "@/lib/types";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
@@ -24,6 +25,8 @@ const PACE_LABELS: Record<string, string> = { "low-pressure": "Low-pressure", "s
 
 export default function MessagesPage() {
   const router = useRouter();
+  const t = useTranslations("messages");
+  const tc = useTranslations("common");
   const { userId, conversations, loading: inboxLoading, refresh: refreshInbox } = useInbox();
   const [receivedInvites, setReceivedInvites] = useState<(ChatInvite & { sender?: Profile })[]>([]);
   const [sentInvites, setSentInvites] = useState<(ChatInvite & { receiver?: Profile })[]>([]);
@@ -228,7 +231,7 @@ export default function MessagesPage() {
     }
   }
 
-  if (loading || inboxLoading) return <p className="text-muted">Loading…</p>;
+  if (loading || inboxLoading) return <p className="text-muted">{tc("loading")}</p>;
 
   const hasSentInvites = sentInvites.length > 0 || sentCollabInvites.length > 0;
   const isEmptyInbox =
@@ -240,7 +243,7 @@ export default function MessagesPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="page-lead">Messages</h1>
+        <h1 className="page-lead">{t("title")}</h1>
         <p className="section-copy">
           Invites and conversations — all by choice, no pressure to reply.
         </p>
@@ -248,7 +251,7 @@ export default function MessagesPage() {
 
       {isEmptyInbox && (
         <EmptyState
-          title="Nothing here yet."
+          title={t("empty")}
           description="When someone invites you to chat, it shows up here. You can also reach out from Explore when you're ready."
         >
           <Link href="/explore" className="btn-secondary">
@@ -261,7 +264,7 @@ export default function MessagesPage() {
       )}
 
       <section>
-        <h2 className="section-heading">Invites you received</h2>
+        <h2 className="section-heading">{t("receivedInvites")}</h2>
         <p className="section-copy">Accept to start a conversation. No obligation.</p>
         {receivedInvites.length === 0 ? (
           <p className="mt-4 text-sm text-muted">No pending chat invites.</p>
@@ -297,7 +300,7 @@ export default function MessagesPage() {
 
       {receivedCollabInvites.length > 0 && (
         <section>
-          <h2 className="section-heading">Collab invites you received</h2>
+          <h2 className="section-heading">{t("receivedCollabInvites")}</h2>
           <p className="section-copy">Respond below. If you&apos;re interested, you&apos;ll open a shared collaboration space.</p>
           <ul className="mt-4 space-y-3">
             {receivedCollabInvites.map((c) => (
@@ -319,7 +322,7 @@ export default function MessagesPage() {
       )}
 
       <section>
-        <h2 className="section-heading">Invites you sent</h2>
+        <h2 className="section-heading">{t("sentInvites")}</h2>
         <p className="section-copy">Waiting for a response. Pending invites can be cancelled.</p>
         {!hasSentInvites ? (
           <p className="mt-4 text-sm text-muted">No pending invites out.</p>
@@ -387,7 +390,7 @@ export default function MessagesPage() {
       </section>
 
       <section>
-        <h2 className="section-heading">Conversations</h2>
+        <h2 className="section-heading">{t("conversations")}</h2>
         <p className="section-copy">Chats you started or accepted.</p>
         {conversations.length === 0 ? (
           <p className="mt-4 text-sm text-muted">No conversations yet. Accept an invite to start one.</p>
@@ -404,7 +407,7 @@ export default function MessagesPage() {
 
       {archivedConversations.length > 0 && (
         <section>
-          <h2 className="section-heading">Hidden from your list</h2>
+          <h2 className="section-heading">{t("hidden")}</h2>
           <p className="section-copy">
             Closed conversations you removed. Restore any time — the other person still has access.
           </p>

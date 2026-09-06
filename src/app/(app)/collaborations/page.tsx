@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import {
   collaborationsSetupError,
@@ -18,13 +19,11 @@ import type { GroupCollabInviteWithMeta } from "@/lib/group-collaborations";
 
 type Filter = "active" | "paused" | "past";
 
-const FILTERS: Array<{ id: Filter; label: string }> = [
-  { id: "active", label: "Active" },
-  { id: "paused", label: "Paused" },
-  { id: "past", label: "Past" },
-];
+const FILTER_IDS = ["active", "paused", "past"] as const;
 
 export default function CollaborationsPage() {
+  const t = useTranslations("collaborations");
+  const tc = useTranslations("common");
   const [filter, setFilter] = useState<Filter>("active");
   const [previews, setPreviews] = useState<CollaborationPreview[]>([]);
   const [groupReceived, setGroupReceived] = useState<GroupCollabInviteWithMeta[]>([]);
@@ -66,7 +65,7 @@ export default function CollaborationsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="page-lead">Collaborations</h1>
+        <h1 className="page-lead">{t("title")}</h1>
         <p className="section-copy">
           Things you&apos;re exploring with other people — shared notes, links, and next steps. No
           deadlines, no pressure.
@@ -75,9 +74,9 @@ export default function CollaborationsPage() {
 
       <div className="flex flex-wrap gap-2">
         <Link href="/collaborations/group/new" className="btn-primary">
-          Start group collab
+          {t("startGroup")}
         </Link>
-        {FILTERS.map(({ id, label }) => (
+        {FILTER_IDS.map((id) => (
           <button
             key={id}
             type="button"
@@ -88,7 +87,7 @@ export default function CollaborationsPage() {
                 : "text-muted hover:text-foreground"
             }`}
           >
-            {label}
+            {id === "active" ? t("filterActive") : id === "paused" ? t("filterPaused") : t("filterPast")}
           </button>
         ))}
       </div>
@@ -108,11 +107,11 @@ export default function CollaborationsPage() {
       />
 
       {loading ? (
-        <p className="text-muted">Loading…</p>
+        <p className="text-muted">{tc("loading")}</p>
       ) : previews.length === 0 ? (
         filter === "active" ? (
           <EmptyState
-            title="No active collaborations yet."
+            title={t("emptyActive")}
             description="When someone responds interested to a collab invite, a shared workspace opens here for notes, links, and next steps."
           >
             <Link href="/messages" className="btn-secondary">
@@ -123,7 +122,7 @@ export default function CollaborationsPage() {
             </Link>
           </EmptyState>
         ) : (
-          <EmptyState title="Nothing here right now." />
+          <EmptyState title={t("emptyOther")} />
         )
       ) : (
         <ul className="space-y-3">

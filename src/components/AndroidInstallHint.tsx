@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { getPwaEnvironment } from "@/lib/pwa";
 
 type InstallPromptEvent = Event & {
@@ -10,6 +11,7 @@ type InstallPromptEvent = Event & {
 export const ANDROID_INSTALL_DISMISS_KEY = "angel_island_android_install_dismissed";
 
 export function AndroidInstallHint() {
+  const t = useTranslations("pwa");
   const [visible, setVisible] = useState(false);
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
 
@@ -44,7 +46,7 @@ export function AndroidInstallHint() {
 
   return (
     <section className="surface p-5 space-y-3">
-      <h2 className="font-medium text-foreground">Add Angel Island to your home screen</h2>
+      <h2 className="font-medium text-foreground">{t("androidTitle")}</h2>
       <p className="text-sm text-muted leading-relaxed">
         Install the app for quicker access and a calmer full-screen experience.
       </p>

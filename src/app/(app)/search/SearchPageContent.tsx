@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ProfileCard } from "@/components/ProfileCard";
 import { SearchBar } from "@/components/SearchBar";
 import { EmptyState } from "@/components/EmptyState";
@@ -15,6 +16,7 @@ import type { Profile, Room } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
 
 export default function SearchPageContent() {
+  const t = useTranslations("search");
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
 
@@ -71,7 +73,7 @@ export default function SearchPageContent() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="page-lead">Search Angel Island</h1>
+        <h1 className="page-lead">{t("title")}</h1>
         <p className="section-copy">
           Find rooms, people, conversations, and collaborations — no popularity ranking.
         </p>
@@ -83,7 +85,7 @@ export default function SearchPageContent() {
 
       {searched && !loading && !hasResults && (
         <EmptyState
-          title="Nothing like that turned up."
+          title={t("empty")}
           description="Try a different word — or browse people and rooms instead."
         >
           <Link href="/rooms" className="btn-secondary">
@@ -97,7 +99,7 @@ export default function SearchPageContent() {
 
       {rooms.length > 0 && (
         <section>
-          <h2 className="section-heading">Rooms</h2>
+          <h2 className="section-heading">{t("rooms")}</h2>
           <ul className="mt-4 space-y-2">
             {rooms.map((room) => (
               <li key={room.id}>
@@ -121,7 +123,7 @@ export default function SearchPageContent() {
 
       {people.length > 0 && (
         <section>
-          <h2 className="section-heading">People</h2>
+          <h2 className="section-heading">{t("people")}</h2>
           <ul className="mt-4 space-y-3">
             {people.map((profile) => (
               <li key={profile.id}>
@@ -140,7 +142,7 @@ export default function SearchPageContent() {
 
       {conversations.length > 0 && (
         <section>
-          <h2 className="section-heading">Conversations</h2>
+          <h2 className="section-heading">{t("conversations")}</h2>
           <ul className="mt-4 space-y-2">
             {conversations.map((conv) => {
               const statusLabel = conversationStatusLabel(conv.conversation_status);
@@ -167,7 +169,7 @@ export default function SearchPageContent() {
       )}
       {collaborations.length > 0 && (
         <section>
-          <h2 className="section-heading">Collaborations</h2>
+          <h2 className="section-heading">{t("collaborations")}</h2>
           <ul className="mt-4 space-y-2">
             {collaborations.map((collab) => {
               const statusLabel = collaborationStatusLabel(collab.status);

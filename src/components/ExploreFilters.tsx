@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { DiscoveryFilters } from "@/lib/discovery";
 import { HERE_FOR_OPTIONS, OPEN_TO_OPTIONS, ROLE_OPTIONS } from "@/lib/profile-options";
 
@@ -50,6 +51,8 @@ function FilterGroup({
 }
 
 export function ExploreFilters({ filters, onChange, locations, genres }: Props) {
+  const t = useTranslations("explore");
+
   function toggleFilter<K extends "location" | "hereFor" | "role" | "genre" | "openTo">(
     key: K,
     value: string,
@@ -64,7 +67,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
   return (
     <div className="surface space-y-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm font-medium text-foreground">Narrow this list</p>
+        <p className="text-sm font-medium text-foreground">{t("filtersTitle")}</p>
         {hasChipFilters && (
           <button
             type="button"
@@ -86,7 +89,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
       </div>
 
       {locations.length > 0 && (
-        <FilterGroup title="Location">
+        <FilterGroup title={t("filterLocation")}>
           {locations.map((location) => (
             <Chip
               key={location}
@@ -98,7 +101,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
         </FilterGroup>
       )}
 
-      <FilterGroup title="Here for">
+      <FilterGroup title={t("filterHereFor")}>
         {HERE_FOR_OPTIONS.map((option) => (
           <Chip
             key={option}
@@ -109,7 +112,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
         ))}
       </FilterGroup>
 
-      <FilterGroup title="Open to">
+      <FilterGroup title={t("filterOpenTo")}>
         {OPEN_TO_OPTIONS.map((option) => (
           <Chip
             key={option}
@@ -120,7 +123,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
         ))}
       </FilterGroup>
 
-      <FilterGroup title="Role">
+      <FilterGroup title={t("filterRole")}>
         {ROLE_OPTIONS.map((option) => (
           <Chip
             key={option}
@@ -132,7 +135,7 @@ export function ExploreFilters({ filters, onChange, locations, genres }: Props) 
       </FilterGroup>
 
       {genres.length > 0 && (
-        <FilterGroup title="Genre">
+        <FilterGroup title={t("filterGenre")}>
           {genres.map((genre) => (
             <Chip
               key={genre}

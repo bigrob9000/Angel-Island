@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { CollabPace, Profile } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
@@ -19,6 +20,8 @@ const inputClass =
   "mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none";
 
 export default function NewGroupCollabPage() {
+  const t = useTranslations("collaborations");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -111,7 +114,7 @@ export default function NewGroupCollabPage() {
     router.push("/collaborations");
   }
 
-  if (loading) return <p className="text-muted">Loading…</p>;
+  if (loading) return <p className="text-muted">{tc("loading")}</p>;
 
   return (
     <div className="space-y-8">
@@ -119,7 +122,7 @@ export default function NewGroupCollabPage() {
         <Link href="/collaborations" className="text-sm text-muted hover:text-foreground">
           ← Collaborations
         </Link>
-        <h1 className="page-lead mt-2">Start a group collab</h1>
+        <h1 className="page-lead mt-2">{t("groupNewTitle")}</h1>
         <p className="section-copy">
           Invite up to {GROUP_COLLAB_MAX_INVITEES} people in one invite. Everyone responds within
           14 days — the workspace opens when all have answered and at least one person is

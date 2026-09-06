@@ -572,7 +572,7 @@ export default function SettingsPage() {
 
       <section className="surface p-5 space-y-6">
         <div>
-          <h2 className="font-medium text-foreground">Email updates</h2>
+          <h2 className="font-medium text-foreground">{t("emailUpdatesTitle")}</h2>
           <p className="mt-1 text-sm text-muted">
             Gentle emails when someone reaches out — no nudges, no guilt. Turn off anytime.
           </p>
@@ -627,7 +627,7 @@ export default function SettingsPage() {
 
       <section className="surface p-5 space-y-6">
         <div>
-          <h2 className="font-medium text-foreground">Browser notifications</h2>
+          <h2 className="font-medium text-foreground">{t("browserNotificationsTitle")}</h2>
           <p className="mt-1 text-sm text-muted">
             Optional alerts for messages and collab workspace activity — even if Angel Island isn&apos;t
             open. Off by default.
@@ -686,7 +686,7 @@ export default function SettingsPage() {
 
       <section className="surface p-5 space-y-5">
         <div>
-          <h2 className="font-medium text-foreground">Blocked people</h2>
+          <h2 className="font-medium text-foreground">{t("blockedPeopleTitle")}</h2>
           <p className="mt-1 text-sm text-muted">
             People you&apos;ve blocked won&apos;t appear in search or Explore, and you can&apos;t
             message each other.

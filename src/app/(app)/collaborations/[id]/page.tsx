@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
@@ -36,16 +37,11 @@ import { PageLoading } from "@/components/PageLoading";
 
 type Tab = CollaborationEntryType | "chat";
 
-const TABS: Array<{ id: Tab; label: string }> = [
-  { id: "note", label: "Notes" },
-  { id: "reference", label: "References" },
-  { id: "step", label: "Next steps" },
-];
-
 const inputClass =
   "mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none";
 
 export default function CollaborationWorkspacePage() {
+  const t = useTranslations("collaborations");
   const params = useParams();
   const router = useRouter();
   const collaborationId = params.id as string;
@@ -76,10 +72,14 @@ export default function CollaborationWorkspacePage() {
   const isGroup = detail?.isGroup ?? false;
 
   const workspaceTabs = useMemo(() => {
-    const base = [...TABS];
-    if (isGroup) base.unshift({ id: "chat" as const, label: "Group chat" });
+    const base: Array<{ id: Tab; label: string }> = [
+      { id: "note", label: t("tabNotes") },
+      { id: "reference", label: t("tabReferences") },
+      { id: "step", label: t("tabSteps") },
+    ];
+    if (isGroup) base.unshift({ id: "chat", label: t("tabGroupChat") });
     return base;
-  }, [isGroup]);
+  }, [isGroup, t]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -279,7 +279,7 @@ export default function CollaborationWorkspacePage() {
   if (!detail || !userId) {
     return (
       <NotFoundPanel
-        title="Collaboration not found"
+        title={t("notFound")}
         description="This workspace may have ended, or you may not have access to it."
         backHref="/collaborations"
         backLabel="← Collaborations"
@@ -313,7 +313,7 @@ export default function CollaborationWorkspacePage() {
         </Link>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="page-lead">{detail.isGroup ? "Group collaboration" : "Collaboration"}</h1>
+            <h1 className="page-lead">{detail.isGroup ? t("groupTitle") : t("detailTitle")}</h1>
             <p className="mt-1 text-sm text-muted">
               {detail.isGroup
                 ? `with ${formatMemberNames(detail.members ?? [])}`
@@ -697,7 +697,7 @@ export default function CollaborationWorkspacePage() {
           <div className="surface max-w-md w-full p-6 shadow-lg">
             {modal === "pause" ? (
               <>
-                <h2 className="section-heading">Pause collaboration</h2>
+                <h2 className="section-heading">{t("pauseTitle")}</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Pausing keeps this space without pressure. Notes and chat pause for both of you until
                   someone resumes.
@@ -722,7 +722,7 @@ export default function CollaborationWorkspacePage() {
               </>
             ) : (
               <>
-                <h2 className="section-heading">End collaboration</h2>
+                <h2 className="section-heading">{t("endTitle")}</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Ending closes this space respectfully. No explanation is required.
                 </p>

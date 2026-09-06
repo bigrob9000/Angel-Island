@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { Room, Post, Profile, PostIntent } from "@/lib/types";
 import { POST_INTENT_LABELS } from "@/lib/types";
@@ -48,6 +49,7 @@ function parseComposeIntent(value: string | null): PostIntent | null {
 }
 
 export default function RoomPage() {
+  const t = useTranslations("rooms");
   const params = useParams();
   const searchParams = useSearchParams();
   const slug = params.slug as string;
@@ -101,6 +103,25 @@ export default function RoomPage() {
   const postSections: RoomSearchGroup[] = isSearching
     ? searchGroups
     : [{ title: "", posts: displayedPosts }];
+
+  function translateSearchGroupTitle(title: string): string {
+    switch (title) {
+      case "Recent conversations":
+        return t("searchConversations");
+      case "Questions":
+        return t("searchQuestions");
+      case "Collaboration posts":
+        return t("searchCollabPosts");
+      case "Ideas":
+        return t("searchIdeas");
+      case "Shared work":
+        return t("sharedWork");
+      case "Introductions":
+        return t("introductions");
+      default:
+        return title;
+    }
+  }
 
   useEffect(() => {
     if (isIntroductions || !composeFromUrl) return;
@@ -360,7 +381,7 @@ export default function RoomPage() {
   if (!room) {
     return (
       <NotFoundPanel
-        title="Room not found"
+        title={t("notFound")}
         description="That room may have moved or doesn't exist yet."
         backHref="/rooms"
         backLabel="← Back to Rooms"
@@ -660,12 +681,12 @@ export default function RoomPage() {
       <section>
         <h2 className="section-heading">
           {isSearching
-            ? "Results"
+            ? t("results")
             : isIntroductions
-              ? "Introductions"
+              ? t("introductions")
               : isListen
-                ? "Shared work"
-                : "Posts"}
+                ? t("sharedWork")
+                : t("posts")}
         </h2>
         {posts.length === 0 ? (
           <p className="mt-4 text-sm text-muted">
@@ -685,7 +706,9 @@ export default function RoomPage() {
             {postSections.map((section) => (
               <div key={section.title || "all"}>
                 {isSearching && section.title && (
-                  <h3 className="mb-3 text-sm font-medium text-foreground">{section.title}</h3>
+                  <h3 className="mb-3 text-sm font-medium text-foreground">
+                    {translateSearchGroupTitle(section.title)}
+                  </h3>
                 )}
                 <ul className="space-y-6">{section.posts.map((post) => renderPost(post))}</ul>
               </div>

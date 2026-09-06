@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Suspense, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import type { OpenToQuestions } from "@/lib/types";
@@ -39,6 +40,7 @@ export default function EditProfilePage() {
 }
 
 function EditProfilePageContent() {
+  const t = useTranslations("profile");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [userId, setUserId] = useState<string | null>(null);
@@ -154,7 +156,7 @@ function EditProfilePageContent() {
         <p className="text-sm text-muted">
           Step {step + 1} of {STEP_COUNT}
         </p>
-        <h1 className="font-serif text-2xl font-medium text-foreground mt-1">Edit profile</h1>
+        <h1 className="font-serif text-2xl font-medium text-foreground mt-1">{t("editTitle")}</h1>
         <p className="mt-2 text-sm text-muted leading-relaxed">
           Fill out as much or as little as you want. Your profile can change whenever you do.
         </p>
@@ -164,7 +166,7 @@ function EditProfilePageContent() {
 
       {step === 0 && (
         <section className="space-y-4">
-          <h2 className="font-medium text-foreground">Basics</h2>
+          <h2 className="font-medium text-foreground">{t("editBasics")}</h2>
           {userId && (
             <ProfileAvatarUpload
               userId={userId}
@@ -216,7 +218,7 @@ function EditProfilePageContent() {
             />
           </label>
           <div className="space-y-3 pt-2">
-            <h3 className="text-sm font-medium text-foreground">Right now, I&apos;m here to…</h3>
+            <h3 className="text-sm font-medium text-foreground">{t("editHereFor")}</h3>
             <p className="text-sm text-muted">From onboarding — pick any that fit. Optional.</p>
             <ChipSelect
               options={HERE_FOR_OPTIONS}
@@ -229,7 +231,7 @@ function EditProfilePageContent() {
 
       {step === 1 && (
         <section className="space-y-3">
-          <h2 className="font-medium text-foreground">Currently open to</h2>
+          <h2 className="font-medium text-foreground">{t("editOpenTo")}</h2>
           <p className="text-sm text-muted">How do you want to show up right now? Pick any that fit.</p>
           <ChipSelect
             options={OPEN_TO_OPTIONS}
@@ -241,7 +243,7 @@ function EditProfilePageContent() {
 
       {step === 2 && (
         <section className="space-y-3">
-          <h2 className="font-medium text-foreground">About you</h2>
+          <h2 className="font-medium text-foreground">{t("editAbout")}</h2>
           <p className="text-sm text-muted">
             How do you relate to music right now? A few honest sentences is enough.
           </p>
@@ -257,7 +259,7 @@ function EditProfilePageContent() {
 
       {step === 3 && (
         <section className="space-y-3">
-          <h2 className="font-medium text-foreground">What you do</h2>
+          <h2 className="font-medium text-foreground">{t("editRoles")}</h2>
           <p className="text-sm text-muted">Select any roles. You don&apos;t have to be an expert.</p>
           <ChipSelect
             options={ROLE_OPTIONS}
@@ -269,7 +271,7 @@ function EditProfilePageContent() {
 
       {step === 4 && (
         <section className="space-y-3">
-          <h2 className="font-medium text-foreground">Looking to collaborate as</h2>
+          <h2 className="font-medium text-foreground">{t("editCollaborateAs")}</h2>
           <p className="text-sm text-muted">Up to two roles. This can change anytime.</p>
           <ChipSelect
             options={ROLE_OPTIONS}
@@ -283,7 +285,7 @@ function EditProfilePageContent() {
       {step === 5 && (
         <section className="space-y-6">
           <div className="space-y-3">
-            <h2 className="font-medium text-foreground">Genres I make</h2>
+            <h2 className="font-medium text-foreground">{t("editGenresMake")}</h2>
             <p className="text-sm text-muted">A few is enough (up to 5).</p>
             <TagInput
               tags={form.genres_make}
@@ -293,7 +295,7 @@ function EditProfilePageContent() {
             />
           </div>
           <div className="space-y-3">
-            <h2 className="font-medium text-foreground">Genres I love / want to explore</h2>
+            <h2 className="font-medium text-foreground">{t("editGenresLove")}</h2>
             <TagInput
               tags={form.genres_love}
               onChange={(genres_love) => updateForm({ genres_love })}
@@ -305,7 +307,7 @@ function EditProfilePageContent() {
 
       {step === 6 && (
         <section className="space-y-3">
-          <h2 className="font-medium text-foreground">Working style</h2>
+          <h2 className="font-medium text-foreground">{t("editWorkingStyle")}</h2>
           <p className="text-sm text-muted">This helps people reach out respectfully.</p>
           <ChipSelect
             options={WORKING_STYLE_OPTIONS}
@@ -317,7 +319,7 @@ function EditProfilePageContent() {
 
       {step === 7 && (
         <section className="space-y-3">
-          <h2 className="font-medium text-foreground">Learning & sharing</h2>
+          <h2 className="font-medium text-foreground">{t("editLearning")}</h2>
           <p className="text-sm text-muted">Open to answering questions or sharing what you know?</p>
           <div className="flex flex-wrap gap-2">
             {OPEN_TO_QUESTIONS_OPTIONS.map(({ value, label }) => (
@@ -340,7 +342,7 @@ function EditProfilePageContent() {
 
       {step === 8 && (
         <section className="space-y-3">
-          <h2 className="font-medium text-foreground">Work / links</h2>
+          <h2 className="font-medium text-foreground">{t("editWorkLinks")}</h2>
           <p className="text-sm text-muted">
             Optional links or descriptions — one per line. Not sharing anything is fine.
           </p>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { ProfileCompletenessProfile } from "@/lib/profile-completeness";
 import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
 import { useDismissStorage } from "@/hooks/useDismissStorage";
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: Props) {
+  const t = useTranslations("profile");
   const { dismissed, ready, dismiss } = useDismissStorage(DISMISS_KEY);
 
   const optional = getOptionalProfileCompleteness(profile);
@@ -28,7 +30,7 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
   if (missingBasics) {
     return (
       <section className="surface p-5">
-        <h2 className="section-heading">One more thing</h2>
+        <h2 className="section-heading">{t("nudgeBasics")}</h2>
         <p className="mt-1 text-sm text-muted">
           Add your name and username so you show up in Explore and people can find your profile.
         </p>
@@ -48,7 +50,7 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
     <section className="surface p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="section-heading">Help people find you</h2>
+          <h2 className="section-heading">{t("nudgeOptional")}</h2>
           <p className="mt-1 text-sm text-muted">
             {remaining === 1
               ? "One optional detail left — only if you want to share it."

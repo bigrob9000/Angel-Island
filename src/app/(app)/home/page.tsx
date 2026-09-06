@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { Profile, Room } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
@@ -24,6 +25,8 @@ import { useCollab } from "@/components/CollabProvider";
 import { loadCollaborationPreviews, type CollaborationPreview } from "@/lib/collaborations";
 
 export default function HomePage() {
+  const t = useTranslations("home");
+  const tc = useTranslations("common");
   const [firstName, setFirstName] = useState<string | null>(null);
   const [viewerProfile, setViewerProfile] = useState<Profile | null>(null);
   const [myRooms, setMyRooms] = useState<Room[]>([]);
@@ -123,9 +126,7 @@ export default function HomePage() {
     <div className="space-y-10">
       <SearchBar />
 
-      <p className="page-lead">
-        Welcome back{welcomeName}. Where would you like to spend your time today?
-      </p>
+      <p className="page-lead">{t("welcome", { name: welcomeName })}</p>
 
       <GettingStartedGuide
         show={showGettingStarted}
@@ -143,14 +144,14 @@ export default function HomePage() {
       <AndroidInstallHint />
 
       <section>
-        <h2 className="section-heading">Your Spaces</h2>
+        <h2 className="section-heading">{t("yourSpaces")}</h2>
         <p className="section-copy">
           Rooms you&apos;ve added. No obligation to post — just a place to return to.
         </p>
         {myRooms.length === 0 ? (
           <EmptyState
             className="mt-4"
-            title="No spaces yet."
+            title={t("emptyNoSpaces")}
             description="Rooms are calm corners for listening, learning, and collab posts. Add one when something catches your eye."
           >
             <Link href="/rooms" className="btn-secondary">
@@ -178,9 +179,9 @@ export default function HomePage() {
 
       <section>
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="section-heading">Explore</h2>
+          <h2 className="section-heading">{t("explore")}</h2>
           <Link href="/explore" className="text-sm text-muted hover:text-foreground shrink-0">
-            See all
+            {tc("seeAll")}
           </Link>
         </div>
         <p className="section-copy">
@@ -190,7 +191,7 @@ export default function HomePage() {
         {people.length === 0 ? (
           <EmptyState
             className="mt-4"
-            title="You're the first one here — or almost."
+            title={t("emptyNoPeople")}
             description="As others join, they'll show up here. You can browse Explore anytime."
           >
             <Link href="/explore" className="btn-secondary">
@@ -210,10 +211,10 @@ export default function HomePage() {
 
       <section>
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="section-heading">Conversations</h2>
+          <h2 className="section-heading">{t("conversations")}</h2>
           {recentConversations.length > 0 && (
             <Link href="/messages" className="text-sm text-muted hover:text-foreground shrink-0">
-              See all
+              {tc("seeAll")}
             </Link>
           )}
         </div>
@@ -221,11 +222,11 @@ export default function HomePage() {
           Chats and collab threads you&apos;re part of.
         </p>
         {conversationsLoading ? (
-          <p className="mt-4 text-sm text-muted">Loading…</p>
+          <p className="mt-4 text-sm text-muted">{tc("loading")}</p>
         ) : recentConversations.length === 0 ? (
           <EmptyState
             className="mt-4"
-            title="No conversations yet."
+            title={t("emptyNoConversations")}
             description="Messages start with an invite — send one from someone's profile, or wait for one to arrive."
           >
             <Link href="/explore" className="btn-secondary">
@@ -248,9 +249,9 @@ export default function HomePage() {
 
       <section>
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="section-heading">Collaborations</h2>
+          <h2 className="section-heading">{t("collaborations")}</h2>
           <Link href="/collaborations" className="text-sm text-muted hover:text-foreground shrink-0">
-            See all
+            {tc("seeAll")}
           </Link>
         </div>
         <p className="section-copy">
@@ -259,7 +260,7 @@ export default function HomePage() {
         {activeCollabs.length === 0 ? (
           <EmptyState
             className="mt-4"
-            title="No active collaborations yet."
+            title={t("emptyNoCollabs")}
             description="When someone responds interested to a collab invite, a shared workspace opens here for notes, links, and next steps."
           >
             <Link href="/explore" className="btn-secondary">

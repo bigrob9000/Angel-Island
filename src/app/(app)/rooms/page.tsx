@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { Room } from "@/lib/types";
 
@@ -25,6 +26,8 @@ const ROOM_POSITION_CLASSES = [
 ] as const;
 
 export default function RoomsPage() {
+  const t = useTranslations("rooms");
+  const tc = useTranslations("common");
   const [rooms, setRooms] = useState<Room[]>([]);
   const [memberRoomIds, setMemberRoomIds] = useState<Set<string>>(new Set());
   const [lastActivity, setLastActivity] = useState<Record<string, string>>({});
@@ -102,15 +105,15 @@ export default function RoomsPage() {
   if (loading) {
     return (
       <div>
-        <h1 className="page-lead">Rooms</h1>
-        <p className="mt-2 text-muted">Loading…</p>
+        <h1 className="page-lead">{t("title")}</h1>
+        <p className="mt-2 text-muted">{tc("loading")}</p>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="page-lead">Explore Rooms</h1>
+      <h1 className="page-lead">{t("exploreTitle")}</h1>
       <p className="section-copy">
         Click a cloud to enter. Read posts, visit profiles, and invite someone to chat when it
         feels right — no obligation to post.
@@ -150,7 +153,7 @@ export default function RoomsPage() {
       </div>
 
       <div className="surface mt-24 p-4 text-sm text-muted">
-        <p className="font-medium text-foreground mb-1">Activity</p>
+        <p className="font-medium text-foreground mb-1">{t("activity")}</p>
         <ul className="space-y-1">
           {rooms.map((room) => (
             <li key={room.id}>

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function AppError({
   error,
@@ -10,13 +11,14 @@ export default function AppError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("errors");
   useEffect(() => {
     console.error(error);
   }, [error]);
 
   return (
     <div className="surface px-5 py-8 text-center">
-      <h1 className="font-serif text-xl font-medium text-foreground">Something went wrong</h1>
+      <h1 className="font-serif text-xl font-medium text-foreground">{t("genericTitle")}</h1>
       <p className="mt-2 text-sm text-muted leading-relaxed">
         This page hit an unexpected error. You can try again or head somewhere else.
       </p>

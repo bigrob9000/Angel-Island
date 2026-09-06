@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import type { ProfileCompletenessProfile } from "@/lib/profile-completeness";
 import { getOptionalProfileCompleteness } from "@/lib/profile-completeness";
@@ -29,6 +30,7 @@ export function GettingStartedGuide({
   hasConnected,
   hasCollabs,
 }: Props) {
+  const t = useTranslations("home");
   const { dismissed, ready, dismiss } = useDismissStorage(DISMISS_KEY);
 
   if (!ready || !show || dismissed || !profile) {
@@ -124,7 +126,7 @@ export function GettingStartedGuide({
     <section className="surface p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="section-heading">Getting started</h2>
+          <h2 className="section-heading">{t("gettingStarted")}</h2>
           <p className="mt-1 text-sm text-muted">
             {doneCount === 0
               ? "You finished onboarding — here are four gentle next steps."

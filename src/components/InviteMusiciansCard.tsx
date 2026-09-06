@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { getInviteSignInUrl, INVITE_MESSAGE_TEMPLATE } from "@/lib/invite";
 
 export function InviteMusiciansCard() {
+  const t = useTranslations("settings");
   const [copied, setCopied] = useState<"link" | "message" | null>(null);
   const inviteUrl = getInviteSignInUrl(
     typeof window !== "undefined" ? window.location.origin : undefined,
@@ -22,7 +24,7 @@ export function InviteMusiciansCard() {
   return (
     <section className="surface p-5">
       <div>
-        <h2 className="font-medium text-foreground">Invite musicians</h2>
+        <h2 className="font-medium text-foreground">{t("inviteMusiciansTitle")}</h2>
         <p className="mt-1 text-sm text-muted">
           Share this link with people you&apos;d actually want to play or collaborate with. They&apos;ll
           read about Angel Island first, then create an account when they&apos;re ready.

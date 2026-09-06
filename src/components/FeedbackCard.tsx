@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import { FEEDBACK_EMAIL } from "@/lib/site";
 import { getFeedbackMailtoUrl } from "@/lib/feedback";
 
 export function FeedbackCard() {
+  const t = useTranslations("settings");
   const [href, setHref] = useState(() => getFeedbackMailtoUrl());
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export function FeedbackCard() {
   return (
     <section className="surface p-5 space-y-3">
       <div>
-        <h2 className="font-medium text-foreground">Beta feedback</h2>
+        <h2 className="font-medium text-foreground">{t("feedbackTitle")}</h2>
         <p className="mt-1 text-sm text-muted">
           Angel Island is early. If something feels off, confusing, or surprisingly good — tell us.
           No pressure to be polite; specifics help.

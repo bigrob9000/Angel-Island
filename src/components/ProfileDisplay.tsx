@@ -1,4 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import type { Profile } from "@/lib/types";
 import { openToQuestionsLabel } from "@/lib/profile-options";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
@@ -31,6 +34,7 @@ type Props = {
 };
 
 export function ProfileDisplay({ profile, showUsername = true }: Props) {
+  const t = useTranslations("profile");
   const name = profile.first_name || "—";
   const questionsLabel = openToQuestionsLabel(profile.open_to_questions);
   const linkLines = profile.work_links
@@ -57,61 +61,61 @@ export function ProfileDisplay({ profile, showUsername = true }: Props) {
       </header>
 
       {profile.here_for.length > 0 && (
-        <Section title="Here for">
+        <Section title={t("hereFor")}>
           <ChipList items={profile.here_for} />
         </Section>
       )}
 
       {profile.open_to.length > 0 && (
-        <Section title="Currently open to">
+        <Section title={t("openTo")}>
           <ChipList items={profile.open_to} />
         </Section>
       )}
 
       {profile.about && (
-        <Section title="About">
+        <Section title={t("about")}>
           <p className="text-muted whitespace-pre-wrap leading-relaxed">{profile.about}</p>
         </Section>
       )}
 
       {profile.roles.length > 0 && (
-        <Section title="What I do">
+        <Section title={t("roles")}>
           <ChipList items={profile.roles} />
         </Section>
       )}
 
       {profile.collaborate_as.length > 0 && (
-        <Section title="Looking to collaborate as">
+        <Section title={t("collaborateAs")}>
           <ChipList items={profile.collaborate_as} />
         </Section>
       )}
 
       {profile.genres_make.length > 0 && (
-        <Section title="Genres I make">
+        <Section title={t("genresMake")}>
           <ChipList items={profile.genres_make} />
         </Section>
       )}
 
       {profile.genres_love.length > 0 && (
-        <Section title="Genres I love / want to explore">
+        <Section title={t("genresLove")}>
           <ChipList items={profile.genres_love} />
         </Section>
       )}
 
       {profile.working_style.length > 0 && (
-        <Section title="Working style">
+        <Section title={t("workingStyle")}>
           <ChipList items={profile.working_style} />
         </Section>
       )}
 
       {questionsLabel && (
-        <Section title="Open to questions or mentoring">
+        <Section title={t("questions")}>
           <p className="text-muted">{questionsLabel}</p>
         </Section>
       )}
 
       {linkLines && linkLines.length > 0 && (
-        <Section title="Work / links">
+        <Section title={t("workLinks")}>
           <ul className="space-y-1 text-sm">
             {linkLines.map((line) => {
               const isUrl = /^https?:\/\//i.test(line);

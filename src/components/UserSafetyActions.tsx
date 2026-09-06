@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { blockUser, unblockUser } from "@/lib/blocks";
 import { submitReport } from "@/lib/reports";
 import type { ReportReason, ReportTargetType } from "@/lib/types";
@@ -41,6 +42,7 @@ export function UserSafetyActions({
   onBlocked,
   onUnblocked,
 }: Props) {
+  const t = useTranslations("safety");
   const [internalDialog, setInternalDialog] = useState<SafetyDialog>(null);
   const [reason, setReason] = useState<ReportReason>("harassment");
   const [details, setDetails] = useState("");
@@ -200,7 +202,7 @@ export function UserSafetyActions({
         >
           <div className="bg-ethereal border border-foreground/10 rounded-lg shadow-lg max-w-md w-full p-6">
             <h2 className="font-serif text-lg font-medium text-foreground">
-              Block {reportedUserName}?
+              {t("blockTitle", { name: reportedUserName })}
             </h2>
             <p className="mt-3 text-sm text-muted leading-relaxed">
               They won&apos;t appear in search or Explore, and you won&apos;t be able to message
@@ -239,7 +241,7 @@ export function UserSafetyActions({
           role="dialog"
         >
           <div className="bg-ethereal border border-foreground/10 rounded-lg shadow-lg max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="font-serif text-lg font-medium text-foreground">Report</h2>
+            <h2 className="font-serif text-lg font-medium text-foreground">{t("reportTitle")}</h2>
             <p className="mt-2 text-sm text-muted">
               Tell us what happened. You don&apos;t need to explain further unless you want to.
             </p>

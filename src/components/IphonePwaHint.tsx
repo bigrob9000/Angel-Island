@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   getPwaEnvironment,
   IPHONE_PWA_HINT_DISMISS_KEY,
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function IphonePwaHint({ respectDismiss = true }: Props) {
+  const t = useTranslations("pwa");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export function IphonePwaHint({ respectDismiss = true }: Props) {
     <section className="surface p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="font-medium text-foreground">Add Angel Island to your Home Screen</h2>
+          <h2 className="font-medium text-foreground">{t("iphoneTitle")}</h2>
           <p className="mt-1 text-sm text-muted">
             On {env.platform === "ios" ? "iPhone and iPad" : "this device"}, Safari tabs can&apos;t
             receive browser notifications. Install the app to your home screen first — then you can

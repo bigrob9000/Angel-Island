@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 type SearchBarProps = {
   className?: string;
@@ -9,6 +10,7 @@ type SearchBarProps = {
 };
 
 export function SearchBar({ className = "", defaultValue = "" }: SearchBarProps) {
+  const t = useTranslations("search");
   const router = useRouter();
   const [query, setQuery] = useState(defaultValue);
 
@@ -22,7 +24,7 @@ export function SearchBar({ className = "", defaultValue = "" }: SearchBarProps)
   return (
     <form onSubmit={handleSubmit} className={className}>
       <label className="block">
-        <span className="sr-only">Search Angel Island</span>
+        <span className="sr-only">{t("label")}</span>
         <div className="surface flex gap-2 p-1.5">
           <input
             type="search"

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { ProfileListenShare } from "@/lib/profile-shares";
 import { listenShareHref, listenSharePreview } from "@/lib/profile-shares";
 
@@ -9,12 +12,14 @@ type Props = {
 };
 
 export function ProfileListenShares({ shares, isOwn = false, showPrompt = false }: Props) {
+  const t = useTranslations("profile");
+
   if (shares.length === 0) {
     if (!isOwn || !showPrompt) return null;
 
     return (
       <section className="surface p-5">
-        <h2 className="section-heading">From Listen & Share</h2>
+        <h2 className="section-heading">{t("listenShares")}</h2>
         <p className="mt-2 text-sm text-muted leading-relaxed">
           Want to share a clip or demo? Listen & Share is the place — your profile can show your
           recent shares here.
@@ -29,7 +34,7 @@ export function ProfileListenShares({ shares, isOwn = false, showPrompt = false 
   return (
     <section className="rounded-lg border border-foreground/10 bg-white/50 p-5">
       <div className="flex items-baseline justify-between gap-4">
-        <h2 className="section-heading">From Listen & Share</h2>
+        <h2 className="section-heading">{t("listenShares")}</h2>
         <Link href="/rooms/listen" className="text-sm text-muted hover:text-foreground shrink-0">
           Visit room
         </Link>

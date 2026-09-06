@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import {
   formatMemberNames,
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function GroupCollabInvitesSection({ received, onResponded }: Props) {
+  const t = useTranslations("collaborations");
   const router = useRouter();
   const [actingId, setActingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function GroupCollabInvitesSection({ received, onResponded }: Props) {
 
   return (
     <section>
-      <h2 className="section-heading">Group collab invites</h2>
+      <h2 className="section-heading">{t("groupInvites")}</h2>
       <p className="section-copy">
         One invite, several people — everyone responds before the workspace opens.
       </p>

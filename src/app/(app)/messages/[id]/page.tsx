@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { notifyNewMessage } from "@/lib/notifications/client";
 import { createClient } from "@/lib/supabase";
 import type { ChatInvite, Message, Profile } from "@/lib/types";
@@ -55,6 +56,7 @@ function conversationActionError(message: string): string {
 }
 
 export default function ConversationPage() {
+  const t = useTranslations("messages");
   const params = useParams();
   const router = useRouter();
   const inviteId = params.id as string;
@@ -311,7 +313,7 @@ export default function ConversationPage() {
   if (!invite) {
     return (
       <NotFoundPanel
-        title="Conversation not found"
+        title={t("notFound")}
         description="This conversation may have ended, or you may not have access to it."
         backHref="/messages"
         backLabel="← Messages"
@@ -625,7 +627,7 @@ export default function ConversationPage() {
           <div className="surface max-w-md w-full p-6 shadow-lg">
             {modal === "pause" ? (
               <>
-                <h2 className="section-heading">Pause conversation</h2>
+                <h2 className="section-heading">{t("pauseTitle")}</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Pausing means this conversation won&apos;t be active for now. Messages will be
                   disabled for both of you. Only you can resume when you&apos;re ready.
@@ -650,7 +652,7 @@ export default function ConversationPage() {
               </>
             ) : modal === "end" ? (
               <>
-                <h2 className="section-heading">End conversation</h2>
+                <h2 className="section-heading">{t("endTitle")}</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Ending will close this conversation permanently. This can&apos;t be undone, and no
                   explanation is required. You can remove it from your Messages list afterward.
@@ -675,7 +677,7 @@ export default function ConversationPage() {
               </>
             ) : modal === "remove" ? (
               <>
-                <h2 className="section-heading">Remove from list</h2>
+                <h2 className="section-heading">{t("removeTitle")}</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   This hides the conversation from your Messages list and Home. The other person
                   still has access, and you can open this thread again from a direct link if you
@@ -701,7 +703,7 @@ export default function ConversationPage() {
               </>
             ) : (
               <>
-                <h2 className="section-heading">Delete permanently</h2>
+                <h2 className="section-heading">{t("deleteTitle")}</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   This deletes the entire conversation and all messages for both of you. It cannot
                   be undone. The other person will no longer see this thread either.

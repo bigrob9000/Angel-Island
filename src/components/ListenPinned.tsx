@@ -1,9 +1,14 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { LISTEN_PINNED } from "@/lib/listen";
 
 export function ListenPinned() {
+  const t = useTranslations("rooms");
+
   return (
     <aside className="surface p-5 space-y-4 ring-1 ring-accent/15">
-      <p className="text-sm font-medium text-foreground">{LISTEN_PINNED.title}</p>
+      <p className="text-sm font-medium text-foreground">{t("listenPinned")}</p>
       <p className="text-sm text-muted leading-relaxed">{LISTEN_PINNED.welcome}</p>
       <p className="text-sm text-muted leading-relaxed">{LISTEN_PINNED.lead}</p>
       <ul className="list-disc pl-5 space-y-1.5 text-sm text-muted leading-relaxed">

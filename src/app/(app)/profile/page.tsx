@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/types";
@@ -15,6 +16,8 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { loadRecentListenShares, type ProfileListenShare } from "@/lib/profile-shares";
 
 export default function ProfilePage() {
+  const t = useTranslations("profile");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -52,12 +55,12 @@ export default function ProfilePage() {
     });
   }, [router]);
 
-  if (loading) return <p className="text-muted">Loading…</p>;
+  if (loading) return <p className="text-muted">{tc("loading")}</p>;
   if (!profile) return null;
 
   return (
     <div className="space-y-8">
-      <h1 className="font-serif text-2xl font-medium text-foreground">Profile</h1>
+      <h1 className="font-serif text-2xl font-medium text-foreground">{t("title")}</h1>
 
       <ProfileCompletenessNudge profile={profile} />
 

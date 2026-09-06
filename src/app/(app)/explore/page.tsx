@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import { ExploreFilters } from "@/components/ExploreFilters";
 import { ExploreProfileList } from "@/components/ExploreProfileList";
@@ -24,13 +25,11 @@ import {
   type DiscoverySort,
 } from "@/lib/discovery";
 
-const SORT_OPTIONS: Array<{ id: DiscoverySort; label: string }> = [
-  { id: "suggested", label: "Suggested for you" },
-  { id: "recent", label: "Recently updated" },
-  { id: "name", label: "Name A–Z" },
-];
+const SORT_OPTION_IDS = ["suggested", "recent", "name"] as const;
 
 export default function ExplorePage() {
+  const t = useTranslations("explore");
+  const tc = useTranslations("common");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [viewerProfile, setViewerProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -96,7 +95,7 @@ export default function ExplorePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-serif text-2xl font-medium text-foreground">Explore People</h1>
+        <h1 className="font-serif text-2xl font-medium text-foreground">{t("title")}</h1>
         <p className="mt-2 text-sm text-muted">
           Musicians on Angel Island right now. Suggested order uses overlap with your profile — not
           popularity or clout.
@@ -133,18 +132,18 @@ export default function ExplorePage() {
       </label>
 
       <div className="flex flex-wrap gap-2">
-        {SORT_OPTIONS.map((option) => (
+        {SORT_OPTION_IDS.map((id) => (
           <button
-            key={option.id}
+            key={id}
             type="button"
-            onClick={() => setSort(option.id)}
+            onClick={() => setSort(id)}
             className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-              sort === option.id
+              sort === id
                 ? "border-foreground/40 bg-foreground/10 text-foreground"
                 : "border-foreground/15 bg-white/50 text-muted hover:text-foreground"
             }`}
           >
-            {option.label}
+            {id === "suggested" ? t("sortSuggested") : id === "recent" ? t("sortRecent") : t("sortName")}
           </button>
         ))}
       </div>
@@ -166,10 +165,10 @@ export default function ExplorePage() {
       </p>
 
       {loading ? (
-        <p className="text-muted">Loading…</p>
+        <p className="text-muted">{tc("loading")}</p>
       ) : shown.length === 0 ? (
         <EmptyState
-          title={profiles.length === 0 ? "Nothing here right now besides you." : "Nothing like that turned up."}
+          title={profiles.length === 0 ? t("emptyAlone") : t("emptyNoMatch")}
           description={
             profiles.length === 0
               ? "When others join, they'll show up here. You can also meet people in Introductions."
@@ -205,7 +204,7 @@ export default function ExplorePage() {
             <>
               <section>
                 <h2 className="font-serif text-lg font-medium text-foreground">
-                  People you might connect with
+                  {t("suggestedGroup")}
                 </h2>
                 <p className="mt-1 text-sm text-muted">
                   Shared location, genres, roles, or collaboration fit with your profile.
@@ -215,7 +214,7 @@ export default function ExplorePage() {
                 </div>
               </section>
               <section>
-                <h2 className="font-serif text-lg font-medium text-foreground">More musicians</h2>
+                <h2 className="font-serif text-lg font-medium text-foreground">{t("moreMusicians")}</h2>
                 <p className="mt-1 text-sm text-muted">Everyone else on Angel Island right now.</p>
                 <div className="mt-4">
                   <ExploreProfileList profiles={grouped.others} />

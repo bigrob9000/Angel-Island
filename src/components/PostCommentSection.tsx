@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { PostCommentWithAuthor } from "@/lib/post-comments";
 import { addPostComment, deletePostComment } from "@/lib/post-comments";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
@@ -26,6 +27,7 @@ export function PostCommentSection({
   variant = "room",
   onCommentsChange,
 }: Props) {
+  const t = useTranslations("rooms");
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -83,7 +85,7 @@ export function PostCommentSection({
 
   return (
     <div className="mt-4 border-t border-foreground/10 pt-4">
-      <p className="profile-section-label">Comments</p>
+      <p className="profile-section-label">{t("comments")}</p>
 
       {tableMissing ? (
         <p className="mt-2 text-sm text-muted">
