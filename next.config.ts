@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 import path from "path";
 import fs from "fs";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 // Load .env.local so NEXT_PUBLIC_* vars are available to the client (avoids "missing" errors on Windows)
 const envLocalPath = path.join(__dirname, ".env.local");
@@ -34,4 +37,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import { FeedbackCard } from "@/components/FeedbackCard";
 import { InviteMusiciansCard } from "@/components/InviteMusiciansCard";
+import { LanguagePicker } from "@/components/LanguagePicker";
 import { SignOutButton } from "@/components/SignOutButton";
 import { IphonePwaHint } from "@/components/IphonePwaHint";
 import { SettingsToggle } from "@/components/SettingsToggle";
@@ -27,6 +29,8 @@ import {
 
 export default function SettingsPage() {
   const { preferences, setPreference } = usePreferences();
+  const t = useTranslations("settings");
+  const tc = useTranslations("common");
   const [email, setEmail] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [newEmail, setNewEmail] = useState("");
@@ -381,24 +385,32 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8">
       <Link href="/profile" className="text-sm text-muted hover:text-foreground">
-        ← Profile
+        {tc("backToProfile")}
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl font-medium text-foreground">Settings</h1>
-          <p className="mt-2 text-sm text-muted">Adjust the space to feel right for you.</p>
+          <h1 className="font-serif text-2xl font-medium text-foreground">{t("title")}</h1>
+          <p className="mt-2 text-sm text-muted">{t("subtitle")}</p>
         </div>
         <SignOutButton />
       </div>
 
       <section className="surface p-5 space-y-5">
         <div>
-          <h2 className="font-medium text-foreground">Account</h2>
-          <p className="mt-1 text-sm text-muted">Your sign-in details.</p>
+          <h2 className="font-medium text-foreground">{t("languageTitle")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("languageSubtitle")}</p>
+        </div>
+        <LanguagePicker />
+      </section>
+
+      <section className="surface p-5 space-y-5">
+        <div>
+          <h2 className="font-medium text-foreground">{t("accountTitle")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("accountSubtitle")}</p>
         </div>
 
         <div>
-          <p className="text-sm text-muted">Email</p>
+          <p className="text-sm text-muted">{tc("email")}</p>
           <p className="mt-1 text-foreground">{email ?? "—"}</p>
           {pendingEmail && pendingEmail !== email && (
             <p className="mt-2 text-sm text-muted">
@@ -535,16 +547,14 @@ export default function SettingsPage() {
 
       <section className="surface p-5 space-y-6">
         <div>
-          <h2 className="font-medium text-foreground">Calm Mode</h2>
-          <p className="mt-1 text-sm text-muted">
-            Softer colors, less motion, and a little more breathing room.
-          </p>
+          <h2 className="font-medium text-foreground">{t("calmModeTitle")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("calmModeSubtitle")}</p>
         </div>
 
         <SettingsToggle
           id="calm-mode"
-          label="Calm Mode"
-          description="Reduced contrast, softer palette, no drifting clouds, and slightly larger text."
+          label={t("calmModeLabel")}
+          description={t("calmModeDescription")}
           checked={preferences.calmMode}
           onChange={(checked) => setPreference("calmMode", checked)}
         />
@@ -552,8 +562,8 @@ export default function SettingsPage() {
         {preferences.calmMode && (
           <SettingsToggle
             id="easier-reading"
-            label="Easier reading font"
-            description="Use a simpler sans-serif font that's easier to scan."
+            label={t("easierReadingLabel")}
+            description={t("easierReadingDescription")}
             checked={preferences.easierReadingFont}
             onChange={(checked) => setPreference("easierReadingFont", checked)}
           />
@@ -740,8 +750,8 @@ export default function SettingsPage() {
       <section className="surface p-5">
         <SettingsToggle
           id="reduce-motion"
-          label="Reduce motion"
-          description="Turn off gentle transitions and hover animations, even when Calm Mode is off."
+          label={t("reduceMotionLabel")}
+          description={t("reduceMotionDescription")}
           checked={preferences.reduceMotion}
           onChange={(checked) => setPreference("reduceMotion", checked)}
         />

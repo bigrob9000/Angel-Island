@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
@@ -13,19 +14,20 @@ import { InboxCollabNotice } from "@/components/InboxCollabNotice";
 import { PushRegistration } from "@/components/PushRegistration";
 import { PwaServiceWorkerRegistration } from "@/components/PwaServiceWorkerRegistration";
 
-const nav = [
-  { href: "/home", label: "Home", shortLabel: "Home" },
-  { href: "/explore", label: "Explore", shortLabel: "Find" },
-  { href: "/rooms", label: "Rooms", shortLabel: "Rooms" },
-  { href: "/messages", label: "Messages", shortLabel: "Msgs" },
-  { href: "/notifications", label: "Activity", shortLabel: "Act" },
-  { href: "/collaborations", label: "Collabs", shortLabel: "Collab" },
-  { href: "/profile", label: "Profile", shortLabel: "Me" },
+const navItems = [
+  { href: "/home", key: "home" as const, shortKey: "homeShort" as const },
+  { href: "/explore", key: "explore" as const, shortKey: "exploreShort" as const },
+  { href: "/rooms", key: "rooms" as const, shortKey: "roomsShort" as const },
+  { href: "/messages", key: "messages" as const, shortKey: "messagesShort" as const },
+  { href: "/notifications", key: "activity" as const, shortKey: "activityShort" as const },
+  { href: "/collaborations", key: "collaborations" as const, shortKey: "collaborationsShort" as const },
+  { href: "/profile", key: "profile" as const, shortKey: "profileShort" as const },
 ] as const;
 
 function AppNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("nav");
   const { unreadCount } = useInbox();
   const { unreadCount: collabUnreadCount } = useCollab();
   const activityUnreadCount = unreadCount + collabUnreadCount;
@@ -37,16 +39,26 @@ function AppNav() {
     });
   }, [router]);
 
+  function unreadLabel(
+    count: number,
+    kind: "activity" | "collab" | "conversation",
+  ): string {
+    if (kind === "activity") {
+      return count === 1 ? t("unreadActivity", { count }) : t("unreadActivityPlural", { count });
+    }
+    if (kind === "collab") {
+      return count === 1 ? t("unreadCollab", { count }) : t("unreadCollabPlural", { count });
+    }
+    return count === 1 ? t("unreadConversation", { count }) : t("unreadConversationPlural", { count });
+  }
+
   return (
     <header className="sticky top-0 z-20 border-b border-foreground/10 bg-ethereal/95 backdrop-blur-sm">
       <div className="mx-auto w-full px-2 py-2 sm:px-4 sm:py-3">
         <div className="flex items-center gap-1 sm:gap-2">
           <AngelIslandLogo variant="mark" size="compact" className="shrink-0" />
-          <nav
-            className="flex min-w-0 flex-1 items-center"
-            aria-label="Main"
-          >
-            {nav.map(({ href, label, shortLabel }) => {
+          <nav className="flex min-w-0 flex-1 items-center" aria-label={t("main")}>
+            {navItems.map(({ href, key, shortKey }) => {
               const isMessages = href === "/messages";
               const isCollabs = href === "/collaborations";
               const isActivity = href === "/notifications";
@@ -58,6 +70,7 @@ function AppNav() {
                   : isActivity
                     ? activityUnreadCount
                     : 0;
+              const label = t(key);
               return (
                 <Link
                   key={href}
@@ -68,12 +81,15 @@ function AppNav() {
                     active ? "nav-pill-active" : "text-muted hover:text-foreground"
                   }`}
                 >
-                  <span className="sm:hidden">{shortLabel}</span>
+                  <span className="sm:hidden">{t(shortKey)}</span>
                   <span className="hidden sm:inline">{label}</span>
                   {badgeCount > 0 && (
                     <span
                       className="absolute -right-1 top-0 h-2 w-2 rounded-full bg-accent"
-                      aria-label={`${badgeCount} unread ${isActivity ? "activity item" : isCollabs ? "collaboration" : "conversation"}${badgeCount === 1 ? "" : "s"}`}
+                      aria-label={unreadLabel(
+                        badgeCount,
+                        isActivity ? "activity" : isCollabs ? "collab" : "conversation",
+                      )}
                     />
                   )}
                 </Link>

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Lora, Cormorant_Garamond } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import "./globals.css";
 import { PreferencesProvider } from "@/components/PreferencesProvider";
-import { getSiteUrl, SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
+import { getSiteUrl } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,47 +27,58 @@ const cormorant = Cormorant_Garamond({
   weight: ["400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getSiteUrl()),
-  title: {
-    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    template: `%s · ${SITE_NAME}`,
-  },
-  description: SITE_DESCRIPTION,
-  applicationName: SITE_NAME,
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    siteName: SITE_NAME,
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
-  },
-  icons: {
-    icon: "/angel-island-mark-light.png",
-    apple: "/apple-icon",
-  },
-  appleWebApp: {
-    capable: true,
-    title: SITE_NAME,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("site");
+  const siteName = t("name");
+  const tagline = t("tagline");
+  const description = t("description");
 
-export default function RootLayout({
+  return {
+    metadataBase: new URL(getSiteUrl()),
+    title: {
+      default: `${siteName} — ${tagline}`,
+      template: `%s · ${siteName}`,
+    },
+    description,
+    applicationName: siteName,
+    openGraph: {
+      type: "website",
+      siteName,
+      title: `${siteName} — ${tagline}`,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${siteName} — ${tagline}`,
+      description,
+    },
+    icons: {
+      icon: "/angel-island-mark-light.png",
+      apple: "/apple-icon",
+    },
+    appleWebApp: {
+      capable: true,
+      title: siteName,
+    },
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${lora.variable} ${cormorant.variable} antialiased`}
       >
-        <PreferencesProvider>{children}</PreferencesProvider>
+        <NextIntlClientProvider messages={messages}>
+          <PreferencesProvider>{children}</PreferencesProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

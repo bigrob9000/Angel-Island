@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { postAuthPath } from "@/lib/auth-redirect";
 import {
   inviteRequiredMessage,
@@ -11,6 +12,7 @@ import {
 import { persistInviteAcceptance } from "@/lib/invite";
 import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
+import { LanguagePicker } from "@/components/LanguagePicker";
 
 function authCallbackUrl(invited: boolean, authMode: "sign-in" | "sign-up") {
   const params = new URLSearchParams();
@@ -23,6 +25,8 @@ function authCallbackUrl(invited: boolean, authMode: "sign-in" | "sign-up") {
 export default function SignInPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("signIn");
+  const tc = useTranslations("common");
   const inviteOnly = isInviteOnlyEnabled();
   const [mode, setMode] = useState<"sign-in" | "sign-up" | "forgot">("sign-in");
   const [email, setEmail] = useState("");
@@ -75,7 +79,7 @@ export default function SignInPageContent() {
     if (hash && (hash.includes("otp_expired") || hash.includes("invalid+or+has+expired"))) {
       setMessage({
         type: "error",
-        text: "That link has expired. Enter your email below and use “Resend confirmation email” to get a new link.",
+        text: t("linkExpired"),
       });
       setMode("sign-up");
       window.history.replaceState(null, "", window.location.pathname + window.location.search);
@@ -89,7 +93,7 @@ export default function SignInPageContent() {
         return;
       }
       if (!agreedToTerms) {
-        setMessage({ type: "error", text: "Please agree to the Terms of Service and Privacy Policy to create an account." });
+        setMessage({ type: "error", text: t("agreeTermsError") });
         return;
       }
     }
@@ -122,7 +126,7 @@ export default function SignInPageContent() {
     if (mode === "sign-up" && !agreedToTerms) {
       setMessage({
         type: "error",
-        text: "Please agree to the Terms of Service and Privacy Policy to create an account.",
+        text: t("agreeTermsError"),
       });
       return;
     }
@@ -142,11 +146,11 @@ export default function SignInPageContent() {
           options: { emailRedirectTo: redirectTo },
         });
         if (error) throw error;
-        setMessage({ type: "ok", text: "Check your email to confirm your account. Click the link soon — it expires in about an hour." });
+        setMessage({ type: "ok", text: t("confirmEmailSent") });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        setMessage({ type: "ok", text: "Signed in. Redirecting…" });
+        setMessage({ type: "ok", text: t("signedInRedirect") });
         const {
           data: { user },
         } = await supabase.auth.getUser();
@@ -162,7 +166,7 @@ export default function SignInPageContent() {
         }
       }
     } catch (err: unknown) {
-      let msg = err instanceof Error ? err.message : "Something went wrong.";
+      let msg = err instanceof Error ? err.message : t("somethingWrong");
       if (msg === "Failed to fetch") {
         const onProduction =
           typeof window !== "undefined" &&
@@ -179,7 +183,7 @@ export default function SignInPageContent() {
 
   async function handleResendConfirmation() {
     if (!email.trim()) {
-      setMessage({ type: "error", text: "Enter your email first." });
+      setMessage({ type: "error", text: t("enterEmailFirst") });
       return;
     }
     setMessage(null);
@@ -197,13 +201,13 @@ export default function SignInPageContent() {
       setMessage({ type: "error", text: error.message });
       return;
     }
-    setMessage({ type: "ok", text: "A new confirmation link was sent. Check your email and click it within about an hour." });
+    setMessage({ type: "ok", text: t("confirmationResent") });
   }
 
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) {
-      setMessage({ type: "error", text: "Enter your email first." });
+      setMessage({ type: "error", text: t("enterEmailFirst") });
       return;
     }
     setMessage(null);
@@ -219,7 +223,7 @@ export default function SignInPageContent() {
     }
     setMessage({
       type: "ok",
-      text: "If an account exists for that email, we sent a reset link. Check your inbox.",
+      text: t("resetEmailSent"),
     });
   }
 
@@ -235,42 +239,38 @@ export default function SignInPageContent() {
         </Link>
         <h1 className="font-serif text-2xl font-medium">
           {showForgot
-            ? "Reset password"
+            ? t("resetPassword")
             : invited && showSignUp
-              ? "Join Angel Island"
+              ? t("join")
               : mode === "sign-in"
-                ? "Sign in"
-                : "Create an account"}
+                ? t("signIn")
+                : t("createAccount")}
         </h1>
         <p className="text-muted mt-2 text-sm">
           {showForgot
-            ? "Enter your email and we will send a link to choose a new password."
+            ? t("forgotIntro")
             : invited
               ? mode === "sign-in"
-                ? "Welcome back. Sign in when you're ready — no rush."
-                : "Someone invited you to a calm space for musicians. Create an account with Google or email."
+                ? t("invitedSignInIntro")
+                : t("invitedSignUpIntro")
               : mode === "sign-in"
-                ? "Sign in with Google, or use email and password."
+                ? t("signInIntro")
                 : inviteOnly
-                  ? "Angel Island is invite-only during beta. Use the link someone shared with you."
-                  : "Create an account with Google, or use email and password."}
+                  ? t("inviteOnlySignUp")
+                  : t("signUpIntro")}
         </p>
 
         {inviteOnly && !invited && !showForgot && (
           <div className="mt-6 rounded-lg border border-foreground/15 bg-white/60 px-4 py-3 text-sm">
-            <p className="font-medium text-foreground">Invite-only, for now</p>
-            <p className="mt-1 text-muted">
-              New accounts need an invite link. Returning members can sign in below.
-            </p>
+            <p className="font-medium text-foreground">{t("inviteOnlyTitle")}</p>
+            <p className="mt-1 text-muted">{t("inviteOnlyBody")}</p>
           </div>
         )}
 
         {invited && showSignUp && (
           <div className="mt-6 rounded-lg border border-foreground/15 bg-white/60 px-4 py-3 text-sm">
-            <p className="font-medium text-foreground">Invite-only, for now</p>
-            <p className="mt-1 text-muted">
-              No clout, no cold DMs — just musicians finding each other and collaborating at their own pace.
-            </p>
+            <p className="font-medium text-foreground">{t("inviteOnlyTitle")}</p>
+            <p className="mt-1 text-muted">{t("invitedBetaBody")}</p>
           </div>
         )}
 
@@ -283,24 +283,28 @@ export default function SignInPageContent() {
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-foreground/30 accent-foreground"
             />
             <span>
-              I agree to the{" "}
-              <Link
-                href="/terms"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-foreground underline underline-offset-2 hover:no-underline"
-              >
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link
-                href="/privacy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-foreground underline underline-offset-2 hover:no-underline"
-              >
-                Privacy Policy
-              </Link>
+              {t.rich("agreeTerms", {
+                terms: () => (
+                  <Link
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground underline underline-offset-2 hover:no-underline"
+                  >
+                    {tc("termsOfService")}
+                  </Link>
+                ),
+                privacy: () => (
+                  <Link
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground underline underline-offset-2 hover:no-underline"
+                  >
+                    {tc("privacyPolicy")}
+                  </Link>
+                ),
+              })}
             </span>
           </label>
         )}
@@ -317,10 +321,8 @@ export default function SignInPageContent() {
             className="mt-8 w-full rounded-md border border-foreground/25 bg-white/80 py-2.5 text-sm font-medium text-foreground hover:bg-white disabled:opacity-50 transition-colors"
           >
             {googleLoading
-              ? "Redirecting…"
-              : showSignUp
-                ? "Continue with Google"
-                : "Continue with Google"}
+              ? t("redirecting")
+              : t("continueGoogle")}
           </button>
         )}
 
@@ -328,7 +330,7 @@ export default function SignInPageContent() {
           <>
             <div className="mt-6 flex items-center gap-3">
               <div className="h-px flex-1 bg-foreground/15" />
-              <span className="text-xs text-muted">or</span>
+              <span className="text-xs text-muted">{tc("or")}</span>
               <div className="h-px flex-1 bg-foreground/15" />
             </div>
           </>
@@ -337,14 +339,14 @@ export default function SignInPageContent() {
         {showForgot ? (
           <form onSubmit={handleForgotPassword} className="mt-8 space-y-4">
             <label className="block">
-              <span className="text-sm text-muted">Email</span>
+              <span className="text-sm text-muted">{tc("email")}</span>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="mt-1 block w-full rounded-md border border-foreground/20 bg-white/80 px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none focus:ring-1 focus:ring-foreground/20"
-                placeholder="you@example.com"
+                placeholder={t("emailPlaceholder")}
               />
             </label>
             {message && (
@@ -359,7 +361,7 @@ export default function SignInPageContent() {
               disabled={forgotLoading}
               className="w-full rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
-              {forgotLoading ? "Sending…" : "Send reset link"}
+              {forgotLoading ? tc("sending") : t("sendResetLink")}
             </button>
             <button
               type="button"
@@ -369,13 +371,13 @@ export default function SignInPageContent() {
               }}
               className="w-full text-center text-sm text-muted hover:text-foreground transition-colors"
             >
-              Back to sign in
+              {t("backToSignIn")}
             </button>
           </form>
         ) : (
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <label className="block">
-            <span className="text-sm text-muted">Email</span>
+            <span className="text-sm text-muted">{tc("email")}</span>
             <input
               type="email"
               value={email}
@@ -386,7 +388,7 @@ export default function SignInPageContent() {
             />
           </label>
           <label className="block">
-            <span className="text-sm text-muted">Password</span>
+            <span className="text-sm text-muted">{tc("password")}</span>
             <input
               type="password"
               value={password}
@@ -406,7 +408,7 @@ export default function SignInPageContent() {
               }}
               className="text-sm text-muted hover:text-foreground transition-colors"
             >
-              Forgot password?
+              {t("forgotPassword")}
             </button>
           )}
           {message && (
@@ -421,7 +423,7 @@ export default function SignInPageContent() {
             disabled={loading || (showSignUp && (!agreedToTerms || !canCreateAccount))}
             className="w-full rounded-md bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
-            {loading ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Sign up"}
+            {loading ? tc("pleaseWait") : mode === "sign-in" ? t("signIn") : t("signUp")}
           </button>
         </form>
         )}
@@ -433,7 +435,7 @@ export default function SignInPageContent() {
             disabled={resendLoading}
             className="mt-3 w-full text-center text-sm text-muted hover:text-foreground disabled:opacity-50 transition-colors"
           >
-            {resendLoading ? "Sending…" : "Resend confirmation email"}
+            {resendLoading ? tc("sending") : t("resendConfirmation")}
           </button>
         )}
 
@@ -457,19 +459,23 @@ export default function SignInPageContent() {
         >
           {mode === "sign-in"
             ? inviteOnly && !invited
-              ? "Need an invite? Ask someone on Angel Island."
-              : "Need an account? Sign up"
-            : "Already have an account? Sign in"}
+              ? t("needInvite")
+              : t("needAccount")
+            : t("haveAccount")}
         </button>
         )}
 
+        <div className="mt-8">
+          <LanguagePicker />
+        </div>
+
         <p className="mt-8 text-center text-xs text-muted">
           <Link href="/privacy" className="hover:text-foreground underline underline-offset-2">
-            Privacy Policy
+            {tc("privacyPolicy")}
           </Link>
           {" · "}
           <Link href="/terms" className="hover:text-foreground underline underline-offset-2">
-            Terms of Service
+            {tc("termsOfService")}
           </Link>
         </p>
       </div>

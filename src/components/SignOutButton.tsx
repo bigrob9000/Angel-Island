@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 
 export function SignOutButton({ className = "", variant = "button" }: Props) {
   const router = useRouter();
+  const t = useTranslations("common");
 
   async function signOut() {
     const supabase = createClient();
@@ -23,7 +25,7 @@ export function SignOutButton({ className = "", variant = "button" }: Props) {
       <button
         type="button"
         onClick={signOut}
-        aria-label="Sign out"
+        aria-label={t("signOut")}
         className={`inline-flex shrink-0 items-center justify-center rounded-full border border-foreground/25 bg-white/60 p-1.5 text-foreground hover:bg-white/90 sm:p-0 ${className}`.trim()}
       >
         <svg
@@ -40,14 +42,14 @@ export function SignOutButton({ className = "", variant = "button" }: Props) {
           <polyline points="16 17 21 12 16 7" />
           <line x1="21" y1="12" x2="9" y2="12" />
         </svg>
-        <span className="hidden px-3 py-1.5 text-sm font-medium sm:inline">Sign out</span>
+        <span className="hidden px-3 py-1.5 text-sm font-medium sm:inline">{t("signOut")}</span>
       </button>
     );
   }
 
   return (
     <button type="button" onClick={signOut} className={`btn-secondary ${className}`.trim()}>
-      Sign out
+      {t("signOut")}
     </button>
   );
 }

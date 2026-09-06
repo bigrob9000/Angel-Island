@@ -10,9 +10,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@formatjs/intl-localematcher": "^0.8.13",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.97.0",
     "next": "16.1.6",
+    "next-intl": "^4.14.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "web-push": "^3.6.7"

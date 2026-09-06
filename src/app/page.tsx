@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import { AngelIslandLogo } from "@/components/AngelIslandLogo";
+import { LanguagePicker } from "@/components/LanguagePicker";
 import { getInviteSignUpPath, persistInviteAcceptance } from "@/lib/invite";
 
 import { ONBOARDING_KEY, isOnboardingCompleteFromProfile } from "@/lib/onboarding";
@@ -12,6 +14,9 @@ import { ONBOARDING_KEY, isOnboardingCompleteFromProfile } from "@/lib/onboardin
 function LandingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("landing");
+  const tc = useTranslations("common");
+  const ts = useTranslations("site");
   const invited = searchParams.get("invite") === "1";
   const enterHref = invited ? getInviteSignUpPath() : "/sign-in";
 
@@ -166,26 +171,25 @@ function LandingPageContent() {
             />
             <div className="min-w-0">
               <h1 className="brand-font text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                Angel Island
+                {ts("name")}
               </h1>
               <p className="mt-6 text-lg leading-relaxed text-muted sm:text-xl max-w-xl">
-                A place for musicians and creatives who care about music. No clout.
-                No pressure. Just connection, collaboration, and conversation.
+                {t("tagline")}
               </p>
               {invited ? (
                 <p className="mt-4 text-sm text-foreground">
-                  You&apos;re invited — take your time reading below, then enter when you&apos;re ready.{" "}
+                  {t("invitedHint")}{" "}
                   <Link href="/sign-in" className="underline underline-offset-2 hover:no-underline">
-                    Already have an account? Sign in
+                    {t("invitedSignIn")}
                   </Link>
                 </p>
               ) : (
                 <p className="mt-4 text-sm text-muted">
-                  Someone invited you?{" "}
+                  {t("inviteQuestion")}{" "}
                   <Link href="/sign-in" className="text-foreground underline underline-offset-2 hover:no-underline">
-                    Sign in
-                  </Link>
-                  {" "}if you already have an account. No rush.
+                    {t("signIn")}
+                  </Link>{" "}
+                  {t("noRush")}
                 </p>
               )}
               <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-6">
@@ -196,13 +200,13 @@ function LandingPageContent() {
                   <span className="btn-cloud-blob" style={{ width: 72, height: 60, top: 2, left: 118 }} />
                   <span className="btn-cloud-blob" style={{ width: 52, height: 46, top: 18, left: 162 }} />
                   <span className="btn-cloud-blob" style={{ width: 48, height: 44, top: 22, left: 188 }} />
-                  <span className="btn-cloud-text">Enter Angel Island</span>
+                  <span className="btn-cloud-text">{t("enter")}</span>
                 </Link>
                 <a
                   href="#why"
                   className="inline-flex items-center justify-center text-base font-medium text-muted underline-offset-4 hover:underline hover:text-foreground"
                 >
-                  Learn more
+                  {t("learnMore")}
                 </a>
               </div>
             </div>
@@ -214,57 +218,50 @@ function LandingPageContent() {
         {/* Why It Exists */}
         <section id="why" className="mb-20 scroll-mt-24">
           <h2 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
-            Why it exists
+            {t("whyTitle")}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
-            Most platforms weren&apos;t built for musicians to find each other.
-            They were built for attention. Angel Island exists so creatives can
-            meet, learn, collaborate, and grow — without algorithms, competition,
-            or noise.
+            {t("whyBody")}
           </p>
         </section>
 
         {/* What Happens Here */}
         <section className="mb-20">
           <h2 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
-            What happens here
+            {t("whatTitle")}
           </h2>
           <ul className="mt-4 list-none space-y-3 text-base leading-relaxed text-muted sm:text-lg">
-            <li>Discover musicians intentionally</li>
-            <li>Explore genres, influences, and ideas</li>
-            <li>Join spaces to jam, collaborate, or learn</li>
-            <li>Ask real questions and get thoughtful answers</li>
-            <li>Make things with people who actually care</li>
+            <li>{t("what1")}</li>
+            <li>{t("what2")}</li>
+            <li>{t("what3")}</li>
+            <li>{t("what4")}</li>
+            <li>{t("what5")}</li>
           </ul>
           <p className="mt-6 text-base leading-relaxed text-muted sm:text-lg">
-            Nothing to perform. Nothing to win. Just people and music.
+            {t("whatClosing")}
           </p>
         </section>
 
         {/* Who It's For */}
         <section className="mb-20">
           <h2 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
-            Who it&apos;s for
+            {t("whoTitle")}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
-            Beginners. Amateurs. Serious artists. Producers and engineers. Quiet
-            and neurodivergent creatives. Anyone who wants to grow through
-            music.
+            {t("whoBody1")}
           </p>
           <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
-            If you care about music and want to get better, you belong here.
+            {t("whoBody2")}
           </p>
         </section>
 
         {/* How It Works */}
         <section className="mb-20">
           <h2 className="font-serif text-2xl font-medium text-foreground sm:text-3xl">
-            How it works
+            {t("howTitle")}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
-            You don&apos;t have to talk to anyone to belong. Explore quietly.
-            Engage when you&apos;re ready. Connection happens by choice, not
-            pressure.
+            {t("howBody")}
           </p>
         </section>
 
@@ -273,8 +270,7 @@ function LandingPageContent() {
         {/* Closing */}
         <section className="mb-8">
           <p className="font-serif text-xl leading-relaxed text-foreground sm:text-2xl">
-            You don&apos;t need to be perfect. You don&apos;t need to be loud.
-            You just need to care.
+            {t("closing1")} {t("closing2")}
           </p>
           <div className="mt-10">
             <Link href={enterHref} className="btn-cloud">
@@ -284,19 +280,24 @@ function LandingPageContent() {
               <span className="btn-cloud-blob" style={{ width: 72, height: 60, top: 2, left: 118 }} />
               <span className="btn-cloud-blob" style={{ width: 52, height: 46, top: 18, left: 162 }} />
               <span className="btn-cloud-blob" style={{ width: 48, height: 44, top: 22, left: 188 }} />
-              <span className="btn-cloud-text">Enter Angel Island</span>
+              <span className="btn-cloud-text">{t("enter")}</span>
             </Link>
           </div>
         </section>
 
-        <footer className="text-center text-xs text-muted">
+        <footer className="space-y-6 text-center text-xs text-muted">
+          <div className="mx-auto max-w-xs text-left">
+            <LanguagePicker />
+          </div>
+          <div>
           <Link href="/privacy" className="hover:text-foreground underline underline-offset-2">
-            Privacy Policy
+            {tc("privacyPolicy")}
           </Link>
           {" · "}
           <Link href="/terms" className="hover:text-foreground underline underline-offset-2">
-            Terms of Service
+            {tc("termsOfService")}
           </Link>
+          </div>
         </footer>
       </main>
     </div>
@@ -304,11 +305,13 @@ function LandingPageContent() {
 }
 
 export default function Home() {
+  const tc = useTranslations("common");
+
   return (
     <Suspense
       fallback={
         <div className="relative min-h-screen bg-ethereal text-foreground flex items-center justify-center">
-          <p className="text-muted">Loading…</p>
+          <p className="text-muted">{tc("loading")}</p>
         </div>
       }
     >
