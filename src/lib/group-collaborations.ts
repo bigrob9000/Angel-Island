@@ -26,7 +26,7 @@ function isGroupCollabMissing(message: string, code?: string): boolean {
 }
 
 export function groupCollabSetupError(): string {
-  return "Group collaborations aren't set up yet. Run migration 029_group_collaborations.sql in Supabase (see supabase/RUN-PENDING-MIGRATIONS.md).";
+  return "Group collaborations aren't set up yet. Run migrations 029–031 in Supabase (see supabase/RUN-PENDING-MIGRATIONS.md).";
 }
 
 export async function expireStaleGroupCollabInvites(): Promise<void> {
@@ -57,7 +57,14 @@ export async function createGroupCollabInvite(input: {
     return { error: error.message };
   }
 
-  return { inviteId: data as string };
+  if (!data || typeof data !== "string") {
+    return {
+      error:
+        "Invite may not have saved. Run migration 031_group_collab_invite_visibility.sql in Supabase, then try again.",
+    };
+  }
+
+  return { inviteId: data };
 }
 
 export async function respondToGroupCollabInvite(
@@ -139,9 +146,73 @@ export async function loadPendingGroupCollabInvitesForUser(
   tableMissing: boolean;
   error?: string;
 }> {
-  await expireStaleGroupCollabInvites();
   const supabase = createClient();
   const { blockedIds } = await loadBlockedUserIds(userId);
+
+  const { data: rpcData, error: rpcError } = await supabase.rpc("list_pending_group_collab_invites");
+
+  if (!rpcError && rpcData && typeof rpcData === "object") {
+    const payload = rpcData as {
+      received?: Array<GroupCollabInvite & { recipients?: GroupCollabInviteRecipient[] }>;
+      sent?: Array<GroupCollabInvite & { recipients?: GroupCollabInviteRecipient[] }>;
+    };
+
+    const rawReceived = payload.received ?? [];
+    const rawSent = payload.sent ?? [];
+
+    const profileIds = new Set<string>();
+    for (const invite of [...rawReceived, ...rawSent]) {
+      profileIds.add(invite.creator_id);
+      for (const recipient of invite.recipients ?? []) {
+        profileIds.add(recipient.user_id);
+      }
+    }
+
+    const { data: profiles } = profileIds.size
+      ? await supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", [...profileIds])
+      : { data: [] };
+
+    const profilesById: Record<string, Profile> = {};
+    (profiles ?? []).forEach((row) => {
+      profilesById[row.id] = normalizeProfile(row as Profile);
+    });
+
+    function attachProfiles(
+      invite: GroupCollabInvite & { recipients?: GroupCollabInviteRecipient[] },
+    ): GroupCollabInviteWithMeta {
+      const recipients = (invite.recipients ?? []).map((r) => ({
+        ...r,
+        profile: profilesById[r.user_id],
+      }));
+      const { recipients: _drop, ...rest } = invite;
+      return {
+        ...rest,
+        creator: profilesById[invite.creator_id],
+        recipients,
+      };
+    }
+
+    const received = rawReceived
+      .map(attachProfiles)
+      .filter((invite) => !blockedIds.has(invite.creator_id));
+    const sent = rawSent.map(attachProfiles);
+
+    return { received, sent, tableMissing: false };
+  }
+
+  if (rpcError && !isGroupCollabMissing(rpcError.message, rpcError.code)) {
+    // Fall through to direct queries if RPC missing; surface other RPC errors later.
+    if (!rpcError.message.includes("list_pending_group_collab_invites")) {
+      return {
+        received: [],
+        sent: [],
+        tableMissing: false,
+        error: rpcError.message,
+      };
+    }
+  }
+
+  await expireStaleGroupCollabInvites();
 
   const { data: recipientRows, error: recvError } = await supabase
     .from("group_collab_invite_recipients")
@@ -209,12 +280,8 @@ export async function loadPendingGroupCollabInvitesForUser(
     : { data: [], error: null };
 
   if (allRecipientsError) {
-    return {
-      received: [],
-      sent: [],
-      tableMissing: isGroupCollabMissing(allRecipientsError.message, allRecipientsError.code),
-      error: allRecipientsError.message,
-    };
+    // Still return invites even if recipient details fail to load.
+    console.warn("group collab recipients load failed:", allRecipientsError.message);
   }
 
   const recipientsByInviteId = new Map<string, GroupCollabInviteRecipient[]>();

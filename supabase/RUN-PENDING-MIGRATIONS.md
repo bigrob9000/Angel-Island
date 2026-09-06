@@ -26,6 +26,16 @@ Fixes group invites not appearing after send (database read permissions + recipi
 
 ---
 
+## 031 — Group collab invite visibility (run after 030)
+
+Run the full file: `supabase/migrations/031_group_collab_invite_visibility.sql`
+
+Fixes invites saving but not appearing (RLS recursion + adds a reliable server-side loader).
+
+**Try it:** Send a fresh group invite after running this — both sender and invitees should see it on **Collaborations** and **Messages**.
+
+---
+
 ## Collab invites — run this now
 
 **File:** `supabase/migrations/003_collab_invites.sql`

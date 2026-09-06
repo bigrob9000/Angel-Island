@@ -110,6 +110,10 @@ export default function NewGroupCollabPage() {
       setError(result.error);
       return;
     }
+    if (!result.inviteId) {
+      setError("Invite did not save. Run migration 031 in Supabase, then try again.");
+      return;
+    }
 
     router.push("/collaborations?sent=1");
   }
