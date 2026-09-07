@@ -56,6 +56,18 @@ Lets senders cancel pending group invites from **Collaborations** or **Messages*
 
 ---
 
+## 034 — UGC translation cache (run after 033)
+
+Run the full file: `supabase/migrations/034_content_translations.sql`
+
+Caches on-demand translations for room posts and comments (written by the translate API using the service role — no client access).
+
+**Also set in Vercel:** `DEEPL_AUTH_KEY` (DeepL Pro API) and ensure `SUPABASE_SERVICE_ROLE_KEY` is set (same as notifications).
+
+**Try it:** Set your language to French → open a room with an English post → click **See translation** on the post body.
+
+---
+
 ## Collab invites — run this now
 
 **File:** `supabase/migrations/003_collab_invites.sql`
@@ -263,6 +275,7 @@ If either line errors with **already member of publication**, that table is alre
 | 026 | Permanent delete for ended conversations (both participants) |
 | 027 | Conversation read state synced across devices (unread badges) |
 | 028 | Collaboration read state synced across devices (Activity badges) |
+| 034 | `content_translations` cache (See translation on room posts) |
 
 ---
 

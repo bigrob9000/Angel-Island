@@ -6,6 +6,7 @@ import type { PostCommentWithAuthor } from "@/lib/post-comments";
 import { addPostComment, deletePostComment } from "@/lib/post-comments";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { UserSafetyActions } from "@/components/UserSafetyActions";
+import { TranslatableText } from "@/components/TranslatableText";
 
 type Props = {
   postId: string;
@@ -109,9 +110,10 @@ export function PostCommentSection({
                         })}
                       </span>
                     </div>
-                    <p className="mt-1 text-muted whitespace-pre-wrap leading-relaxed">
-                      {comment.body}
-                    </p>
+                    <TranslatableText
+                      text={comment.body}
+                      className="mt-1 text-muted whitespace-pre-wrap leading-relaxed"
+                    />
                     {isOwn ? (
                       <button
                         type="button"

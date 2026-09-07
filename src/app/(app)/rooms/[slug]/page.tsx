@@ -21,6 +21,7 @@ import { PageLoading } from "@/components/PageLoading";
 import { normalizeMediaUrl } from "@/lib/media-embed";
 import { PostCommentSection } from "@/components/PostCommentSection";
 import { PostLoveButton } from "@/components/PostLoveButton";
+import { TranslatableText } from "@/components/TranslatableText";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { loadCommentsForPosts, type PostCommentWithAuthor } from "@/lib/post-comments";
 import { loadPostLoveState } from "@/lib/post-loves";
@@ -443,11 +444,18 @@ export default function RoomPage() {
           </span>
         </div>
         {!isIntroductions && post.title && (
-          <p className="mt-2 font-medium text-foreground">{post.title}</p>
+          <TranslatableText
+            text={post.title}
+            as="p"
+            className="mt-2 font-medium text-foreground"
+          />
         )}
         {post.media_url && <MediaEmbed url={post.media_url} />}
         {post.body && (
-          <p className="mt-2 text-muted whitespace-pre-wrap leading-relaxed">{post.body}</p>
+          <TranslatableText
+            text={post.body}
+            className="mt-2 text-muted whitespace-pre-wrap leading-relaxed"
+          />
         )}
         <PostAuthorActions
           username={author?.username ?? ""}

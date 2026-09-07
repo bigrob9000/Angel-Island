@@ -825,5 +825,11 @@
       "updatePassword": "Actualizar contraseña",
       "backToSignIn": "Volver a iniciar sesión"
     }
+  },
+  "translation": {
+    "seeTranslation": "Ver traducción",
+    "showOriginal": "Mostrar original",
+    "translating": "Traduciendo…",
+    "failed": "No se pudo traducir ahora."
   }
 }

@@ -682,6 +682,12 @@
     "iphoneTitle": "Add Angel Island to your Home Screen",
     "androidTitle": "Add Angel Island to your home screen"
   },
+  "translation": {
+    "seeTranslation": "See translation",
+    "showOriginal": "Show original",
+    "translating": "Translating…",
+    "failed": "Could not translate right now."
+  },
   "safety": {
     "blockTitle": "Block {name}?",
     "reportTitle": "Report",

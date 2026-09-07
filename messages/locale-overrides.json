@@ -479,7 +479,11 @@
     "settings.updatePassword": "Mettre à jour le mot de passe",
     "status.active": "Actif",
     "status.closed": "Fermé",
-    "status.paused": "En pause"
+    "status.paused": "En pause",
+    "translation.seeTranslation": "Voir la traduction",
+    "translation.showOriginal": "Afficher l'original",
+    "translation.translating": "Traduction…",
+    "translation.failed": "Impossible de traduire pour le moment."
   },
   "es": {
     "auth.resetPassword.backToSignIn": "Volver a iniciar sesión",
@@ -961,7 +965,11 @@
     "settings.updatePassword": "Actualizar contraseña",
     "status.active": "Activo",
     "status.closed": "Cerrado",
-    "status.paused": "En pausa"
+    "status.paused": "En pausa",
+    "translation.seeTranslation": "Ver traducción",
+    "translation.showOriginal": "Mostrar original",
+    "translation.translating": "Traduciendo…",
+    "translation.failed": "No se pudo traducir ahora."
   },
   "de": {
     "auth.resetPassword.backToSignIn": "Zurück zur Anmeldung",
@@ -1443,6 +1451,10 @@
     "settings.updatePassword": "Passwort aktualisieren",
     "status.active": "Aktiv",
     "status.closed": "Geschlossen",
-    "status.paused": "Pausiert"
+    "status.paused": "Pausiert",
+    "translation.seeTranslation": "Übersetzung anzeigen",
+    "translation.showOriginal": "Original anzeigen",
+    "translation.translating": "Wird übersetzt…",
+    "translation.failed": "Übersetzung gerade nicht möglich."
   }
 }

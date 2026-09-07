@@ -825,5 +825,11 @@
       "updatePassword": "Update password",
       "backToSignIn": "Back to sign in"
     }
+  },
+  "translation": {
+    "seeTranslation": "See translation",
+    "showOriginal": "Show original",
+    "translating": "Translating…",
+    "failed": "Could not translate right now."
   }
 }
