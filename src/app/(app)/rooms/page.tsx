@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { Room } from "@/lib/types";
+import { orderRoomsWithListenFirst } from "@/lib/room-order";
 
 import type { TranslateFn } from "@/lib/i18n/labels";
 import { translateRoomName } from "@/lib/i18n/rooms";
@@ -47,7 +48,7 @@ export default function RoomsPage() {
         setLoading(false);
         return;
       }
-      setRooms(roomsRes.data ?? []);
+      setRooms(orderRoomsWithListenFirst(roomsRes.data ?? []));
 
       const userId = userRes.data.user?.id;
       if (!userId) {

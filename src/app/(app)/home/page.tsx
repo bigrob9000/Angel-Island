@@ -24,6 +24,8 @@ import { ProfileCompletenessNudge } from "@/components/ProfileCompletenessNudge"
 import { CollaborationPreviewLink } from "@/components/CollaborationPreviewLink";
 import { useCollab } from "@/components/CollabProvider";
 import { loadCollaborationPreviews, type CollaborationPreview } from "@/lib/collaborations";
+import { loadListenShareFeed, type ListenShareFeedEntry } from "@/lib/listen-feed";
+import { ListenShareFeedSection } from "@/components/ListenShareFeedSection";
 
 export default function HomePage() {
   const t = useTranslations("home");
@@ -35,6 +37,7 @@ export default function HomePage() {
   const [onboardingDone, setOnboardingDone] = useState(false);
   const [people, setPeople] = useState<ReturnType<typeof rankProfilesForViewer>>([]);
   const [activeCollabs, setActiveCollabs] = useState<CollaborationPreview[]>([]);
+  const [listenShares, setListenShares] = useState<ListenShareFeedEntry[]>([]);
   const [homeReady, setHomeReady] = useState(false);
   const { conversations, loading: conversationsLoading } = useInbox();
   const { collaborations: trackedCollabs } = useCollab();
@@ -91,6 +94,14 @@ export default function HomePage() {
 
       setPeople(rankProfilesForViewer(viewer, candidates).slice(0, 5));
       setActiveCollabs(collabResult.previews.slice(0, 3));
+
+      const listenShareEntries = await loadListenShareFeed({
+        limit: 5,
+        excludeAuthorIds: blockedIds,
+      });
+      if (!cancelled) {
+        setListenShares(listenShareEntries);
+      }
 
       const roomIds = (roomMembersRes.data ?? []).map((row) => row.room_id);
       if (roomIds.length === 0) {
@@ -178,6 +189,8 @@ export default function HomePage() {
           </ul>
         )}
       </section>
+
+      <ListenShareFeedSection entries={listenShares} loading={!homeReady} />
 
       <section>
         <div className="flex items-baseline justify-between gap-4">

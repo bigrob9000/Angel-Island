@@ -250,7 +250,15 @@
     "invitationsFooter": "Nur Einladungen — kein Druck.",
     "startCollabPost": "Collab-Beitrag starten",
     "askQuestion": "Eine Frage stellen",
-    "shareWorkingOn": "Teilen, woran du arbeitest"
+    "shareWorkingOn": "Teilen, woran du arbeitest",
+    "listenShare": {
+      "title": "Zuhören & Teilen",
+      "copy": "Aktuelle Clips und Demos von Musiker·innen — höre, wenn du magst, ohne antworten zu müssen.",
+      "visitRoom": "Raum öffnen",
+      "shareYours": "Deine Arbeit teilen",
+      "emptyTitle": "Noch nichts geteilt",
+      "emptyDescription": "Zuhören & Teilen ist ein ruhiger Raum für Clips, Demos und Works-in-Progress. Stöbere im Raum oder teile etwas, wenn du bereit bist."
+    }
   },
   "explore": {
     "title": "Personen entdecken",

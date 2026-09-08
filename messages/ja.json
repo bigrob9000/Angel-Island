@@ -250,7 +250,15 @@
     "invitationsFooter": "Invitations only — no pressure.",
     "startCollabPost": "Start a collab post",
     "askQuestion": "Ask a question",
-    "shareWorkingOn": "Share what you're working on"
+    "shareWorkingOn": "Share what you're working on",
+    "listenShare": {
+      "title": "Listen & Share",
+      "copy": "Recent clips and demos from musicians in the listening room — listen when you're ready, no pressure to respond.",
+      "visitRoom": "Visit room",
+      "shareYours": "Share your work",
+      "emptyTitle": "Nothing shared yet",
+      "emptyDescription": "Listen & Share is a calm room for clips, demos, and works-in-progress. Browse the room or add something when you're ready."
+    }
   },
   "explore": {
     "title": "人を探索",

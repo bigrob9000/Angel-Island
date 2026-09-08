@@ -483,7 +483,13 @@
     "translation.seeTranslation": "Voir la traduction",
     "translation.showOriginal": "Afficher l'original",
     "translation.translating": "Traduction…",
-    "translation.failed": "Impossible de traduire pour le moment."
+    "translation.failed": "Impossible de traduire pour le moment.",
+    "home.listenShare.title": "Écouter et partager",
+    "home.listenShare.copy": "Clips et démos récents des musicien·ne·s — écoutez quand vous voulez, sans obligation de répondre.",
+    "home.listenShare.visitRoom": "Voir la salle",
+    "home.listenShare.shareYours": "Partager votre travail",
+    "home.listenShare.emptyTitle": "Rien de partagé pour l'instant",
+    "home.listenShare.emptyDescription": "Écouter et partager est une salle calme pour clips, démos et brouillons. Parcourez la salle ou ajoutez quelque chose quand vous êtes prêt·e."
   },
   "es": {
     "auth.resetPassword.backToSignIn": "Volver a iniciar sesión",
@@ -969,7 +975,13 @@
     "translation.seeTranslation": "Ver traducción",
     "translation.showOriginal": "Mostrar original",
     "translation.translating": "Traduciendo…",
-    "translation.failed": "No se pudo traducir ahora."
+    "translation.failed": "No se pudo traducir ahora.",
+    "home.listenShare.title": "Escuchar y compartir",
+    "home.listenShare.copy": "Clips y demos recientes de músicos — escucha cuando quieras, sin presión para responder.",
+    "home.listenShare.visitRoom": "Ver sala",
+    "home.listenShare.shareYours": "Comparte tu trabajo",
+    "home.listenShare.emptyTitle": "Aún no hay nada compartido",
+    "home.listenShare.emptyDescription": "Escuchar y compartir es una sala tranquila para clips, demos y borradores. Explora la sala o añade algo cuando estés listo."
   },
   "de": {
     "auth.resetPassword.backToSignIn": "Zurück zur Anmeldung",
@@ -1455,6 +1467,12 @@
     "translation.seeTranslation": "Übersetzung anzeigen",
     "translation.showOriginal": "Original anzeigen",
     "translation.translating": "Wird übersetzt…",
-    "translation.failed": "Übersetzung gerade nicht möglich."
+    "translation.failed": "Übersetzung gerade nicht möglich.",
+    "home.listenShare.title": "Zuhören & Teilen",
+    "home.listenShare.copy": "Aktuelle Clips und Demos von Musiker·innen — höre, wenn du magst, ohne antworten zu müssen.",
+    "home.listenShare.visitRoom": "Raum öffnen",
+    "home.listenShare.shareYours": "Deine Arbeit teilen",
+    "home.listenShare.emptyTitle": "Noch nichts geteilt",
+    "home.listenShare.emptyDescription": "Zuhören & Teilen ist ein ruhiger Raum für Clips, Demos und Works-in-Progress. Stöbere im Raum oder teile etwas, wenn du bereit bist."
   }
 }

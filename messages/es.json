@@ -250,7 +250,15 @@
     "invitationsFooter": "Solo invitaciones — sin presión.",
     "startCollabPost": "Empezar una publicación de collab",
     "askQuestion": "Hacer una pregunta",
-    "shareWorkingOn": "Compartir en qué estás trabajando"
+    "shareWorkingOn": "Compartir en qué estás trabajando",
+    "listenShare": {
+      "title": "Escuchar y compartir",
+      "copy": "Clips y demos recientes de músicos — escucha cuando quieras, sin presión para responder.",
+      "visitRoom": "Ver sala",
+      "shareYours": "Comparte tu trabajo",
+      "emptyTitle": "Aún no hay nada compartido",
+      "emptyDescription": "Escuchar y compartir es una sala tranquila para clips, demos y borradores. Explora la sala o añade algo cuando estés listo."
+    }
   },
   "explore": {
     "title": "Explorar personas",
