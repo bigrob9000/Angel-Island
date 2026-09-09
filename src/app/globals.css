@@ -750,30 +750,25 @@ html.reduce-motion .room-enter {
   min-width: 0;
 }
 
-/* Profile "room" — MySpace-style background + mantra */
-.profile-room {
-  position: relative;
-  margin: -2rem -1rem 0;
-  padding: 2rem 1rem 0;
-  border-radius: 0 0 1.25rem 1.25rem;
-  overflow: hidden;
+/* Profile "room" — full-page MySpace-style background + mantra */
+html.profile-room-active .bg-ethereal {
+  background: transparent;
 }
 
-@media (min-width: 640px) {
-  .profile-room {
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
+.profile-room-page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .profile-room-bg {
   position: absolute;
   inset: 0;
-  z-index: 0;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .profile-room-bg-custom {
@@ -810,31 +805,17 @@ html.reduce-motion .room-enter {
   background: linear-gradient(180deg, #2a3344 0%, #3d4a5c 50%, #4a5568 100%);
 }
 
-.profile-room-scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgba(250, 248, 245, 0.08) 0%,
-    rgba(250, 248, 245, 0.55) 55%,
-    rgba(250, 248, 245, 0.82) 100%
-  );
-  pointer-events: none;
+.profile-room-page-scrim {
+  background: rgba(250, 248, 245, 0.08);
 }
 
-.profile-room-bg-night + .profile-room-scrim {
-  background: linear-gradient(
-    180deg,
-    rgba(20, 24, 32, 0.15) 0%,
-    rgba(250, 248, 245, 0.72) 60%,
-    rgba(250, 248, 245, 0.9) 100%
-  );
+.profile-room-page-night .profile-room-page-scrim {
+  background: rgba(20, 24, 32, 0.18);
 }
 
-.profile-room-inner {
+.profile-room-content {
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
 .profile-room-mantra {
