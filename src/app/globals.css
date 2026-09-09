@@ -723,6 +723,16 @@ html.reduce-motion .room-enter {
   filter: drop-shadow(0 1px 4px rgba(212, 226, 240, 0.45));
 }
 
+.nav-cloud-shape-clip-start {
+  left: 0;
+  overflow: hidden;
+}
+
+.nav-cloud-shape-clip-end {
+  right: 0;
+  overflow: hidden;
+}
+
 .nav-cloud-blob {
   position: absolute;
   border-radius: 50%;

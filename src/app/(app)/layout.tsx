@@ -57,9 +57,11 @@ function AppNav() {
     <header className="sticky top-0 z-20 border-b border-foreground/10 bg-ethereal/95 backdrop-blur-sm">
       <div className="mx-auto w-full px-2 py-2 sm:px-4 sm:py-3">
         <div className="flex items-center gap-1 sm:gap-2">
-          <AngelIslandLogo variant="mark" size="compact" className="shrink-0" />
-          <nav className="flex min-w-0 flex-1 items-center" aria-label={t("main")}>
-            {navItems.map(({ href, key, shortKey }) => {
+          <AngelIslandLogo variant="mark" size="compact" className="relative z-[2] shrink-0" />
+          <nav className="relative z-[1] flex min-w-0 flex-1 items-center" aria-label={t("main")}>
+            {navItems.map(({ href, key, shortKey }, index) => {
+              const isFirst = index === 0;
+              const isLast = index === navItems.length - 1;
               const isMessages = href === "/messages";
               const isCollabs = href === "/collaborations";
               const isActivity = href === "/notifications";
@@ -82,7 +84,7 @@ function AppNav() {
                     active ? "nav-pill-active" : "text-muted hover:text-foreground"
                   }`}
                 >
-                  {active && <NavCloudBackdrop />}
+                  {active && <NavCloudBackdrop clipStart={isFirst} clipEnd={isLast} />}
                   <span className="relative z-[1] sm:hidden">{t(shortKey)}</span>
                   <span className="relative z-[1] hidden sm:inline">{label}</span>
                   {badgeCount > 0 && (
