@@ -1,7 +1,10 @@
+import { DEFAULT_APP_THEME, isAppTheme, type AppTheme } from "@/lib/app-theme";
+
 export type UserPreferences = {
   calmMode: boolean;
   reduceMotion: boolean;
   easierReadingFont: boolean;
+  appTheme: AppTheme;
 };
 
 export const PREFERENCES_KEY = "angel_island_preferences";
@@ -10,6 +13,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   calmMode: false,
   reduceMotion: false,
   easierReadingFont: false,
+  appTheme: DEFAULT_APP_THEME,
 };
 
 export function loadPreferences(): UserPreferences {
@@ -23,6 +27,7 @@ export function loadPreferences(): UserPreferences {
       calmMode: Boolean(parsed.calmMode),
       reduceMotion: Boolean(parsed.reduceMotion),
       easierReadingFont: Boolean(parsed.easierReadingFont),
+      appTheme: isAppTheme(parsed.appTheme) ? parsed.appTheme : DEFAULT_APP_THEME,
     };
   } catch {
     return DEFAULT_PREFERENCES;

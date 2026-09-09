@@ -11,6 +11,7 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { IphonePwaHint } from "@/components/IphonePwaHint";
 import { SettingsToggle } from "@/components/SettingsToggle";
 import { usePreferences } from "@/components/PreferencesProvider";
+import { AppThemePicker } from "@/components/AppThemePicker";
 import { sendTestNotificationEmail } from "@/lib/notifications/client";
 import {
   fetchPushStatus,
@@ -539,6 +540,18 @@ export default function SettingsPage() {
       </section>
 
       <InviteMusiciansCard />
+
+      <section className="surface p-5 space-y-4">
+        <div>
+          <h2 className="font-medium text-foreground">{t("appearanceTitle")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("appearanceSubtitle")}</p>
+        </div>
+        <AppThemePicker
+          value={preferences.appTheme}
+          onChange={(appTheme) => setPreference("appTheme", appTheme)}
+        />
+        <p className="text-xs text-muted">{t(`appearanceHint.${preferences.appTheme}`)}</p>
+      </section>
 
       <section className="surface p-5 space-y-6">
         <div>

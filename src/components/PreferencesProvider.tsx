@@ -16,6 +16,7 @@ import {
   shouldReduceMotion,
   type UserPreferences,
 } from "@/lib/preferences";
+import { APP_THEMES } from "@/lib/app-theme";
 
 type PreferencesContextValue = {
   preferences: UserPreferences;
@@ -30,6 +31,9 @@ function applyDocumentClasses(prefs: UserPreferences): void {
   root.classList.toggle("calm-mode", prefs.calmMode);
   root.classList.toggle("reduce-motion", shouldReduceMotion(prefs));
   root.classList.toggle("easier-reading", prefs.calmMode && prefs.easierReadingFont);
+  for (const theme of APP_THEMES) {
+    root.classList.toggle(`theme-${theme}`, prefs.appTheme === theme);
+  }
 }
 
 export function PreferencesProvider({ children }: { children: ReactNode }) {

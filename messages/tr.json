@@ -197,6 +197,22 @@
       "pushSettingsNotSetup": "Push settings aren't set up yet.",
       "pushCollabNotSetup": "Collab push notifications aren't set up yet.",
       "testEmailFailed": "Could not send test email."
+    },
+    "appearanceTitle": "Appearance",
+    "appearanceSubtitle": "Choose a background and contrast level that feels comfortable.",
+    "appearanceHint": {
+      "ethereal": "The default Angel Island sky — bright and airy.",
+      "soft": "Softer background with more solid cards — easier to read.",
+      "dusk": "Warm twilight tones — gentle and muted.",
+      "dark": "Dark mode — dim background with light text."
+    },
+    "appearance": {
+      "themes": {
+        "ethereal": "Ethereal",
+        "soft": "Soft",
+        "dusk": "Dusk",
+        "dark": "Dark"
+      }
     }
   },
   "site": {

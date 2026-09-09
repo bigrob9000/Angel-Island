@@ -72,7 +72,14 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var p=JSON.parse(localStorage.getItem("angel_island_preferences")||"{}");var t=p.appTheme||"ethereal";document.documentElement.classList.add("theme-"+t);}catch(e){document.documentElement.classList.add("theme-ethereal");}})();`,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${lora.variable} ${cormorant.variable} antialiased`}
       >

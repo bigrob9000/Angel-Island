@@ -26,6 +26,19 @@
   --logo-mat: #ebe4da;
   --logo-ring: rgba(95, 122, 107, 0.45);
   --logo-glow: rgba(212, 226, 240, 0.4);
+  --surface-bg: rgba(255, 255, 255, 0.62);
+  --surface-bg-hover: rgba(255, 255, 255, 0.82);
+  --surface-border: rgba(95, 122, 107, 0.1);
+  --surface-shadow: 0 1px 2px rgba(42, 42, 42, 0.03), 0 10px 28px rgba(212, 226, 240, 0.28);
+  --surface-shadow-hover: 0 2px 4px rgba(42, 42, 42, 0.04), 0 14px 32px rgba(212, 226, 240, 0.38);
+  --input-bg: #ffffff;
+  --input-border: rgba(42, 42, 42, 0.2);
+  --header-bg: rgba(250, 248, 245, 0.95);
+  --btn-secondary-bg: rgba(255, 255, 255, 0.55);
+  --btn-secondary-border: rgba(95, 122, 107, 0.22);
+  --btn-secondary-bg-hover: rgba(255, 255, 255, 0.85);
+  --chip-bg: rgba(95, 122, 107, 0.1);
+  --chip-muted-bg: rgba(42, 42, 42, 0.05);
 }
 
 @theme inline {
@@ -576,21 +589,17 @@ html.reduce-motion .room-enter {
 
 .surface {
   border-radius: 1rem;
-  border: 1px solid rgba(95, 122, 107, 0.1);
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow:
-    0 1px 2px rgba(42, 42, 42, 0.03),
-    0 10px 28px rgba(212, 226, 240, 0.28);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-bg);
+  box-shadow: var(--surface-shadow);
   backdrop-filter: blur(10px);
 }
 
 .surface-interactive {
   border-radius: 1rem;
-  border: 1px solid rgba(95, 122, 107, 0.1);
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow:
-    0 1px 2px rgba(42, 42, 42, 0.03),
-    0 10px 28px rgba(212, 226, 240, 0.28);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-bg);
+  box-shadow: var(--surface-shadow);
   backdrop-filter: blur(10px);
   transition:
     background 0.2s ease,
@@ -599,10 +608,8 @@ html.reduce-motion .room-enter {
 }
 
 .surface-interactive:hover {
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow:
-    0 2px 4px rgba(42, 42, 42, 0.04),
-    0 14px 32px rgba(212, 226, 240, 0.38);
+  background: var(--surface-bg-hover);
+  box-shadow: var(--surface-shadow-hover);
   transform: translateY(-1px);
 }
 
@@ -610,7 +617,7 @@ html.reduce-motion .room-enter {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  background: rgba(95, 122, 107, 0.1);
+  background: var(--chip-bg);
   color: var(--accent);
   padding: 0.2rem 0.65rem;
   font-size: 0.8125rem;
@@ -621,7 +628,7 @@ html.reduce-motion .room-enter {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  background: rgba(42, 42, 42, 0.05);
+  background: var(--chip-muted-bg);
   color: var(--muted);
   padding: 0.2rem 0.65rem;
   font-size: 0.8125rem;
@@ -662,8 +669,8 @@ html.reduce-motion .room-enter {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid rgba(95, 122, 107, 0.22);
-  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--btn-secondary-border);
+  background: var(--btn-secondary-bg);
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -674,8 +681,8 @@ html.reduce-motion .room-enter {
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(95, 122, 107, 0.35);
+  background: var(--btn-secondary-bg-hover);
+  border-color: var(--accent-soft);
 }
 
 .btn-primary {
@@ -891,4 +898,133 @@ html.calm-mode .surface-interactive {
 
 html.calm-mode .surface-interactive:hover {
   transform: none;
+}
+
+/* ——— App appearance themes ——— */
+
+html.theme-soft {
+  --background-ethereal: linear-gradient(
+    180deg,
+    #e4e8ef 0%,
+    #ebe8e4 45%,
+    #f2eee8 100%
+  );
+  --surface-bg: rgba(255, 255, 255, 0.92);
+  --surface-bg-hover: rgba(255, 255, 255, 0.97);
+  --surface-border: rgba(95, 122, 107, 0.14);
+  --surface-shadow: 0 2px 6px rgba(42, 42, 42, 0.05), 0 10px 24px rgba(42, 42, 42, 0.04);
+  --surface-shadow-hover: 0 3px 8px rgba(42, 42, 42, 0.06), 0 14px 28px rgba(42, 42, 42, 0.05);
+  --btn-secondary-bg: rgba(255, 255, 255, 0.82);
+  --btn-secondary-bg-hover: rgba(255, 255, 255, 0.95);
+}
+
+html.theme-dusk {
+  --background-ethereal: linear-gradient(
+    180deg,
+    #c5cfe0 0%,
+    #d8c4bc 40%,
+    #e8dfd4 70%,
+    #ebe3d8 100%
+  );
+  --surface-bg: rgba(255, 252, 248, 0.88);
+  --surface-bg-hover: rgba(255, 252, 248, 0.96);
+  --surface-border: rgba(80, 70, 62, 0.12);
+  --surface-shadow: 0 2px 8px rgba(50, 42, 36, 0.06), 0 12px 28px rgba(50, 42, 36, 0.05);
+}
+
+html.theme-dark {
+  color-scheme: dark;
+  --background: #161922;
+  --background-ethereal: linear-gradient(180deg, #161922 0%, #1c2230 50%, #222836 100%);
+  --foreground: #ece8e3;
+  --muted: #a9a5a0;
+  --accent: #9cb8a8;
+  --accent-soft: #7a9688;
+  --cloud: rgba(52, 60, 76, 0.95);
+  --cloud-shadow: rgba(0, 0, 0, 0.25);
+  --cloud-glow: rgba(255, 255, 255, 0.04);
+  --surface-bg: rgba(34, 40, 54, 0.94);
+  --surface-bg-hover: rgba(42, 48, 64, 0.98);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --surface-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  --surface-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.42);
+  --input-bg: #252b38;
+  --input-border: rgba(255, 255, 255, 0.12);
+  --header-bg: rgba(22, 25, 34, 0.92);
+  --btn-secondary-bg: rgba(42, 48, 64, 0.85);
+  --btn-secondary-border: rgba(255, 255, 255, 0.12);
+  --btn-secondary-bg-hover: rgba(52, 58, 74, 0.95);
+  --chip-bg: rgba(156, 184, 168, 0.18);
+  --chip-muted-bg: rgba(255, 255, 255, 0.06);
+}
+
+html.theme-dark header.sticky.border-b {
+  background: var(--header-bg) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.theme-dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html.theme-dark textarea,
+html.theme-dark select {
+  background-color: var(--input-bg) !important;
+  color: var(--foreground) !important;
+  border-color: var(--input-border) !important;
+}
+
+html.theme-dark .bg-white\/50 {
+  background: var(--surface-bg) !important;
+}
+
+.app-theme-preset {
+  position: relative;
+  display: block;
+  height: 3.75rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.app-theme-preset:hover {
+  transform: translateY(-1px);
+}
+
+.app-theme-preset-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.app-theme-preset-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--foreground);
+  background: linear-gradient(180deg, transparent 0%, rgba(250, 248, 245, 0.88) 100%);
+}
+
+.app-theme-preview-ethereal {
+  background: linear-gradient(180deg, #e8f0fc 0%, #f0ebe8 60%, #faf6f2 100%);
+}
+
+.app-theme-preview-soft {
+  background: linear-gradient(180deg, #e4e8ef 0%, #f2eee8 100%);
+}
+
+.app-theme-preview-dusk {
+  background: linear-gradient(180deg, #c5cfe0 0%, #ebe3d8 100%);
+}
+
+.app-theme-preview-dark {
+  background: linear-gradient(180deg, #161922 0%, #222836 100%);
+}
+
+.app-theme-preview-dark .app-theme-preset-label {
+  color: #ece8e3;
+  background: linear-gradient(180deg, transparent 0%, rgba(22, 25, 34, 0.88) 100%);
 }

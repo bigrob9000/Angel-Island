@@ -122,6 +122,22 @@
     "languageAuto": "Automatic (browser)",
     "languageAutoHint": "Uses whatever language your device or browser is set to.",
     "languageSaved": "Language updated.",
+    "appearanceTitle": "Appearance",
+    "appearanceSubtitle": "Choose a background and contrast level that feels comfortable.",
+    "appearanceHint": {
+      "ethereal": "The default Angel Island sky — bright and airy.",
+      "soft": "Softer background with more solid cards — easier to read.",
+      "dusk": "Warm twilight tones — gentle and muted.",
+      "dark": "Dark mode — dim background with light text."
+    },
+    "appearance": {
+      "themes": {
+        "ethereal": "Ethereal",
+        "soft": "Soft",
+        "dusk": "Dusk",
+        "dark": "Dark"
+      }
+    },
     "accountTitle": "Account",
     "accountSubtitle": "Your sign-in details.",
     "calmModeTitle": "Calm Mode",
