@@ -56,6 +56,9 @@ export interface Profile {
   open_to_questions: OpenToQuestions | null;
   work_links: string | null;
   avatar_url: string | null;
+  profile_mantra: string | null;
+  profile_background_preset: string | null;
+  profile_background_url: string | null;
   notify_email_messages: boolean;
   notify_email_collab: boolean;
   notify_push_collab: boolean;
@@ -81,6 +84,9 @@ export function normalizeProfile(row: Partial<Profile> & { id: string }): Profil
     open_to_questions: row.open_to_questions ?? null,
     work_links: row.work_links ?? null,
     avatar_url: row.avatar_url ?? null,
+    profile_mantra: row.profile_mantra ?? null,
+    profile_background_preset: row.profile_background_preset ?? null,
+    profile_background_url: row.profile_background_url ?? null,
     notify_email_messages: row.notify_email_messages ?? true,
     notify_email_collab: row.notify_email_collab ?? true,
     notify_push_collab: row.notify_push_collab ?? false,

@@ -10,6 +10,7 @@ import { normalizeProfile } from "@/lib/types";
 import type { CollabPace } from "@/lib/types";
 import { ProfileDisplay } from "@/components/ProfileDisplay";
 import { ProfileListenShares } from "@/components/ProfileListenShares";
+import { ProfileRoomShell } from "@/components/ProfileRoomShell";
 import { RoomDiscoveryBanner } from "@/components/RoomDiscoveryBanner";
 import { UserSafetyActions, type SafetyDialog } from "@/components/UserSafetyActions";
 import { loadRecentListenShares, type ProfileListenShare } from "@/lib/profile-shares";
@@ -357,7 +358,7 @@ function PublicProfilePageContent() {
   }
 
   return (
-    <div className="space-y-8">
+    <ProfileRoomShell profile={profile}>
       {roomContext && roomName && (
         <RoomDiscoveryBanner
           roomName={roomName}
@@ -550,7 +551,8 @@ function PublicProfilePageContent() {
       )}
         </>
       )}
-    </div>
+      <div className="pb-8" />
+    </ProfileRoomShell>
   );
 }
 

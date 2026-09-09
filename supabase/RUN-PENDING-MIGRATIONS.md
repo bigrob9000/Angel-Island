@@ -68,6 +68,16 @@ Caches on-demand translations for room posts and comments (written by the transl
 
 ---
 
+## 035 — Profile room personalization (run after 034)
+
+Run the full file: `supabase/migrations/035_profile_room.sql`
+
+Adds mantra, background presets, and custom background uploads for MySpace-style profile pages.
+
+**Try it:** Profile → **Your room** → pick a preset or upload a background, add a mantra.
+
+---
+
 ## Collab invites — run this now
 
 **File:** `supabase/migrations/003_collab_invites.sql`
@@ -276,6 +286,7 @@ If either line errors with **already member of publication**, that table is alre
 | 027 | Conversation read state synced across devices (unread badges) |
 | 028 | Collaboration read state synced across devices (Activity badges) |
 | 034 | `content_translations` cache (See translation on room posts) |
+| 035 | Profile room: mantra, background presets, custom upload |
 
 ---
 

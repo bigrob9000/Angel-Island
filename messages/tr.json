@@ -617,7 +617,29 @@
     "saveAndExplore": "Save & explore",
     "save": "Save",
     "saveAndExit": "Save & exit",
-    "back": "Back"
+    "back": "Back",
+    "room": {
+      "title": "Your room",
+      "copy": "Make this space yours — a background and a line that feels like home. Visitors see it on your profile.",
+      "mantraLabel": "Mantra or tagline",
+      "mantraPlaceholder": "A line, lyric, or intention…",
+      "mantraHint": "Optional — up to 120 characters.",
+      "presetsLabel": "Background",
+      "uploadLabel": "Your own background",
+      "uploadCopy": "Upload a photo or image you love. JPG, PNG, or WebP — 3 MB max.",
+      "uploadButton": "Upload image",
+      "changeUpload": "Change image",
+      "removeUpload": "Use preset instead",
+      "working": "Working…",
+      "presets": {
+        "ethereal": "Ethereal sky",
+        "dusk": "Dusk",
+        "sage": "Sage",
+        "warm": "Warm sand",
+        "lavender": "Lavender",
+        "night": "Night"
+      }
+    }
   },
   "search": {
     "title": "Angel Island'da ara",

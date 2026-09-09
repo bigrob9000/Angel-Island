@@ -12,6 +12,8 @@ import { ProfileDisplay } from "@/components/ProfileDisplay";
 import { ProfileAvatarUpload } from "@/components/ProfileAvatarUpload";
 import { ProfileListenShares } from "@/components/ProfileListenShares";
 import { ProfileCompletenessNudge } from "@/components/ProfileCompletenessNudge";
+import { ProfileRoomShell } from "@/components/ProfileRoomShell";
+import { ProfileRoomCustomize } from "@/components/ProfileRoomCustomize";
 import { SignOutButton } from "@/components/SignOutButton";
 import { loadRecentListenShares, type ProfileListenShare } from "@/lib/profile-shares";
 
@@ -59,7 +61,7 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   return (
-    <div className="space-y-8">
+    <ProfileRoomShell profile={profile}>
       <h1 className="font-serif text-2xl font-medium text-foreground">{t("title")}</h1>
 
       <ProfileCompletenessNudge profile={profile} />
@@ -84,7 +86,15 @@ export default function ProfilePage() {
 
       <ProfileListenShares shares={listenShares} isOwn showPrompt />
 
-      <div className="flex flex-wrap gap-3">
+      {userId && (
+        <ProfileRoomCustomize
+          userId={userId}
+          profile={profile}
+          onChange={(patch) => setProfile((prev) => (prev ? { ...prev, ...patch } : prev))}
+        />
+      )}
+
+      <div className="flex flex-wrap gap-3 pb-8">
         <Link href="/profile/edit" className="btn-secondary">
           Edit profile
         </Link>
@@ -93,6 +103,6 @@ export default function ProfilePage() {
         </Link>
         <SignOutButton />
       </div>
-    </div>
+    </ProfileRoomShell>
   );
 }

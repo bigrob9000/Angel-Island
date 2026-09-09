@@ -750,6 +750,138 @@ html.reduce-motion .room-enter {
   min-width: 0;
 }
 
+/* Profile "room" — MySpace-style background + mantra */
+.profile-room {
+  position: relative;
+  margin: -2rem -1rem 0;
+  padding: 2rem 1rem 0;
+  border-radius: 0 0 1.25rem 1.25rem;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .profile-room {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.profile-room-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.profile-room-bg-custom {
+  background-color: #e8e6f0;
+}
+
+.profile-room-bg-ethereal {
+  background: var(--background-ethereal);
+}
+
+.profile-room-bg-dusk {
+  background: linear-gradient(
+    180deg,
+    #c9d8f0 0%,
+    #e8c4b8 35%,
+    #f0dcc8 65%,
+    #f5ebe0 100%
+  );
+}
+
+.profile-room-bg-sage {
+  background: linear-gradient(180deg, #dce8e0 0%, #c8ddd0 40%, #e8ebe4 100%);
+}
+
+.profile-room-bg-warm {
+  background: linear-gradient(180deg, #f5e6d3 0%, #efd9c4 45%, #faf3ea 100%);
+}
+
+.profile-room-bg-lavender {
+  background: linear-gradient(180deg, #e4dff5 0%, #d8cfe8 45%, #f0ecf8 100%);
+}
+
+.profile-room-bg-night {
+  background: linear-gradient(180deg, #2a3344 0%, #3d4a5c 50%, #4a5568 100%);
+}
+
+.profile-room-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(250, 248, 245, 0.08) 0%,
+    rgba(250, 248, 245, 0.55) 55%,
+    rgba(250, 248, 245, 0.82) 100%
+  );
+  pointer-events: none;
+}
+
+.profile-room-bg-night + .profile-room-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(20, 24, 32, 0.15) 0%,
+    rgba(250, 248, 245, 0.72) 60%,
+    rgba(250, 248, 245, 0.9) 100%
+  );
+}
+
+.profile-room-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.profile-room-mantra {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--foreground);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.85);
+  padding: 0 0.5rem;
+}
+
+.profile-room-preset-btn {
+  position: relative;
+  display: block;
+  height: 3.5rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.profile-room-preset-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.profile-room-preset-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.profile-room-preset-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--foreground);
+  background: linear-gradient(180deg, transparent 0%, rgba(250, 248, 245, 0.85) 100%);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
 @media (min-width: 640px) {
   .nav-pill-header {
     padding: 0.3rem 0.25rem;

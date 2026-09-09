@@ -17,7 +17,15 @@ export function isDiscoverableProfile(
 
 export type ProfileFormState = Omit<
   Profile,
-  "id" | "updated_at" | "notify_email_messages" | "notify_email_collab" | "notify_push_collab" | "onboarding_complete"
+  | "id"
+  | "updated_at"
+  | "notify_email_messages"
+  | "notify_email_collab"
+  | "notify_push_collab"
+  | "onboarding_complete"
+  | "profile_mantra"
+  | "profile_background_preset"
+  | "profile_background_url"
 >;
 
 export function profileToForm(profile: Profile): ProfileFormState {
