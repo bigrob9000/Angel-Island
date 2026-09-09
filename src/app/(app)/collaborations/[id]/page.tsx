@@ -26,6 +26,7 @@ import {
   inviteGroupCollabMember,
 } from "@/lib/group-collaborations";
 import { GroupCollabChat } from "@/components/GroupCollabChat";
+import { NavCloudBackdrop } from "@/components/NavCloudBackdrop";
 import {
   subscribeToCollaboration,
   unsubscribeFromCollaboration,
@@ -547,13 +548,14 @@ export default function CollaborationWorkspacePage() {
               key={id}
               type="button"
               onClick={() => setTab(id)}
-              className={`nav-pill text-sm ${
+              className={`nav-pill relative text-sm ${
                 tab === id
                   ? "nav-pill-active font-medium text-foreground"
                   : "text-muted hover:text-foreground"
               }`}
             >
-              {label}
+              {tab === id && <NavCloudBackdrop />}
+              <span className="relative z-[1]">{label}</span>
             </button>
           ))}
         </div>

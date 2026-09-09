@@ -13,6 +13,7 @@ import { InboxMessageNotice } from "@/components/InboxMessageNotice";
 import { InboxCollabNotice } from "@/components/InboxCollabNotice";
 import { PushRegistration } from "@/components/PushRegistration";
 import { PwaServiceWorkerRegistration } from "@/components/PwaServiceWorkerRegistration";
+import { NavCloudBackdrop } from "@/components/NavCloudBackdrop";
 
 const navItems = [
   { href: "/home", key: "home" as const, shortKey: "homeShort" as const },
@@ -81,11 +82,12 @@ function AppNav() {
                     active ? "nav-pill-active" : "text-muted hover:text-foreground"
                   }`}
                 >
-                  <span className="sm:hidden">{t(shortKey)}</span>
-                  <span className="hidden sm:inline">{label}</span>
+                  {active && <NavCloudBackdrop />}
+                  <span className="relative z-[1] sm:hidden">{t(shortKey)}</span>
+                  <span className="relative z-[1] hidden sm:inline">{label}</span>
                   {badgeCount > 0 && (
                     <span
-                      className="absolute -right-1 top-0 h-2 w-2 rounded-full bg-accent"
+                      className="absolute -right-1 top-0 z-[2] h-2 w-2 rounded-full bg-accent"
                       aria-label={unreadLabel(
                         badgeCount,
                         isActivity ? "activity" : isCollabs ? "collab" : "conversation",

@@ -14,6 +14,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { CollaborationPreviewLink } from "@/components/CollaborationPreviewLink";
 import { GroupCollabInvitesSection } from "@/components/GroupCollabInvitesSection";
 import { GroupMemberInvitesSection } from "@/components/GroupMemberInvitesSection";
+import { NavCloudBackdrop } from "@/components/NavCloudBackdrop";
 import { useCollab } from "@/components/CollabProvider";
 import type { GroupCollabInviteWithMeta } from "@/lib/group-collaborations";
 
@@ -92,13 +93,16 @@ export default function CollaborationsPage() {
             key={id}
             type="button"
             onClick={() => setFilter(id)}
-            className={`nav-pill text-sm ${
+            className={`nav-pill relative text-sm ${
               filter === id
                 ? "nav-pill-active text-foreground"
                 : "text-muted hover:text-foreground"
             }`}
           >
-            {id === "active" ? t("filterActive") : id === "paused" ? t("filterPaused") : t("filterPast")}
+            {filter === id && <NavCloudBackdrop />}
+            <span className="relative z-[1]">
+              {id === "active" ? t("filterActive") : id === "paused" ? t("filterPaused") : t("filterPast")}
+            </span>
           </button>
         ))}
       </div>
