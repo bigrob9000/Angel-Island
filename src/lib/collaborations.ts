@@ -241,6 +241,28 @@ export async function createCollaborationWorkspace(
   return { id: data.id };
 }
 
+export async function withdrawCollabInvite(
+  collabInviteId: string,
+): Promise<{ error?: string; setupMissing?: boolean }> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("withdraw_collab_invite", {
+    p_invite_id: collabInviteId,
+  });
+
+  if (error) {
+    if (error.message.includes("withdraw_collab_invite")) {
+      return {
+        setupMissing: true,
+        error:
+          "Withdraw isn't set up yet. Run migration 043_collab_invite_withdraw.sql in Supabase (see supabase/RUN-PENDING-MIGRATIONS.md).",
+      };
+    }
+    return { error: error.message };
+  }
+
+  return {};
+}
+
 export async function loadCollaborationPreviews(
   userId: string,
   filter: "active" | "paused" | "past",

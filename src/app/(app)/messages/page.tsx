@@ -13,6 +13,7 @@ import { useInbox } from "@/components/InboxProvider";
 import {
   createCollaborationWorkspace,
   findOpenCollaborationBetweenUsers,
+  withdrawCollabInvite,
 } from "@/lib/collaborations";
 import { notifyCollabResponse } from "@/lib/notifications/client";
 import { loadBlockedUserIds } from "@/lib/blocks";
@@ -235,21 +236,23 @@ export default function MessagesPage() {
   }
 
   async function cancelCollabInvite(collabId: string) {
-    const supabase = createClient();
     setActingId(collabId);
-    const { error } = await supabase
-      .from("collab_invites")
-      .update({ status: "cancelled" })
-      .eq("id", collabId)
-      .eq("status", "pending");
+    const result = await withdrawCollabInvite(collabId);
     setActingId(null);
-    if (error) {
-      if (error.message.includes("cancelled") || error.code === "23514") {
-        window.alert(t("errors.collabCancelNotSetup"));
-      }
+    if (result.error) {
+      window.alert(result.error);
       return;
     }
     setSentCollabInvites((prev) => prev.filter((c) => c.id !== collabId));
+  }
+
+  function canWithdrawSentCollabInvite(
+    invite: (typeof sentCollabInvites)[number],
+  ): boolean {
+    if (invite.status === "pending" || invite.status === "maybe") return true;
+    if (invite.status !== "interested") return false;
+    if (!invite.workspaceId) return true;
+    return invite.workspaceStatus === "pending_alignment";
   }
 
   async function respondToCollab(collabId: string, response: "interested" | "maybe" | "not_fit") {
@@ -528,7 +531,7 @@ export default function MessagesPage() {
                   <p className="mt-2 text-xs text-muted italic">{inviteResponseLabel(c.status as "interested" | "maybe" | "not_fit", tInvite)}</p>
                 )}
                 </div>
-                {c.status === "pending" && (
+                {canWithdrawSentCollabInvite(c) && (
                   <button
                     type="button"
                     onClick={() => cancelCollabInvite(c.id)}

@@ -88,6 +88,16 @@ Stores theme (Ethereal / Soft / Dusk / Dark), calm mode, and reading options on 
 
 ---
 
+## 043 — Withdraw stuck collab invites (run after 042)
+
+Run the full file: `supabase/migrations/043_collab_invite_withdraw.sql`
+
+Lets senders cancel **pending**, **maybe**, or **stuck interested** collab invites from Messages (including failed workspace attempts).
+
+**Try it:** Messages → **Sent invites** → **Cancel invite** on a stuck collab — it disappears from your list.
+
+---
+
 ## 042 — 1:1 collaboration workspace create (run after 041)
 
 Run the full file: `supabase/migrations/042_collaboration_workspace_create.sql`
