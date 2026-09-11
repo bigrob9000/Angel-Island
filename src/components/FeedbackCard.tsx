@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
-import { FEEDBACK_EMAIL } from "@/lib/site";
 import { getFeedbackMailtoUrl } from "@/lib/feedback";
 
 export function FeedbackCard() {
@@ -35,7 +34,7 @@ export function FeedbackCard() {
       >
         {t("sendFeedback")}
       </a>
-      <p className="text-xs text-muted">{t("feedbackHint", { email: FEEDBACK_EMAIL })}</p>
+      <p className="text-xs text-muted">{t("feedbackHint")}</p>
     </section>
   );
 }
