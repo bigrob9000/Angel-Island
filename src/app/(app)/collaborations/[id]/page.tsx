@@ -554,8 +554,10 @@ export default function CollaborationWorkspacePage() {
                   : "text-muted hover:text-foreground"
               }`}
             >
-              {tab === id && <NavCloudBackdrop />}
-              <span className="relative z-[1]">{label}</span>
+              <span className="nav-pill-label">
+                {tab === id && <NavCloudBackdrop />}
+                <span className="relative z-[1]">{label}</span>
+              </span>
             </button>
           ))}
         </div>

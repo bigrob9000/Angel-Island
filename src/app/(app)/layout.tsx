@@ -82,9 +82,11 @@ function AppNav() {
                     active ? "nav-pill-active" : "text-muted hover:text-foreground"
                   }`}
                 >
-                  {active && <NavCloudBackdrop />}
-                  <span className="relative z-[1] sm:hidden">{t(shortKey)}</span>
-                  <span className="relative z-[1] hidden sm:inline">{label}</span>
+                  <span className="nav-pill-label">
+                    {active && <NavCloudBackdrop />}
+                    <span className="relative z-[1] sm:hidden">{t(shortKey)}</span>
+                    <span className="relative z-[1] hidden sm:inline">{label}</span>
+                  </span>
                   {badgeCount > 0 && (
                     <span
                       className="absolute -right-1 top-0 z-[2] h-2 w-2 rounded-full bg-accent"

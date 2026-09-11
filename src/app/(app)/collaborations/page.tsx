@@ -102,9 +102,11 @@ export default function CollaborationsPage() {
                   : "text-muted hover:text-foreground"
               }`}
             >
-              {filter === id && <NavCloudBackdrop />}
-              <span className="relative z-[1]">
-                {id === "active" ? t("filterActive") : id === "paused" ? t("filterPaused") : t("filterPast")}
+              <span className="nav-pill-label">
+                {filter === id && <NavCloudBackdrop />}
+                <span className="relative z-[1]">
+                  {id === "active" ? t("filterActive") : id === "paused" ? t("filterPaused") : t("filterPast")}
+                </span>
               </span>
             </button>
           ))}

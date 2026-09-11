@@ -722,11 +722,20 @@ html.reduce-motion .room-enter {
 }
 
 .nav-pill {
-  padding: 0.35rem 0.75rem;
+  padding: 0.15rem 0.2rem;
   border-radius: 9999px;
   overflow: visible;
   isolation: isolate;
   transition: color 0.15s ease;
+}
+
+.nav-pill-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.45rem;
+  line-height: 1;
 }
 
 .nav-pill-active {
@@ -737,7 +746,7 @@ html.reduce-motion .room-enter {
 
 .nav-cloud-highlight {
   position: absolute;
-  inset: 2px 4px;
+  inset: 0;
   z-index: 0;
   pointer-events: none;
   border-radius: 9999px;
@@ -750,23 +759,14 @@ html.reduce-motion .room-enter {
 
 /* App header — equal-width nav slots so every link stays visible */
 .nav-pill-header {
-  padding: 0.3rem 0.2rem;
+  padding: 0.2rem 0.1rem;
   min-width: 0;
   min-height: 1.65rem;
   overflow: visible;
 }
 
-/* Header — shorter oval; edge tabs inset away from logo / sign-out */
-.nav-pill-header .nav-cloud-highlight {
-  inset: 6px 3px;
-}
-
-nav .nav-pill-header:first-child .nav-cloud-highlight {
-  inset: 6px 3px 6px 8px;
-}
-
-nav .nav-pill-header:last-child .nav-cloud-highlight {
-  inset: 6px 8px 6px 3px;
+.nav-pill-header .nav-pill-label {
+  padding: 0.44rem 0.34rem;
 }
 
 /* Profile "room" — full-page MySpace-style background + mantra */
