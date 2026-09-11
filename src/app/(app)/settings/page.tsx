@@ -554,11 +554,6 @@ export default function SettingsPage() {
       </section>
 
       <section className="surface p-5 space-y-6">
-        <div>
-          <h2 className="font-medium text-foreground">{t("calmModeTitle")}</h2>
-          <p className="mt-1 text-sm text-muted">{t("calmModeSubtitle")}</p>
-        </div>
-
         <SettingsToggle
           id="calm-mode"
           label={t("calmModeLabel")}
