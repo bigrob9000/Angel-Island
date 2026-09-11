@@ -176,12 +176,43 @@ export async function findCollaborationIdByInvite(
   return data?.id ?? null;
 }
 
+export function describeCollaborationWorkspaceError(message: string): string {
+  const lower = message.toLowerCase();
+  if (
+    lower.includes("pending_alignment") ||
+    lower.includes("collaborations_status_check")
+  ) {
+    return "Run migration 037_collab_alignment.sql in Supabase — workspaces need the pending_alignment status.";
+  }
+  if (lower.includes("create_collaboration_workspace")) {
+    return "Run migration 042_collaboration_workspace_create.sql in Supabase (see supabase/RUN-PENDING-MIGRATIONS.md).";
+  }
+  return message;
+}
+
 export async function createCollaborationWorkspace(
   collabInviteId: string,
   chatInviteId: string | null,
-  status: CollaborationStatus = "pending_alignment"
+  status: CollaborationStatus = "pending_alignment",
 ): Promise<{ id?: string; error?: string; tableMissing?: boolean }> {
   const supabase = createClient();
+
+  const { data: rpcId, error: rpcError } = await supabase.rpc("create_collaboration_workspace", {
+    p_collab_invite_id: collabInviteId,
+    p_chat_invite_id: chatInviteId,
+  });
+
+  if (!rpcError && typeof rpcId === "string") {
+    return { id: rpcId };
+  }
+
+  if (rpcError && !rpcError.message.includes("create_collaboration_workspace")) {
+    if (isCollabWorkspaceMissing(rpcError.message, rpcError.code)) {
+      return { tableMissing: true, error: collaborationsSetupError() };
+    }
+    return { error: describeCollaborationWorkspaceError(rpcError.message) };
+  }
+
   const { data, error } = await supabase
     .from("collaborations")
     .insert({
@@ -204,7 +235,7 @@ export async function createCollaborationWorkspace(
     if (isCollabWorkspaceMissing(error.message, error.code)) {
       return { tableMissing: true, error: collaborationsSetupError() };
     }
-    return { error: error.message };
+    return { error: describeCollaborationWorkspaceError(error.message) };
   }
 
   return { id: data.id };

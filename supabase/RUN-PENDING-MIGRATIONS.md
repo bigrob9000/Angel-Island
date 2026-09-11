@@ -88,6 +88,16 @@ Stores theme (Ethereal / Soft / Dusk / Dark), calm mode, and reading options on 
 
 ---
 
+## 042 — 1:1 collaboration workspace create (run after 041)
+
+Run the full file: `supabase/migrations/042_collaboration_workspace_create.sql`
+
+Fixes **Interested** on a 1:1 collab invite failing with “Could not open a collaboration workspace”.
+
+**Try it:** Messages → respond **Interested** → workspace opens (alignment step if migration 037 is applied).
+
+---
+
 ## 041 — Collaboration read grants (run after 040)
 
 Run the full file: `supabase/migrations/041_collaboration_read_grants.sql`

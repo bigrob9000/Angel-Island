@@ -296,7 +296,7 @@ export default function MessagesPage() {
         window.alert(
           workspace.tableMissing
             ? workspace.error
-            : t("errors.collabWorkspaceFailed"),
+            : workspace.error || t("errors.collabWorkspaceFailed"),
         );
         return;
       }
