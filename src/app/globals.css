@@ -775,6 +775,17 @@ html.reduce-motion .room-enter {
   inset: 0 -0.85rem;
 }
 
+/* Collaborations filters — align tab text with page copy, not extra pill inset */
+.collaborations-filters .nav-pill {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.collaborations-filters .nav-pill-label {
+  padding-block: 0.4rem;
+  padding-inline: 0.58rem;
+}
+
 /* Profile "room" — full-page MySpace-style background + mantra */
 html.profile-room-active .bg-ethereal {
   background: transparent;

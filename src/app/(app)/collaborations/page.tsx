@@ -84,14 +84,15 @@ export default function CollaborationsPage() {
         <p className="section-copy">{t("subtitle")}</p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Link
-          href="/collaborations/group/new"
-          className="btn-primary relative z-[1] ml-1 shrink-0 sm:ml-0"
-        >
+      <div className="space-y-3">
+        <Link href="/collaborations/group/new" className="btn-primary w-fit">
           {t("startGroup")}
         </Link>
-        <div className="flex flex-wrap gap-2 overflow-visible" role="tablist" aria-label={t("title")}>
+        <div
+          className="collaborations-filters flex flex-wrap gap-2 overflow-visible"
+          role="tablist"
+          aria-label={t("title")}
+        >
           {FILTER_IDS.map((id) => (
             <button
               key={id}
