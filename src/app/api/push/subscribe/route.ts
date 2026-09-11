@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: error.message.includes("push_subscriptions")
-          ? "Push subscriptions aren't set up yet. Run migration 018_browser_push.sql in Supabase."
+          ? "Push subscription could not be saved. Run migrations 018_browser_push.sql and 044_push_subscriptions_update.sql in Supabase."
           : error.message,
       },
       { status: 500 },

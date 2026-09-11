@@ -88,6 +88,16 @@ Stores theme (Ethereal / Soft / Dusk / Dark), calm mode, and reading options on 
 
 ---
 
+## 044 — Push subscription upsert (run after 018)
+
+Run the full file: `supabase/migrations/044_push_subscriptions_update.sql`
+
+Fixes **Collab workspace activity** browser push failing with “Run migration 018…” when message push already works (018 granted insert but not update for upsert).
+
+**Try it:** Settings → **Browser notifications** → turn on **Collab workspace activity** — should save without error.
+
+---
+
 ## 043 — Withdraw stuck collab invites (run after 042)
 
 Run the full file: `supabase/migrations/043_collab_invite_withdraw.sql`
@@ -358,6 +368,7 @@ If either line errors with **already member of publication**, that table is alre
 | 019 | Realtime on collaboration workspaces (live notes/steps) |
 | 020 | Collab workspace activity in notification log |
 | 021 | Browser push preference for collab workspace activity |
+| 044 | Push subscription update grant (collab push toggle / upsert) |
 | 022 | Cancel sent collab invites (`cancelled` status + sender RLS) |
 | 023 | Onboarding completion flag on profiles (`onboarding_complete`) |
 | 024 | Public read of discoverable profiles (shared links + OG) |
