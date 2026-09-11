@@ -734,7 +734,7 @@ html.reduce-motion .room-enter {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.4rem 0.45rem;
+  padding: 0.4rem 0.58rem;
   line-height: 1;
 }
 
@@ -766,7 +766,7 @@ html.reduce-motion .room-enter {
 }
 
 .nav-pill-header .nav-pill-label {
-  padding: 0.44rem 0.34rem;
+  padding: 0.44rem 0.48rem;
 }
 
 /* Profile "room" — full-page MySpace-style background + mantra */
