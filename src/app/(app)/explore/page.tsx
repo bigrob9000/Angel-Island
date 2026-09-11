@@ -209,7 +209,7 @@ export default function ExplorePage() {
                 </div>
               </section>
               <section>
-                <h2 className="font-serif text-lg font-medium text-foreground">{t("moreMusicians")}</h2>
+                <h2 className="font-serif text-lg font-medium text-foreground">{t("morePeople")}</h2>
                 <p className="mt-1 text-sm text-muted">{t("moreMusiciansCopy")}</p>
                 <div className="mt-4">
                   <ExploreProfileList profiles={grouped.others} />
