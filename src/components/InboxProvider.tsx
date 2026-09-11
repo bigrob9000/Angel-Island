@@ -64,7 +64,10 @@ export function InboxProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const showMessageNotice = useCallback(
-    (message: { invite_id: string; sender_id: string; body: string }, previews: ConversationPreview[]) => {
+    (
+      message: { id: string; invite_id: string; sender_id: string; body: string },
+      previews: ConversationPreview[],
+    ) => {
       if (!userId || message.sender_id === userId) return;
       if (openInviteId === message.invite_id) return;
 
@@ -86,7 +89,7 @@ export function InboxProvider({ children }: { children: ReactNode }) {
           title: `${senderName} sent you a message`,
           body: preview,
           url: `/messages/${message.invite_id}`,
-          tag: `message-${message.invite_id}`,
+          tag: `message-${message.id}`,
         });
       }
     },

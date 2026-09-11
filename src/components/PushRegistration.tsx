@@ -35,8 +35,19 @@ export function PushRegistration() {
     }
 
     void sync();
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void sync();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+
     return () => {
       cancelled = true;
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
     };
   }, []);
 

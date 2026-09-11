@@ -141,10 +141,6 @@ export async function sendMessageNotification(
     return { ok: false, skipped: "opted_out" };
   }
 
-  if (await recentlySent(recipientId, "message", invite.id, MESSAGE_DEBOUNCE_MINUTES)) {
-    return { ok: false, skipped: "debounced" };
-  }
-
   const { data: senderProfile } = await admin
     .from("profiles")
     .select("first_name, username")
@@ -159,7 +155,12 @@ export async function sendMessageNotification(
   let emailSent = false;
   let pushSent = false;
 
-  if (wantsEmail && emailConfigured) {
+  const emailDebounced =
+    wantsEmail &&
+    emailConfigured &&
+    (await recentlySent(recipientId, "message", invite.id, MESSAGE_DEBOUNCE_MINUTES));
+
+  if (wantsEmail && emailConfigured && !emailDebounced) {
     const recipientEmail = await getUserEmail(recipientId);
     if (recipientEmail) {
       const subject = `${senderName} sent you a message`;
@@ -182,16 +183,21 @@ export async function sendMessageNotification(
       body: preview,
       url: link,
       recipientId,
-      tag: `message-${invite.id}`,
+      tag: `message-${message.id}`,
     });
     pushSent = pushResult.ok;
   }
 
   if (!emailSent && !pushSent) {
+    if (emailDebounced && !(wantsPush && pushConfigured)) {
+      return { ok: false, skipped: "debounced" };
+    }
     return { ok: false, skipped: "delivery_failed" };
   }
 
-  await logSend(recipientId, "message", invite.id);
+  if (emailSent) {
+    await logSend(recipientId, "message", invite.id);
+  }
   return { ok: true, email: emailSent, push: pushSent };
 }
 
