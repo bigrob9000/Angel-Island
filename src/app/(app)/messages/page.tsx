@@ -249,13 +249,15 @@ export default function MessagesPage() {
 
     setReceivedCollabInvites((prev) => prev.filter((c) => c.id !== collabId));
     setActingId(null);
-    notifyCollabResponse(collabId);
 
     if (response === "interested" && collab) {
       const workspace = await createCollaborationWorkspace(collabId, null);
+      notifyCollabResponse(collabId, { collaborationId: workspace.id });
       if (workspace.id) {
         router.push(`/collaborations/${workspace.id}`);
       }
+    } else {
+      notifyCollabResponse(collabId);
     }
   }
 

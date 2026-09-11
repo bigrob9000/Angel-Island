@@ -8,12 +8,18 @@ export function notifyNewMessage(messageId: string): void {
   }).catch(() => {});
 }
 
-export function notifyCollabResponse(collabInviteId: string): void {
+export function notifyCollabResponse(
+  collabInviteId: string,
+  options?: { collaborationId?: string },
+): void {
   void fetch("/api/notifications/collab-response", {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ collabInviteId }),
+    body: JSON.stringify({
+      collabInviteId,
+      collaborationId: options?.collaborationId,
+    }),
   }).catch(() => {});
 }
 

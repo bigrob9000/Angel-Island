@@ -175,7 +175,7 @@
     "notifyMessagesLabel": "New messages",
     "notifyMessagesDescription": "Email when someone sends you a message.",
     "notifyCollabLabel": "Collab responses",
-    "notifyCollabDescription": "Email when someone responds to a collab invite.",
+    "notifyCollabDescription": "Email when someone responds to a collab invite — including when they're interested and waiting for you to confirm alignment.",
     "sendTestEmail": "Send test email",
     "testEmailSent": "Test email sent — check your inbox.",
     "testEmailHint": "Sends to {email}",

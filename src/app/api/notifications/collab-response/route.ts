@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { collabInviteId?: string };
+  let body: { collabInviteId?: string; collaborationId?: string };
   try {
     body = await request.json();
   } catch {
@@ -24,7 +24,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await sendCollabResponseNotification(body.collabInviteId, user.id);
+    const result = await sendCollabResponseNotification(body.collabInviteId, user.id, {
+      collaborationId: body.collaborationId,
+    });
     return NextResponse.json(result);
   } catch {
     return NextResponse.json({ ok: false, skipped: "server_error" });

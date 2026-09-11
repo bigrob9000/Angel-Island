@@ -192,15 +192,18 @@ export async function sendMessageNotification(
 export async function sendCollabResponseNotification(
   collabInviteId: string,
   responderUserId: string,
-): Promise<{ ok: boolean; skipped?: string }> {
-  if (!isNotificationEmailConfigured()) {
-    return { ok: false, skipped: "email_not_configured" };
+  options?: { collaborationId?: string },
+): Promise<{ ok: boolean; skipped?: string; email?: boolean; push?: boolean }> {
+  const emailConfigured = isNotificationEmailConfigured();
+  const pushConfigured = isPushConfigured();
+  if (!emailConfigured && !pushConfigured) {
+    return { ok: false, skipped: "notifications_not_configured" };
   }
 
   const admin = createAdminClient();
   const { data: collab } = await admin
     .from("collab_invites")
-    .select("id, sender_id, receiver_id, about, status")
+    .select("id, sender_id, receiver_id, about, status, invitee_aligned_at")
     .eq("id", collabInviteId)
     .maybeSingle();
 
@@ -220,11 +223,17 @@ export async function sendCollabResponseNotification(
 
   const { data: senderProfile } = await admin
     .from("profiles")
-    .select("notify_email_collab")
+    .select("notify_email_collab, notify_push_collab")
     .eq("id", senderId)
     .maybeSingle();
 
-  if (senderProfile?.notify_email_collab === false) {
+  const wantsEmail = senderProfile?.notify_email_collab !== false;
+  const wantsPush = senderProfile?.notify_push_collab === true;
+
+  if (
+    (!wantsEmail || !emailConfigured) &&
+    (!wantsPush || !pushConfigured)
+  ) {
     return { ok: false, skipped: "opted_out" };
   }
 
@@ -234,32 +243,109 @@ export async function sendCollabResponseNotification(
     .eq("id", responderUserId)
     .maybeSingle();
 
-  const senderEmail = await getUserEmail(senderId);
-  if (!senderEmail) {
-    return { ok: false, skipped: "no_email" };
-  }
-
   const responderName = profileLabel(responderProfile ?? {});
   const responseLabel = COLLAB_RESPONSE_LABELS[collab.status] ?? collab.status;
   const siteUrl = getSiteUrl();
-  const link = `${siteUrl}/messages`;
 
-  const subject = `${responderName} responded to your collab invite`;
-  const text = `${responderName} responded to your collab invite about "${collab.about}": ${responseLabel}.\n\nSee Messages on Angel Island: ${link}\n\nTurn off these emails in Settings.`;
-  const html = `
-    <p><strong>${escapeHtml(responderName)}</strong> responded to your collab invite about <em>${escapeHtml(collab.about)}</em>:</p>
-    <p style="color:#5f7a6b;margin:16px 0;">${escapeHtml(responseLabel)}</p>
-    <p><a href="${link}">Open Messages</a></p>
-    <p style="color:#888;font-size:13px;margin-top:24px;">Turn off collab email updates in Settings on Angel Island.</p>
-  `;
+  let collaborationId = options?.collaborationId;
+  let collaborationStatus: string | null = null;
 
-  const sent = await sendNotificationEmail({ to: senderEmail, subject, html, text });
-  if (!sent.ok) {
-    return { ok: false, skipped: sent.error };
+  if (collab.status === "interested") {
+    if (collaborationId) {
+      const { data: workspace } = await admin
+        .from("collaborations")
+        .select("id, status")
+        .eq("id", collaborationId)
+        .maybeSingle();
+      collaborationStatus = workspace?.status ?? null;
+    } else {
+      const { data: workspace } = await admin
+        .from("collaborations")
+        .select("id, status")
+        .eq("collab_invite_id", collabInviteId)
+        .maybeSingle();
+      collaborationId = workspace?.id;
+      collaborationStatus = workspace?.status ?? null;
+    }
+  }
+
+  const awaitingAlignment =
+    collab.status === "interested" &&
+    collaborationStatus === "pending_alignment" &&
+    Boolean(collab.invitee_aligned_at);
+
+  const link =
+    collab.status === "interested" && collaborationId
+      ? `${siteUrl}/collaborations/${collaborationId}`
+      : `${siteUrl}/messages`;
+
+  let subject: string;
+  let text: string;
+  let html: string;
+  let pushTitle: string;
+  let pushBody: string;
+
+  if (awaitingAlignment) {
+    subject = `${responderName} is interested — confirm your collab`;
+    text = `${responderName} is interested in your collab invite about "${collab.about}". They confirmed this matches what they want.\n\nConfirm you're aligned too: ${link}\n\nTurn off these emails in Settings on Angel Island.`;
+    html = `
+      <p><strong>${escapeHtml(responderName)}</strong> is interested in your collab invite about <em>${escapeHtml(collab.about)}</em>.</p>
+      <p style="color:#5f7a6b;margin:16px 0;">They confirmed this matches what they want. Open the workspace to confirm you're aligned too — then notes and chat will unlock.</p>
+      <p><a href="${link}">Confirm collaboration</a></p>
+      <p style="color:#888;font-size:13px;margin-top:24px;">No rush. Turn off collab email updates in Settings on Angel Island.</p>
+    `;
+    pushTitle = `${responderName} is interested`;
+    pushBody = `Confirm you're aligned on "${collab.about}"`;
+  } else if (collab.status === "interested" && collaborationId) {
+    subject = `${responderName} is interested in your collab`;
+    text = `${responderName} is interested in your collab invite about "${collab.about}".\n\nOpen the collaboration space: ${link}\n\nTurn off these emails in Settings on Angel Island.`;
+    html = `
+      <p><strong>${escapeHtml(responderName)}</strong> responded to your collab invite about <em>${escapeHtml(collab.about)}</em>:</p>
+      <p style="color:#5f7a6b;margin:16px 0;">${escapeHtml(responseLabel)}</p>
+      <p><a href="${link}">Open collaboration space</a></p>
+      <p style="color:#888;font-size:13px;margin-top:24px;">Turn off collab email updates in Settings on Angel Island.</p>
+    `;
+    pushTitle = `${responderName} is interested`;
+    pushBody = `Open your collab about "${collab.about}"`;
+  } else {
+    subject = `${responderName} responded to your collab invite`;
+    text = `${responderName} responded to your collab invite about "${collab.about}": ${responseLabel}.\n\nSee Messages on Angel Island: ${link}\n\nTurn off these emails in Settings.`;
+    html = `
+      <p><strong>${escapeHtml(responderName)}</strong> responded to your collab invite about <em>${escapeHtml(collab.about)}</em>:</p>
+      <p style="color:#5f7a6b;margin:16px 0;">${escapeHtml(responseLabel)}</p>
+      <p><a href="${link}">Open Messages</a></p>
+      <p style="color:#888;font-size:13px;margin-top:24px;">Turn off collab email updates in Settings on Angel Island.</p>
+    `;
+    pushTitle = `${responderName} responded to your collab invite`;
+    pushBody = `${responseLabel} — "${collab.about}"`;
+  }
+
+  let emailSent = false;
+  let pushSent = false;
+
+  if (wantsEmail && emailConfigured) {
+    const senderEmail = await getUserEmail(senderId);
+    if (senderEmail) {
+      const sent = await sendNotificationEmail({ to: senderEmail, subject, html, text });
+      emailSent = sent.ok;
+    }
+  }
+
+  if (wantsPush && pushConfigured) {
+    const pushResult = await sendPushToUser(senderId, {
+      title: pushTitle,
+      body: pushBody,
+      url: link,
+    });
+    pushSent = pushResult.ok;
+  }
+
+  if (!emailSent && !pushSent) {
+    return { ok: false, skipped: "delivery_failed" };
   }
 
   await logSend(senderId, "collab_response", collab.id);
-  return { ok: true };
+  return { ok: true, email: emailSent, push: pushSent };
 }
 
 function collabActivitySummary(entryType: string, body: string | null, url: string | null): string {
