@@ -16,9 +16,7 @@ export function ConversationPreviewLink({ conversation, className = "" }: Props)
   const name =
     conversation.other?.first_name ?? conversation.other?.username ?? t("someone");
   const statusLabel = conversationStatusLabel(conversation.conversation_status, tStatus);
-  const href = conversation.collaborationId
-    ? `/collaborations/${conversation.collaborationId}`
-    : `/messages/${conversation.id}`;
+  const href = `/messages/${conversation.id}`;
 
   return (
     <Link
