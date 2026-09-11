@@ -5,6 +5,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import "./globals.css";
 import { PreferencesProvider } from "@/components/PreferencesProvider";
 import { getSiteUrl } from "@/lib/site";
+import { themeBootScript } from "@/lib/theme-scope";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,7 +77,7 @@ export default async function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var p=JSON.parse(localStorage.getItem("angel_island_preferences")||"{}");var t=p.appTheme||"ethereal";document.documentElement.classList.add("theme-"+t);}catch(e){document.documentElement.classList.add("theme-ethereal");}})();`,
+            __html: themeBootScript(),
           }}
         />
       </head>
