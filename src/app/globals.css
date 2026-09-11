@@ -735,7 +735,7 @@ html.reduce-motion .room-enter {
   align-items: center;
   justify-content: center;
   padding-block: 0.4rem;
-  padding-inline: 0.8rem;
+  padding-inline: 1.05rem;
   line-height: 1;
 }
 
@@ -747,7 +747,7 @@ html.reduce-motion .room-enter {
 
 .nav-cloud-highlight {
   position: absolute;
-  inset: 0 -0.625rem;
+  inset: 0 -1rem;
   z-index: 0;
   pointer-events: none;
   border-radius: 9999px;
@@ -768,11 +768,11 @@ html.reduce-motion .room-enter {
 
 .nav-pill-header .nav-pill-label {
   padding-block: 0.42rem;
-  padding-inline: 0.65rem;
+  padding-inline: 0.85rem;
 }
 
 .nav-pill-header .nav-cloud-highlight {
-  inset: 0 -0.5rem;
+  inset: 0 -0.85rem;
 }
 
 /* Profile "room" — full-page MySpace-style background + mantra */
