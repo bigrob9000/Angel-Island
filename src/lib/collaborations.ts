@@ -31,8 +31,19 @@ export type CollaborationDetail = CollaborationPreview & {
   messages?: CollaborationMessage[];
 };
 
+function isMissingTable(table: string, message: string, code?: string): boolean {
+  if (code === "PGRST205") return true;
+  const lower = message.toLowerCase();
+  if (!lower.includes(table.toLowerCase())) return false;
+  return (
+    lower.includes("could not find the table") ||
+    lower.includes("does not exist") ||
+    lower.includes("schema cache")
+  );
+}
+
 function isCollabWorkspaceMissing(message: string, code?: string): boolean {
-  return message.includes("collaborations") || code === "PGRST205";
+  return isMissingTable("collaborations", message, code);
 }
 
 export function collaborationsSetupError(): string {
@@ -420,7 +431,7 @@ export async function loadCollaborationPreviews(
 export async function loadCollaborationDetail(
   collaborationId: string,
   userId: string
-): Promise<{ detail: CollaborationDetail | null; tableMissing: boolean }> {
+): Promise<{ detail: CollaborationDetail | null; tableMissing: boolean; loadError?: string | null }> {
   const supabase = createClient();
 
   const { data: collab, error } = await supabase
@@ -433,7 +444,7 @@ export async function loadCollaborationDetail(
     if (isCollabWorkspaceMissing(error.message, error.code)) {
       return { detail: null, tableMissing: true };
     }
-    return { detail: null, tableMissing: false };
+    return { detail: null, tableMissing: false, loadError: error.message };
   }
   if (!collab) return { detail: null, tableMissing: false };
 

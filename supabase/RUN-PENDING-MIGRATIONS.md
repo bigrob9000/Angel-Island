@@ -88,6 +88,16 @@ Stores theme (Ethereal / Soft / Dusk / Dark), calm mode, and reading options on 
 
 ---
 
+## 041 — Collaboration read grants (run after 040)
+
+Run the full file: `supabase/migrations/041_collaboration_read_grants.sql`
+
+Fixes group collab workspaces failing to open after accept (permission errors were misread as “run migration 016”).
+
+**Try it:** Accept a group collab invite → the workspace should load.
+
+---
+
 ## 040 — Collab archive grants (run after 039)
 
 Run the full file: `supabase/migrations/040_collaboration_archive_grants.sql`

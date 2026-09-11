@@ -62,6 +62,7 @@ export default function CollaborationWorkspacePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tableMissing, setTableMissing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("note");
   const [noteBody, setNoteBody] = useState("");
   const [refTitle, setRefTitle] = useState("");
@@ -110,6 +111,7 @@ export default function CollaborationWorkspacePage() {
       const result = await loadCollaborationDetail(collaborationId, user.id);
       setDetail(result.detail);
       setTableMissing(result.tableMissing);
+      setLoadError(result.loadError ?? null);
       if (result.detail?.isGroup) {
         setTab("chat");
         const supabase = createClient();
@@ -189,6 +191,7 @@ export default function CollaborationWorkspacePage() {
     const result = await loadCollaborationDetail(collaborationId, userId);
     setDetail(result.detail);
     setTableMissing(result.tableMissing);
+    setLoadError(result.loadError ?? null);
   }
 
   async function handleAddEntry(e: React.FormEvent) {
@@ -341,6 +344,19 @@ export default function CollaborationWorkspacePage() {
     return (
       <div>
         <p className="text-muted">{collaborationsSetupError()}</p>
+        <Link href="/collaborations" className="mt-4 inline-block text-foreground underline hover:no-underline">
+          ← Collaborations
+        </Link>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div>
+        <p className="text-sm text-red-600" role="alert">
+          {loadError}
+        </p>
         <Link href="/collaborations" className="mt-4 inline-block text-foreground underline hover:no-underline">
           ← Collaborations
         </Link>
