@@ -803,13 +803,15 @@ html.reduce-motion .room-enter {
   overflow: visible;
 }
 
-/* Header clouds — shorter vertically only; full width kept */
+/* Header clouds — squash height only (scaleY), keep full horizontal puff */
 .nav-pill-header .nav-cloud-highlight {
-  inset: 5px -4px;
+  inset: -4px -10px;
+  transform: scaleY(0.68);
+  transform-origin: center center;
 }
 
 nav .nav-pill-header:first-child .nav-cloud-highlight {
-  inset: 5px -4px 5px 10px;
+  transform: scaleY(0.68) translateX(5px);
 }
 
 nav .nav-pill-header:first-child .nav-cloud-highlight-blob--1 {
@@ -817,7 +819,7 @@ nav .nav-pill-header:first-child .nav-cloud-highlight-blob--1 {
 }
 
 nav .nav-pill-header:last-child .nav-cloud-highlight {
-  inset: 5px 10px 5px -4px;
+  transform: scaleY(0.68) translateX(-5px);
 }
 
 nav .nav-pill-header:last-child .nav-cloud-highlight-blob--5 {
