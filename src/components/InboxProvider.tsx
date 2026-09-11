@@ -21,6 +21,7 @@ import {
   conversationPreviewText,
 } from "@/lib/conversations";
 import { subscribeToInbox, unsubscribeFromInbox } from "@/lib/message-realtime";
+import { showBrowserNotification } from "@/lib/push/client";
 import type { ChatInvite } from "@/lib/types";
 import { normalizeConversationStatus } from "@/lib/types";
 
@@ -56,6 +57,7 @@ export function InboxProvider({ children }: { children: ReactNode }) {
   const [conversations, setConversations] = useState<ConversationPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [messageNotice, setMessageNotice] = useState<MessageNotice | null>(null);
+  const [notifyPushMessages, setNotifyPushMessages] = useState(false);
 
   const dismissMessageNotice = useCallback(() => {
     setMessageNotice(null);
@@ -71,14 +73,24 @@ export function InboxProvider({ children }: { children: ReactNode }) {
         conversation?.other?.first_name ??
         conversation?.other?.username ??
         "Someone";
+      const preview = conversationPreviewText(message.body, conversation?.optional_message);
 
       setMessageNotice({
         inviteId: message.invite_id,
         senderName,
-        preview: conversationPreviewText(message.body, conversation?.optional_message),
+        preview,
       });
+
+      if (notifyPushMessages) {
+        void showBrowserNotification({
+          title: `${senderName} sent you a message`,
+          body: preview,
+          url: `/messages/${message.invite_id}`,
+          tag: `message-${message.invite_id}`,
+        });
+      }
     },
-    [userId, openInviteId]
+    [userId, openInviteId, notifyPushMessages]
   );
 
   const refresh = useCallback(async () => {
@@ -95,10 +107,12 @@ export function InboxProvider({ children }: { children: ReactNode }) {
     }
 
     setUserId(user.id);
-    const [previews] = await Promise.all([
+    const [previews, , profileRes] = await Promise.all([
       loadConversationPreviews(user.id),
       ensureConversationReadsLoaded(user.id),
+      supabase.from("profiles").select("notify_push_messages").eq("id", user.id).maybeSingle(),
     ]);
+    setNotifyPushMessages(profileRes.data?.notify_push_messages === true);
     setConversations(withUnreadState(previews, user.id, openInviteId));
     setLoading(false);
   }, [openInviteId]);
@@ -112,6 +126,23 @@ export function InboxProvider({ children }: { children: ReactNode }) {
     if (!userId) return;
     setConversations((prev) => withUnreadState(prev, userId, openInviteId));
   }, [openInviteId, userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    async function reloadPushPreference() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("profiles")
+        .select("notify_push_messages")
+        .eq("id", userId)
+        .maybeSingle();
+      setNotifyPushMessages(data?.notify_push_messages === true);
+    }
+
+    window.addEventListener("focus", reloadPushPreference);
+    return () => window.removeEventListener("focus", reloadPushPreference);
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;

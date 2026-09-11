@@ -189,6 +189,29 @@ async function savePushSubscription(
   return { ok: true };
 }
 
+/** Show an OS/browser notification via the service worker (when permission is granted). */
+export async function showBrowserNotification(options: {
+  title: string;
+  body: string;
+  url: string;
+  tag?: string;
+}): Promise<void> {
+  if (!isBrowserPushSupported() || Notification.permission !== "granted") return;
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification(options.title, {
+      body: options.body,
+      icon: "/angel-island-mark-light.png",
+      badge: "/angel-island-mark-light.png",
+      tag: options.tag,
+      data: { url: options.url },
+    });
+  } catch {
+    // Non-fatal — in-app notice may still be visible.
+  }
+}
+
 /** Re-sync subscription if user opted in but browser lost it (e.g. after cache clear). */
 export async function ensurePushSubscription(publicKey: string): Promise<void> {
   if (!isBrowserPushSupported() || Notification.permission !== "granted") return;

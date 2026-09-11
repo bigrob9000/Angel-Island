@@ -181,8 +181,8 @@ export async function sendMessageNotification(
       title: `${senderName} sent you a message`,
       body: preview,
       url: link,
-      senderId: senderUserId,
       recipientId,
+      tag: `message-${invite.id}`,
     });
     pushSent = pushResult.ok;
   }
@@ -342,7 +342,6 @@ export async function sendCollabResponseNotification(
       title: pushTitle,
       body: pushBody,
       url: link,
-      senderId: responderUserId,
       recipientId: senderId,
     });
     pushSent = pushResult.ok;
@@ -493,7 +492,6 @@ export async function sendCollabActivityNotification(
       title: pushTitle,
       body: summary,
       url: link,
-      senderId: authorUserId,
       recipientId,
     });
     pushSent = pushResult.ok;
