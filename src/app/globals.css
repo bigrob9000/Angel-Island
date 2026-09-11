@@ -803,73 +803,25 @@ html.reduce-motion .room-enter {
   overflow: visible;
 }
 
-/* Header clouds — shorter and tucked in so edge tabs don't reach logo / sign-out */
+/* Header clouds — shorter vertically only; full width kept */
 .nav-pill-header .nav-cloud-highlight {
-  inset: 5px 1px;
-  filter: drop-shadow(0 1px 3px rgba(212, 226, 240, 0.38));
-}
-
-.nav-pill-header .nav-cloud-highlight-blob--1 {
-  width: 52%;
-  height: 68%;
-  top: 16%;
-  left: 0;
-}
-
-.nav-pill-header .nav-cloud-highlight-blob--2 {
-  width: 48%;
-  height: 64%;
-  top: 18%;
-  left: 18%;
-}
-
-.nav-pill-header .nav-cloud-highlight-blob--3 {
-  width: 44%;
-  height: 60%;
-  top: 20%;
-  left: 38%;
-}
-
-.nav-pill-header .nav-cloud-highlight-blob--4 {
-  width: 40%;
-  height: 56%;
-  top: 22%;
-  left: 56%;
-}
-
-.nav-pill-header .nav-cloud-highlight-blob--5 {
-  width: 36%;
-  height: 52%;
-  top: 24%;
-  left: 68%;
+  inset: 5px -4px;
 }
 
 nav .nav-pill-header:first-child .nav-cloud-highlight {
-  inset: 5px 0 5px 8px;
+  inset: 5px -4px 5px 10px;
 }
 
 nav .nav-pill-header:first-child .nav-cloud-highlight-blob--1 {
   display: none;
 }
 
-nav .nav-pill-header:first-child .nav-cloud-highlight-blob--2 {
-  left: 10%;
-}
-
 nav .nav-pill-header:last-child .nav-cloud-highlight {
-  inset: 5px 8px 5px 0;
+  inset: 5px 10px 5px -4px;
 }
 
 nav .nav-pill-header:last-child .nav-cloud-highlight-blob--5 {
   display: none;
-}
-
-nav .nav-pill-header:last-child .nav-cloud-highlight-blob--4 {
-  left: 54%;
-}
-
-html.theme-dark .nav-pill-header .nav-cloud-highlight {
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.28));
 }
 
 /* Profile "room" — full-page MySpace-style background + mantra */
