@@ -78,6 +78,16 @@ Adds mantra, background presets, and custom background uploads for MySpace-style
 
 ---
 
+## 036 — Appearance preferences sync (run after 035)
+
+Run the full file: `supabase/migrations/036_app_preferences.sql`
+
+Stores theme (Ethereal / Soft / Dusk / Dark), calm mode, and reading options on your profile so they follow you on phone and desktop.
+
+**Try it:** Settings → **Appearance** → pick Dark on your phone → sign in on desktop → same theme loads.
+
+---
+
 ## Collab invites — run this now
 
 **File:** `supabase/migrations/003_collab_invites.sql`
@@ -287,6 +297,7 @@ If either line errors with **already member of publication**, that table is alre
 | 028 | Collaboration read state synced across devices (Activity badges) |
 | 034 | `content_translations` cache (See translation on room posts) |
 | 035 | Profile room: mantra, background presets, custom upload |
+| 036 | Appearance preferences synced across devices |
 
 ---
 

@@ -791,6 +791,32 @@ html.reduce-motion .room-enter {
   margin-left: -1rem;
 }
 
+@media (max-width: 639px) {
+  .nav-pill-label {
+    padding-inline: 0.5rem;
+  }
+
+  .nav-cloud-highlight {
+    inset: 0 -0.4rem;
+  }
+
+  .nav-pill-header .nav-pill-label {
+    padding-inline: 0.32rem;
+  }
+
+  .nav-pill-header .nav-cloud-highlight {
+    inset: 0 -0.28rem;
+  }
+
+  .collaborations-filters .nav-pill-label {
+    padding-inline: 0.4rem;
+  }
+
+  .collaborations-start-btn {
+    margin-left: -0.4rem;
+  }
+}
+
 /* Profile "room" — full-page MySpace-style background + mantra */
 html.profile-room-active .bg-ethereal {
   background: transparent;

@@ -17,8 +17,13 @@ import {
   shouldReduceMotion,
   type UserPreferences,
 } from "@/lib/preferences";
+import {
+  loadProfilePreferences,
+  saveProfilePreferences,
+} from "@/lib/profile-preferences";
 import { APP_THEMES, DEFAULT_APP_THEME } from "@/lib/app-theme";
 import { shouldApplyUserTheme } from "@/lib/theme-scope";
+import { createClient } from "@/lib/supabase";
 
 type PreferencesContextValue = {
   preferences: UserPreferences;
@@ -46,10 +51,39 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [ready, setReady] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    setPreferences(loadPreferences());
+    const local = loadPreferences();
+    setPreferences(local);
+    savePreferences(local);
     setReady(true);
+
+    const supabase = createClient();
+
+    async function syncForUser(id: string) {
+      setUserId(id);
+      const remote = await loadProfilePreferences(id);
+      if (remote) {
+        setPreferences(remote);
+        savePreferences(remote);
+        return;
+      }
+      void saveProfilePreferences(id, loadPreferences());
+    }
+
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) void syncForUser(user.id);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) void syncForUser(session.user.id);
+      else setUserId(null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -73,9 +107,12 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
       const next = { ...prev, [key]: value };
       savePreferences(next);
       applyDocumentClasses(next, pathname);
+      if (userId) {
+        void saveProfilePreferences(userId, next);
+      }
       return next;
     });
-  }, [pathname]);
+  }, [pathname, userId]);
 
   const motionReduced = shouldReduceMotion(preferences);
 
