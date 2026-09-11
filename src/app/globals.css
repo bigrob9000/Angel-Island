@@ -484,10 +484,6 @@ html.calm-mode .room-cloud-shape {
 
 html.calm-mode .nav-cloud-highlight {
   filter: none;
-}
-
-html.calm-mode .nav-cloud-highlight-blob {
-  filter: none;
   box-shadow: none;
   border: 1px solid rgba(95, 122, 107, 0.12);
 }
@@ -741,58 +737,15 @@ html.reduce-motion .room-enter {
 
 .nav-cloud-highlight {
   position: absolute;
-  inset: -5px -4px;
+  inset: 2px 4px;
   z-index: 0;
   pointer-events: none;
-  overflow: visible;
-  filter: drop-shadow(0 1px 4px rgba(212, 226, 240, 0.45));
-}
-
-.nav-cloud-highlight-blob {
-  position: absolute;
-  border-radius: 50%;
+  border-radius: 9999px;
   background: var(--nav-cloud-core);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.42);
   box-shadow:
-    0 -1px 10px var(--cloud-glow),
-    0 2px 10px var(--cloud-shadow);
-  filter: blur(4px);
-  pointer-events: none;
-}
-
-.nav-cloud-highlight-blob--1 {
-  width: 58%;
-  height: 88%;
-  top: 8%;
-  left: -5%;
-}
-
-.nav-cloud-highlight-blob--2 {
-  width: 54%;
-  height: 80%;
-  top: 2%;
-  left: 15%;
-}
-
-.nav-cloud-highlight-blob--3 {
-  width: 48%;
-  height: 74%;
-  top: 10%;
-  left: 36%;
-}
-
-.nav-cloud-highlight-blob--4 {
-  width: 44%;
-  height: 68%;
-  top: 16%;
-  left: 56%;
-}
-
-.nav-cloud-highlight-blob--5 {
-  width: 40%;
-  height: 62%;
-  top: 20%;
-  left: 72%;
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 1px 5px var(--cloud-shadow);
 }
 
 /* App header — equal-width nav slots so every link stays visible */
@@ -803,27 +756,17 @@ html.reduce-motion .room-enter {
   overflow: visible;
 }
 
-/* Header clouds — squash height only (scaleY), keep full horizontal puff */
+/* Header — shorter oval; edge tabs inset away from logo / sign-out */
 .nav-pill-header .nav-cloud-highlight {
-  inset: -4px -10px;
-  transform: scaleY(0.68);
-  transform-origin: center center;
+  inset: 6px 3px;
 }
 
 nav .nav-pill-header:first-child .nav-cloud-highlight {
-  transform: scaleY(0.68) translateX(5px);
-}
-
-nav .nav-pill-header:first-child .nav-cloud-highlight-blob--1 {
-  display: none;
+  inset: 6px 3px 6px 8px;
 }
 
 nav .nav-pill-header:last-child .nav-cloud-highlight {
-  transform: scaleY(0.68) translateX(-5px);
-}
-
-nav .nav-pill-header:last-child .nav-cloud-highlight-blob--5 {
-  display: none;
+  inset: 6px 8px 6px 3px;
 }
 
 /* Profile "room" — full-page MySpace-style background + mantra */
@@ -1029,14 +972,10 @@ html.theme-dark {
 }
 
 html.theme-dark .nav-cloud-highlight {
-  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.35));
-}
-
-html.theme-dark .nav-cloud-highlight-blob {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
   box-shadow:
-    0 -1px 6px rgba(255, 255, 255, 0.04),
-    0 2px 10px rgba(0, 0, 0, 0.35);
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 1px 8px rgba(0, 0, 0, 0.28);
 }
 
 html.theme-dark header.sticky.border-b {
