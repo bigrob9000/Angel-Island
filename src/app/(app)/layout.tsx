@@ -98,7 +98,7 @@ function AppNav() {
               );
             })}
           </nav>
-          <SignOutButton variant="header" className="shrink-0" />
+          <SignOutButton variant="header" className="relative z-[2] shrink-0" />
         </div>
       </div>
     </header>
