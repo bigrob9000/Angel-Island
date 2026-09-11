@@ -542,7 +542,7 @@ export default function CollaborationWorkspacePage() {
       )}
 
       <div>
-        <div className="flex flex-wrap gap-2 pb-2">
+        <div className="flex flex-wrap gap-2 overflow-visible pb-2">
           {workspaceTabs.map(({ id, label }) => (
             <button
               key={id}

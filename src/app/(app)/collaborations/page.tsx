@@ -84,28 +84,30 @@ export default function CollaborationsPage() {
         <p className="section-copy">{t("subtitle")}</p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Link href="/collaborations/group/new" className="btn-primary relative z-[1] shrink-0">
+      <div className="space-y-3">
+        <Link href="/collaborations/group/new" className="btn-primary inline-flex shrink-0">
           {t("startGroup")}
         </Link>
-        <div className="flex flex-wrap gap-2">
-        {FILTER_IDS.map((id) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setFilter(id)}
-            className={`nav-pill relative text-sm ${
-              filter === id
-                ? "nav-pill-active text-foreground"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            {filter === id && <NavCloudBackdrop clipStart={id === "active"} clipEnd={id === "past"} />}
-            <span className="relative z-[1]">
-              {id === "active" ? t("filterActive") : id === "paused" ? t("filterPaused") : t("filterPast")}
-            </span>
-          </button>
-        ))}
+        <div className="flex flex-wrap gap-2 overflow-visible" role="tablist" aria-label={t("title")}>
+          {FILTER_IDS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={filter === id}
+              onClick={() => setFilter(id)}
+              className={`nav-pill relative text-sm ${
+                filter === id
+                  ? "nav-pill-active text-foreground"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              {filter === id && <NavCloudBackdrop />}
+              <span className="relative z-[1]">
+                {id === "active" ? t("filterActive") : id === "paused" ? t("filterPaused") : t("filterPast")}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 

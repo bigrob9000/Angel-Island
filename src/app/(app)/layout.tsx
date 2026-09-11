@@ -58,10 +58,8 @@ function AppNav() {
       <div className="mx-auto w-full px-2 py-2 sm:px-4 sm:py-3">
         <div className="flex items-center gap-1 sm:gap-2">
           <AngelIslandLogo variant="mark" size="compact" className="relative z-[2] shrink-0" />
-          <nav className="relative z-[1] flex min-w-0 flex-1 items-center" aria-label={t("main")}>
-            {navItems.map(({ href, key, shortKey }, index) => {
-              const isFirst = index === 0;
-              const isLast = index === navItems.length - 1;
+          <nav className="relative z-[1] flex min-w-0 flex-1 items-center overflow-visible" aria-label={t("main")}>
+            {navItems.map(({ href, key, shortKey }) => {
               const isMessages = href === "/messages";
               const isCollabs = href === "/collaborations";
               const isActivity = href === "/notifications";
@@ -80,11 +78,11 @@ function AppNav() {
                   href={href}
                   aria-label={label}
                   title={label}
-                  className={`nav-pill nav-pill-header relative flex flex-1 items-center justify-center whitespace-nowrap text-[0.625rem] font-medium leading-none transition-colors sm:text-xs md:text-sm ${
+                  className={`nav-pill nav-pill-header relative flex flex-1 items-center justify-center overflow-visible whitespace-nowrap text-[0.625rem] font-medium leading-none transition-colors sm:text-xs md:text-sm ${
                     active ? "nav-pill-active" : "text-muted hover:text-foreground"
                   }`}
                 >
-                  {active && <NavCloudBackdrop clipStart={isFirst} clipEnd={isLast} />}
+                  {active && <NavCloudBackdrop />}
                   <span className="relative z-[1] sm:hidden">{t(shortKey)}</span>
                   <span className="relative z-[1] hidden sm:inline">{label}</span>
                   {badgeCount > 0 && (
