@@ -41,6 +41,7 @@ export default function MessagesPage() {
   const [receivedInvites, setReceivedInvites] = useState<(ChatInvite & { sender?: Profile })[]>([]);
   const [sentInvites, setSentInvites] = useState<(ChatInvite & { receiver?: Profile })[]>([]);
   const [receivedCollabInvites, setReceivedCollabInvites] = useState<(CollabInvite & { sender?: Profile })[]>([]);
+  const [maybeCollabInvites, setMaybeCollabInvites] = useState<(CollabInvite & { sender?: Profile })[]>([]);
   const [sentCollabInvites, setSentCollabInvites] = useState<
     (CollabInvite & { receiver?: Profile; workspaceId?: string | null; workspaceStatus?: CollaborationStatus | null })[]
   >([]);
@@ -83,9 +84,15 @@ export default function MessagesPage() {
           .from("collab_invites")
           .select("*")
           .eq("sender_id", userId)
-          .eq("status", "pending")
+          .in("status", ["pending", "interested", "maybe"])
           .order("created_at", { ascending: false }),
-      ]).then(async ([recvRes, sentRes, collabRecvRes, collabSentRes]) => {
+        supabase
+          .from("collab_invites")
+          .select("*")
+          .eq("receiver_id", userId)
+          .eq("status", "maybe")
+          .order("created_at", { ascending: false }),
+      ]).then(async ([recvRes, sentRes, collabRecvRes, collabSentRes, collabMaybeRes]) => {
         const { blockedIds } = await loadBlockedUserIds(userId);
         const recv = ((recvRes.data ?? []) as ChatInvite[]).filter(
           (inv) => !blockedIds.has(inv.sender_id)
@@ -154,6 +161,17 @@ export default function MessagesPage() {
             setSentCollabInvites(withWorkspace);
           });
         } else setSentCollabInvites([]);
+
+        const collabsMaybe = ((collabMaybeRes.data ?? []) as CollabInvite[]).filter(
+          (c) => !blockedIds.has(c.sender_id)
+        );
+        if (collabsMaybe.length > 0) {
+          supabase.from("profiles").select(PROFILE_ATTRIBUTION_FIELDS).in("id", collabsMaybe.map((c) => c.sender_id)).then((pRes) => {
+            const byId: Record<string, Profile> = {};
+            (pRes.data ?? []).forEach((row) => { byId[row.id] = row as Profile; });
+            setMaybeCollabInvites(collabsMaybe.map((c) => ({ ...c, sender: byId[c.sender_id] })));
+          });
+        } else setMaybeCollabInvites([]);
       }).finally(() => setLoading(false));
   }, [router, userId, inboxLoading]);
 
@@ -240,7 +258,9 @@ export default function MessagesPage() {
     if (!user) return;
     setActingId(collabId);
 
-    const collab = receivedCollabInvites.find((c) => c.id === collabId);
+    const collab =
+      receivedCollabInvites.find((c) => c.id === collabId) ??
+      maybeCollabInvites.find((c) => c.id === collabId);
     if (response === "interested" && collab) {
       const existing = await findOpenCollaborationBetweenUsers(user.id, collab.sender_id);
       if (existing) {
@@ -267,6 +287,7 @@ export default function MessagesPage() {
     }
 
     setReceivedCollabInvites((prev) => prev.filter((c) => c.id !== collabId));
+    setMaybeCollabInvites((prev) => prev.filter((c) => c.id !== collabId));
     setActingId(null);
 
     if (response === "interested" && collab) {
@@ -295,6 +316,7 @@ export default function MessagesPage() {
   const isEmptyInbox =
     receivedInvites.length === 0 &&
     receivedCollabInvites.length === 0 &&
+    maybeCollabInvites.length === 0 &&
     groupReceived.length === 0 &&
     !hasSentInvites &&
     conversations.length === 0;
@@ -354,6 +376,40 @@ export default function MessagesPage() {
           </ul>
         )}
       </section>
+
+      {maybeCollabInvites.length > 0 && (
+        <section>
+          <h2 className="section-heading">{t("maybeCollabInvites")}</h2>
+          <p className="section-copy">{t("maybeCollabInvitesCopy")}</p>
+          <ul className="mt-4 space-y-3">
+            {maybeCollabInvites.map((c) => (
+              <li key={c.id} className="surface p-4">
+                <ProfileAttribution profile={c.sender} className="font-medium" />
+                <p className="text-sm text-muted mt-1">{t("aboutLabel", { about: c.about })}</p>
+                {c.message && <p className="text-sm text-muted">{c.message}</p>}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => respondToCollab(c.id, "interested")}
+                    disabled={actingId === c.id}
+                    className="btn-primary btn-sm"
+                  >
+                    {t("revisitInterested")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => respondToCollab(c.id, "not_fit")}
+                    disabled={actingId === c.id}
+                    className="btn-secondary btn-sm"
+                  >
+                    {t("notAFit")}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {receivedCollabInvites.length > 0 && (
         <section>
@@ -464,8 +520,12 @@ export default function MessagesPage() {
                       {t("openCollaborationSpace")}
                     </Link>
                   )
-                ) : (
+                ) : c.status === "maybe" ? (
+                  <p className="mt-2 text-xs text-muted italic">{t("maybeLaterSentNote")}</p>
+                ) : c.status === "pending" ? (
                   <p className="mt-2 text-xs text-muted italic">{inviteResponseLabel("waiting", tInvite)}</p>
+                ) : (
+                  <p className="mt-2 text-xs text-muted italic">{inviteResponseLabel(c.status as "interested" | "maybe" | "not_fit", tInvite)}</p>
                 )}
                 </div>
                 {c.status === "pending" && (

@@ -88,6 +88,16 @@ Stores theme (Ethereal / Soft / Dusk / Dark), calm mode, and reading options on 
 
 ---
 
+## 038 — Collab maybe revisit (run after 037)
+
+Run the full file: `supabase/migrations/038_collab_maybe_revisit.sql`
+
+Lets receivers change a **Maybe later** response to **Interested** or **Not a fit** from Messages.
+
+**Try it:** Tap **Maybe** on a collab invite → find it under **Collab invites to revisit** → tap **Interested now**.
+
+---
+
 ## 037 — Collab alignment handshake (run after 036)
 
 Run the full file: `supabase/migrations/037_collab_alignment.sql`

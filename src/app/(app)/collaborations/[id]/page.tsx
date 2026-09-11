@@ -506,8 +506,13 @@ export default function CollaborationWorkspacePage() {
       )}
 
       {detail.status === "ended" && (
-        <div className="surface px-4 py-3 text-sm text-muted">
-          This collaboration is closed. You can still read what you shared here.
+        <div className="surface space-y-3 px-4 py-3 text-sm text-muted">
+          <p>{t("endedCopy")}</p>
+          {!detail.isGroup && detail.other?.username && (
+            <Link href={`/people/${detail.other.username}`} className="btn-secondary btn-sm inline-block">
+              {t("startNewCollabWith", { name: otherName })}
+            </Link>
+          )}
         </div>
       )}
 
