@@ -23,26 +23,27 @@ export function InboxMessageNotice() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-6 sm:pb-8"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-6 pt-16 sm:pb-8"
       role="region"
       aria-live="polite"
       aria-label="New message"
     >
+      <div className="inbox-notice-scrim" aria-hidden />
       <div
-        className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-lg border border-foreground/15 bg-white/95 px-4 py-3 shadow-lg backdrop-blur-sm ${
+        className={`inbox-notice-banner pointer-events-auto flex w-full max-w-md items-start gap-3 px-4 py-3.5 ${
           motionReduced ? "" : "animate-inbox-notice"
         }`}
       >
-        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden />
+        <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-accent" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-foreground">
+          <p className="text-sm font-semibold text-foreground">
             New message from {messageNotice.senderName}
           </p>
-          <p className="mt-0.5 truncate text-sm text-muted">{messageNotice.preview}</p>
+          <p className="mt-1 truncate text-sm text-foreground">{messageNotice.preview}</p>
           <Link
             href={`/messages/${messageNotice.inviteId}`}
             onClick={dismissMessageNotice}
-            className="mt-2 inline-block text-sm font-medium text-accent hover:underline"
+            className="mt-2 inline-block text-sm font-semibold text-accent hover:underline"
           >
             Open conversation
           </Link>
@@ -50,7 +51,7 @@ export function InboxMessageNotice() {
         <button
           type="button"
           onClick={dismissMessageNotice}
-          className="shrink-0 text-sm text-muted hover:text-foreground"
+          className="shrink-0 text-sm font-medium text-foreground/70 hover:text-foreground"
           aria-label="Dismiss"
         >
           ✕

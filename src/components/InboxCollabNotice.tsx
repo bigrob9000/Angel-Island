@@ -23,26 +23,27 @@ export function InboxCollabNotice() {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-24 sm:pb-28"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-24 pt-16 sm:pb-28"
       role="region"
       aria-live="polite"
       aria-label="Collaboration update"
     >
+      <div className="inbox-notice-scrim" aria-hidden />
       <div
-        className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-lg border border-foreground/15 bg-white/95 px-4 py-3 shadow-lg backdrop-blur-sm ${
+        className={`inbox-notice-banner pointer-events-auto flex w-full max-w-md items-start gap-3 px-4 py-3.5 ${
           motionReduced ? "" : "animate-inbox-notice"
         }`}
       >
-        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden />
+        <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-accent" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-foreground">
+          <p className="text-sm font-semibold text-foreground">
             {collabNotice.authorName} {collabNotice.activityLabel}
           </p>
-          <p className="mt-0.5 truncate text-sm text-muted">{collabNotice.preview}</p>
+          <p className="mt-1 truncate text-sm text-foreground">{collabNotice.preview}</p>
           <Link
             href={`/collaborations/${collabNotice.collaborationId}`}
             onClick={dismissCollabNotice}
-            className="mt-2 inline-block text-sm font-medium text-accent hover:underline"
+            className="mt-2 inline-block text-sm font-semibold text-accent hover:underline"
           >
             Open collaboration
           </Link>
@@ -50,7 +51,7 @@ export function InboxCollabNotice() {
         <button
           type="button"
           onClick={dismissCollabNotice}
-          className="shrink-0 text-sm text-muted hover:text-foreground"
+          className="shrink-0 text-sm font-medium text-foreground/70 hover:text-foreground"
           aria-label="Dismiss"
         >
           ✕

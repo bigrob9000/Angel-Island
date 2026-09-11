@@ -117,6 +117,10 @@ export async function sendMessageNotification(
   const recipientId =
     invite.sender_id === senderUserId ? invite.receiver_id : invite.sender_id;
 
+  if (recipientId === senderUserId) {
+    return { ok: false, skipped: "self_message" };
+  }
+
   if (await isBlocked(senderUserId, recipientId)) {
     return { ok: false, skipped: "blocked" };
   }
@@ -177,6 +181,8 @@ export async function sendMessageNotification(
       title: `${senderName} sent you a message`,
       body: preview,
       url: link,
+      senderId: senderUserId,
+      recipientId,
     });
     pushSent = pushResult.ok;
   }
@@ -336,6 +342,8 @@ export async function sendCollabResponseNotification(
       title: pushTitle,
       body: pushBody,
       url: link,
+      senderId: responderUserId,
+      recipientId: senderId,
     });
     pushSent = pushResult.ok;
   }
@@ -485,6 +493,8 @@ export async function sendCollabActivityNotification(
       title: pushTitle,
       body: summary,
       url: link,
+      senderId: authorUserId,
+      recipientId,
     });
     pushSent = pushResult.ok;
   }

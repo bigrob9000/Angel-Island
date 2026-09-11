@@ -131,26 +131,9 @@ export async function subscribeToPush(publicKey: string): Promise<{ ok: boolean;
     });
   }
 
-  const json = subscription.toJSON();
-  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
-    return { ok: false, error: "Could not read push subscription." };
-  }
-
-  const response = await fetch("/api/push/subscribe", {
-    method: "POST",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      endpoint: json.endpoint,
-      p256dh: json.keys.p256dh,
-      auth: json.keys.auth,
-      userAgent: navigator.userAgent,
-    }),
-  });
-
-  if (!response.ok) {
-    const data = (await response.json().catch(() => ({}))) as { error?: string };
-    return { ok: false, error: data.error ?? "Could not save push subscription." };
+  const saved = await savePushSubscription(subscription);
+  if (!saved.ok) {
+    return { ok: false, error: saved.error ?? "Could not save push subscription." };
   }
 
   return { ok: true };
@@ -178,6 +161,34 @@ export async function unsubscribeFromPush(): Promise<{ ok: boolean; error?: stri
   return { ok: true };
 }
 
+async function savePushSubscription(
+  subscription: PushSubscription,
+): Promise<{ ok: boolean; error?: string }> {
+  const json = subscription.toJSON();
+  if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
+    return { ok: false, error: "Could not read push subscription." };
+  }
+
+  const response = await fetch("/api/push/subscribe", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+      userAgent: navigator.userAgent,
+    }),
+  }).catch(() => null);
+
+  if (!response?.ok) {
+    const data = (await response?.json().catch(() => ({}))) as { error?: string };
+    return { ok: false, error: data.error ?? "Could not save push subscription." };
+  }
+
+  return { ok: true };
+}
+
 /** Re-sync subscription if user opted in but browser lost it (e.g. after cache clear). */
 export async function ensurePushSubscription(publicKey: string): Promise<void> {
   if (!isBrowserPushSupported() || Notification.permission !== "granted") return;
@@ -185,7 +196,10 @@ export async function ensurePushSubscription(publicKey: string): Promise<void> {
   const registration = await navigator.serviceWorker.register("/sw.js");
   await navigator.serviceWorker.ready;
   const existing = await registration.pushManager.getSubscription();
-  if (existing) return;
+  if (existing) {
+    await savePushSubscription(existing);
+    return;
+  }
 
   await subscribeToPush(publicKey);
 }

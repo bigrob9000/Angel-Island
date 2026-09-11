@@ -11,6 +11,10 @@ export type PushPayload = {
   title: string;
   body: string;
   url: string;
+  /** Who triggered the notification — used to suppress echo for the sender. */
+  senderId?: string;
+  /** Who should receive the notification — always show when they have the app open. */
+  recipientId?: string;
 };
 
 type PushSubscriptionRow = {

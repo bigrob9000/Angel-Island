@@ -538,7 +538,48 @@ html.reduce-motion .room-enter {
 }
 
 .animate-inbox-notice {
-  animation: inbox-notice-in 0.35s ease-out;
+  animation: inbox-notice-in 0.35s ease-out forwards;
+}
+
+.inbox-notice-scrim {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(42, 42, 42, 0.18) 0%,
+    rgba(42, 42, 42, 0.08) 45%,
+    transparent 100%
+  );
+}
+
+html.theme-dark .inbox-notice-scrim {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.25) 45%,
+    transparent 100%
+  );
+}
+
+.inbox-notice-banner {
+  position: relative;
+  z-index: 1;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 24%, transparent);
+  background: #ffffff;
+  box-shadow:
+    0 2px 4px rgba(42, 42, 42, 0.08),
+    0 12px 32px rgba(42, 42, 42, 0.18);
+  color: var(--foreground);
+}
+
+html.theme-dark .inbox-notice-banner {
+  background: #252b38;
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 12px 32px rgba(0, 0, 0, 0.5);
 }
 
 @media (prefers-reduced-motion: reduce) {

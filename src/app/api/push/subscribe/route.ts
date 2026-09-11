@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isPushConfigured } from "@/lib/push/vapid";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
@@ -25,6 +26,14 @@ export async function POST(request: Request) {
 
   if (!body.endpoint || !body.p256dh || !body.auth) {
     return NextResponse.json({ error: "endpoint, p256dh, and auth are required." }, { status: 400 });
+  }
+
+  // A browser endpoint belongs to one signed-in user at a time.
+  try {
+    const admin = createAdminClient();
+    await admin.from("push_subscriptions").delete().eq("endpoint", body.endpoint).neq("user_id", user.id);
+  } catch {
+    // Non-fatal — upsert below still saves this user's subscription.
   }
 
   const { error } = await supabase.from("push_subscriptions").upsert(
