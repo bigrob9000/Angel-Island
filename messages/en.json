@@ -496,6 +496,8 @@
     "deleteCopy": "Permanently delete this conversation from your account.",
     "deleting": "Deleting…",
     "errors": {
+      "alreadyOpenCollab": "You already have an open collaboration with this person — opening that workspace instead.",
+      "collabWorkspaceFailed": "Could not open a collaboration workspace. If this keeps happening, check that migration 037 is applied in Supabase.",
       "collabCancelNotSetup": "Collab cancel isn't set up yet. Run migration 022 in Supabase.",
       "pauseEndNotSetup": "Pause/end isn't set up yet. Run migration 021 in Supabase.",
       "onlyPauserCanResume": "Only the person who paused can resume.",
@@ -843,6 +845,7 @@
     "inviteToChat": "Invite to chat",
     "collabInviteSent": "Collab invite sent",
     "inviteToCollaborate": "Invite to collaborate",
+    "openCollaboration": "Open collaboration",
     "collabAboutPrompt": "What's this about?",
     "collabAbout": {
       "coWriting": "Co-writing",
@@ -873,7 +876,8 @@
       "invitePending": "You already sent an invite. They haven't responded yet.",
       "tooManyPending": "You have 5 pending invites. Cancel one or wait for a response before sending more.",
       "rateLimit": "You can send 3 invites per 24 hours. Try again later.",
-      "collabInvitesNotSetup": "Collab invites aren't set up yet. Run migration 003 in Supabase."
+      "collabInvitesNotSetup": "Collab invites aren't set up yet. Run migration 003 in Supabase.",
+      "openCollabExists": "You already have an open collaboration with this person. Open that workspace instead of sending another invite."
     }
   },
   "auth": {

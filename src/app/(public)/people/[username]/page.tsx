@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Suspense, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
+import { findOpenCollaborationBetweenUsers } from "@/lib/collaborations";
 import type { Profile } from "@/lib/types";
 import { normalizeProfile } from "@/lib/types";
 import type { CollabPace } from "@/lib/types";
@@ -69,6 +70,7 @@ function PublicProfilePageContent() {
   const [collabSending, setCollabSending] = useState(false);
   const [collabError, setCollabError] = useState<string | null>(null);
   const [existingCollabInvite, setExistingCollabInvite] = useState<"pending" | "responded" | null>(null);
+  const [openCollaborationId, setOpenCollaborationId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [blockedByMe, setBlockedByMe] = useState(false);
   const [blockedByThem, setBlockedByThem] = useState(false);
@@ -127,6 +129,10 @@ function PublicProfilePageContent() {
             if (r.data?.status === "pending") setExistingCollabInvite("pending");
             else if (r.data) setExistingCollabInvite("responded");
           });
+
+        findOpenCollaborationBetweenUsers(userId, p.id).then((match) => {
+          setOpenCollaborationId(match?.collaborationId ?? null);
+        });
       }
     });
   }, [username]);
@@ -278,6 +284,14 @@ function PublicProfilePageContent() {
       return;
     }
 
+    const openCollab = await findOpenCollaborationBetweenUsers(user.id, profile.id);
+    if (openCollab) {
+      setOpenCollaborationId(openCollab.collaborationId);
+      setCollabError(t("errors.openCollabExists"));
+      setCollabSending(false);
+      return;
+    }
+
     const { error } = await supabase.from("collab_invites").insert({
       sender_id: user.id,
       receiver_id: profile.id,
@@ -397,14 +411,23 @@ function PublicProfilePageContent() {
         >
           {existingInvite === "pending" ? t("inviteSent") : existingInvite === "declined" ? t("inviteDeclined") : t("inviteToChat")}
         </button>
-        <button
-          type="button"
-          onClick={() => { setCollabOpen(true); setCollabError(null); setCollabStep(1); }}
-          disabled={existingCollabInvite === "pending"}
-          className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {existingCollabInvite === "pending" ? t("collabInviteSent") : t("inviteToCollaborate")}
-        </button>
+        {openCollaborationId ? (
+          <Link
+            href={`/collaborations/${openCollaborationId}`}
+            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+          >
+            {t("openCollaboration")}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => { setCollabOpen(true); setCollabError(null); setCollabStep(1); }}
+            disabled={existingCollabInvite === "pending"}
+            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {existingCollabInvite === "pending" ? t("collabInviteSent") : t("inviteToCollaborate")}
+          </button>
+        )}
       </div>
 
       {currentUserId && (

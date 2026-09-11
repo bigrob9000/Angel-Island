@@ -104,6 +104,54 @@ function otherUserId(invite: CollabInvite, userId: string): string {
   return invite.sender_id === userId ? invite.receiver_id : invite.sender_id;
 }
 
+const OPEN_COLLABORATION_STATUSES: CollaborationStatus[] = [
+  "pending_alignment",
+  "active",
+  "paused",
+];
+
+export type OpenCollaborationMatch = {
+  collaborationId: string;
+  collabInviteId: string;
+  status: CollaborationStatus;
+};
+
+export async function findOpenCollaborationBetweenUsers(
+  userId: string,
+  otherUserId: string
+): Promise<OpenCollaborationMatch | null> {
+  const supabase = createClient();
+  const { data: invites } = await supabase
+    .from("collab_invites")
+    .select("id, created_at")
+    .eq("status", "interested")
+    .or(
+      `and(sender_id.eq.${userId},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${userId})`
+    )
+    .order("created_at", { ascending: false });
+
+  const inviteIds = (invites ?? []).map((invite) => invite.id);
+  if (inviteIds.length === 0) return null;
+
+  const { data: collabs } = await supabase
+    .from("collaborations")
+    .select("id, collab_invite_id, status, created_at")
+    .in("collab_invite_id", inviteIds)
+    .in("status", OPEN_COLLABORATION_STATUSES)
+    .order("created_at", { ascending: false });
+
+  const open = (collabs ?? [])[0] as
+    | { id: string; collab_invite_id: string; status: CollaborationStatus }
+    | undefined;
+  if (!open?.collab_invite_id) return null;
+
+  return {
+    collaborationId: open.id,
+    collabInviteId: open.collab_invite_id,
+    status: open.status,
+  };
+}
+
 export async function findCollaborationIdByInvite(
   collabInviteId: string
 ): Promise<string | null> {

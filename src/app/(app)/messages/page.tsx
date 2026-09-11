@@ -10,7 +10,10 @@ import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { EmptyState } from "@/components/EmptyState";
 import { useInbox } from "@/components/InboxProvider";
-import { createCollaborationWorkspace } from "@/lib/collaborations";
+import {
+  createCollaborationWorkspace,
+  findOpenCollaborationBetweenUsers,
+} from "@/lib/collaborations";
 import { notifyCollabResponse } from "@/lib/notifications/client";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
@@ -238,8 +241,18 @@ export default function MessagesPage() {
     setActingId(collabId);
 
     const collab = receivedCollabInvites.find((c) => c.id === collabId);
+    if (response === "interested" && collab) {
+      const existing = await findOpenCollaborationBetweenUsers(user.id, collab.sender_id);
+      if (existing) {
+        setActingId(null);
+        window.alert(t("errors.alreadyOpenCollab"));
+        router.push(`/collaborations/${existing.collaborationId}`);
+        return;
+      }
+    }
+
     const now = new Date().toISOString();
-    await supabase
+    const { error: updateError } = await supabase
       .from("collab_invites")
       .update({
         status: response,
@@ -247,11 +260,25 @@ export default function MessagesPage() {
       })
       .eq("id", collabId);
 
+    if (updateError) {
+      setActingId(null);
+      window.alert(updateError.message);
+      return;
+    }
+
     setReceivedCollabInvites((prev) => prev.filter((c) => c.id !== collabId));
     setActingId(null);
 
     if (response === "interested" && collab) {
       const workspace = await createCollaborationWorkspace(collabId, null);
+      if (workspace.error && !workspace.id) {
+        window.alert(
+          workspace.tableMissing
+            ? workspace.error
+            : t("errors.collabWorkspaceFailed"),
+        );
+        return;
+      }
       notifyCollabResponse(collabId, { collaborationId: workspace.id });
       if (workspace.id) {
         router.push(`/collaborations/${workspace.id}`);
