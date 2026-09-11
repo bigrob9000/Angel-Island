@@ -13,6 +13,7 @@ import { COLLAB_PACE_LABELS } from "@/lib/types";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
 import { normalizeProfile } from "@/lib/types";
 import { formatMemberNames } from "@/lib/group-collaborations";
+import { loadArchivedCollaborationIds } from "@/lib/collaboration-archive";
 
 export type CollaborationPreview = Collaboration & {
   isGroup: boolean;
@@ -200,9 +201,11 @@ export async function createCollaborationWorkspace(
 
 export async function loadCollaborationPreviews(
   userId: string,
-  filter: "active" | "paused" | "past"
+  filter: "active" | "paused" | "past",
+  options?: { archivedOnly?: boolean },
 ): Promise<{ previews: CollaborationPreview[]; tableMissing: boolean }> {
   const supabase = createClient();
+  const archivedIds = await loadArchivedCollaborationIds(userId);
 
   const { data: invites, error: inviteError } = await supabase
     .from("collab_invites")
@@ -381,23 +384,32 @@ export async function loadCollaborationPreviews(
         }
       });
 
-      groupPreviews = filteredGroup.map((collab) => {
-        const groupInvite = groupInviteById[collab.group_collab_invite_id!];
-        const members = (membersByCollab[collab.id] ?? []).filter((p) => p.id !== userId);
-        return {
-          ...collab,
-          isGroup: true,
-          groupInvite,
-          members,
-          other: members[0],
-          lastActivityAt: groupLastActivity[collab.id] ?? collab.created_at,
-          lastEntryAuthorId: groupLastAuthor[collab.id] ?? null,
-        };
-      });
+      groupPreviews = filteredGroup
+        .filter((collab) => groupInviteById[collab.group_collab_invite_id!]?.status === "open")
+        .map((collab) => {
+          const groupInvite = groupInviteById[collab.group_collab_invite_id!];
+          const members = (membersByCollab[collab.id] ?? []).filter((p) => p.id !== userId);
+          return {
+            ...collab,
+            isGroup: true,
+            groupInvite,
+            members,
+            other: members[0],
+            lastActivityAt: groupLastActivity[collab.id] ?? collab.created_at,
+            lastEntryAuthorId: groupLastAuthor[collab.id] ?? null,
+          };
+        });
     }
   }
 
-  const combined = [...previews, ...groupPreviews];
+  let combined = [...previews, ...groupPreviews];
+
+  if (options?.archivedOnly) {
+    combined = combined.filter((preview) => archivedIds.has(preview.id));
+  } else if (filter === "past") {
+    combined = combined.filter((preview) => !archivedIds.has(preview.id));
+  }
+
   combined.sort(
     (a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime()
   );

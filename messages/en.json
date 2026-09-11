@@ -598,7 +598,20 @@
     "alignmentWaitingInviter": "You confirmed — waiting for them to confirm too.",
     "alignmentComplete": "You're both aligned. Notes, links, and chat are open.",
     "endedCopy": "This collaboration is closed. You can still read what you shared here.",
-    "startNewCollabWith": "Start something new with {name}"
+    "startNewCollabWith": "Start something new with {name}",
+    "hidden": "Hidden from your list",
+    "hiddenCopy": "Closed collaborations you removed. Restore any time — others can still access the workspace until someone deletes it.",
+    "removeFromList": "Remove from list",
+    "deletePermanently": "Delete permanently",
+    "hiddenFromListTitle": "Hidden from your Collabs list.",
+    "hiddenFromListCopy": "Others can still open this workspace. Restore to show it in Past again.",
+    "restoreToList": "Restore to list",
+    "removeTitle": "Remove from list",
+    "deleteTitle": "Delete permanently",
+    "removeCopy": "Remove from your Past list. Others keep access until someone deletes the workspace.",
+    "removing": "Removing…",
+    "deleteCopy": "Permanently delete this collaboration for everyone. Notes, links, and chat are erased.",
+    "deleting": "Deleting…"
   },
   "profile": {
     "title": "Profile",

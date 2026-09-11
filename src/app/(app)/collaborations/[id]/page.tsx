@@ -35,14 +35,22 @@ import {
 import { useCollab } from "@/components/CollabProvider";
 import { NotFoundPanel } from "@/components/NotFoundPanel";
 import { PageLoading } from "@/components/PageLoading";
+import {
+  hideCollaborationFromList,
+  loadArchivedCollaborationIds,
+  permanentlyDeleteCollaboration,
+  restoreCollaborationToList,
+} from "@/lib/collaboration-archive";
 
 type Tab = CollaborationEntryType | "chat";
+type ModalKind = "pause" | "end" | "remove" | "delete" | null;
 
 const inputClass =
   "mt-1 block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none";
 
 export default function CollaborationWorkspacePage() {
   const t = useTranslations("collaborations");
+  const tc = useTranslations("common");
   const tStatus = useTranslations("status");
   const tPace = useTranslations("pace");
   const params = useParams();
@@ -63,9 +71,10 @@ export default function CollaborationWorkspacePage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [modal, setModal] = useState<"pause" | "end" | null>(null);
+  const [modal, setModal] = useState<ModalKind>(null);
   const [safetyDialog, setSafetyDialog] = useState<SafetyDialog>(null);
   const [contextOpen, setContextOpen] = useState(true);
+  const [isArchived, setIsArchived] = useState(false);
 
   const [inviteUserId, setInviteUserId] = useState("");
   const [inviteError, setInviteError] = useState<string | null>(null);
@@ -93,6 +102,11 @@ export default function CollaborationWorkspacePage() {
         return;
       }
       setUserId(user.id);
+
+      void loadArchivedCollaborationIds(user.id).then((ids) => {
+        setIsArchived(ids.has(collaborationId));
+      });
+
       const result = await loadCollaborationDetail(collaborationId, user.id);
       setDetail(result.detail);
       setTableMissing(result.tableMissing);
@@ -267,6 +281,60 @@ export default function CollaborationWorkspacePage() {
     if (status === "ended") router.push("/collaborations");
   }
 
+  async function handleRemoveFromList() {
+    if (!userId) return;
+    setActing(true);
+    const { error } = await hideCollaborationFromList(userId, collaborationId);
+    setActing(false);
+    setModal(null);
+    setMenuOpen(false);
+
+    if (error) {
+      setActionError(error);
+      return;
+    }
+
+    setActionError(null);
+    setIsArchived(true);
+    void refreshCollabInbox();
+    router.push("/collaborations");
+  }
+
+  async function handleRestoreToList() {
+    if (!userId) return;
+    setActing(true);
+    const { error } = await restoreCollaborationToList(userId, collaborationId);
+    setActing(false);
+    setMenuOpen(false);
+
+    if (error) {
+      setActionError(error);
+      return;
+    }
+
+    setActionError(null);
+    setIsArchived(false);
+    void refreshCollabInbox();
+  }
+
+  async function handleDeletePermanently() {
+    if (!userId) return;
+    setActing(true);
+    const { error } = await permanentlyDeleteCollaboration(userId, collaborationId);
+    setActing(false);
+    setModal(null);
+    setMenuOpen(false);
+
+    if (error) {
+      setActionError(error);
+      return;
+    }
+
+    setActionError(null);
+    void refreshCollabInbox();
+    router.push("/collaborations");
+  }
+
   if (loading) return <PageLoading />;
 
   if (tableMissing) {
@@ -368,6 +436,30 @@ export default function CollaborationWorkspacePage() {
                   >
                     End collaboration
                   </button>
+                )}
+                {detail.status === "ended" && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setModal("remove");
+                      }}
+                      className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-foreground/5"
+                    >
+                      {t("removeFromList")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setModal("delete");
+                      }}
+                      className="block w-full px-4 py-2 text-left text-sm text-red-700 hover:bg-red-50"
+                    >
+                      {t("deletePermanently")}
+                    </button>
+                  </>
                 )}
                 <button
                   type="button"
@@ -505,13 +597,51 @@ export default function CollaborationWorkspacePage() {
         </div>
       )}
 
+      {isArchived && (
+        <div className="surface px-4 py-3 text-sm">
+          <p className="font-medium text-foreground">{t("hiddenFromListTitle")}</p>
+          <p className="mt-1 text-muted">{t("hiddenFromListCopy")}</p>
+          <button
+            type="button"
+            onClick={handleRestoreToList}
+            disabled={acting}
+            className="btn-secondary btn-sm mt-3"
+          >
+            {acting ? tc("restoring") : t("restoreToList")}
+          </button>
+        </div>
+      )}
+
       {detail.status === "ended" && (
         <div className="surface space-y-3 px-4 py-3 text-sm text-muted">
           <p>{t("endedCopy")}</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setModal("remove")}
+              disabled={acting}
+              className="btn-secondary btn-sm"
+            >
+              {t("removeFromList")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setModal("delete")}
+              disabled={acting}
+              className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-100 disabled:opacity-50"
+            >
+              {t("deletePermanently")}
+            </button>
+          </div>
           {!detail.isGroup && detail.other?.username && (
             <Link href={`/people/${detail.other.username}`} className="btn-secondary btn-sm inline-block">
               {t("startNewCollabWith", { name: otherName })}
             </Link>
+          )}
+          {actionError && (
+            <p className="text-sm text-red-600" role="alert">
+              {actionError}
+            </p>
           )}
         </div>
       )}
@@ -743,11 +873,11 @@ export default function CollaborationWorkspacePage() {
                     onClick={() => setModal(null)}
                     className="btn-secondary"
                   >
-                    Cancel
+                    {tc("cancel")}
                   </button>
                 </div>
               </>
-            ) : (
+            ) : modal === "end" ? (
               <>
                 <h2 className="section-heading">{t("endTitle")}</h2>
                 <p className="mt-3 text-sm text-muted leading-relaxed">
@@ -760,14 +890,58 @@ export default function CollaborationWorkspacePage() {
                     disabled={acting}
                     className="btn-primary"
                   >
-                    End
+                    {tc("end")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setModal(null)}
                     className="btn-secondary"
                   >
-                    Cancel
+                    {tc("cancel")}
+                  </button>
+                </div>
+              </>
+            ) : modal === "remove" ? (
+              <>
+                <h2 className="section-heading">{t("removeTitle")}</h2>
+                <p className="mt-3 text-sm text-muted leading-relaxed">{t("removeCopy")}</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleRemoveFromList}
+                    disabled={acting}
+                    className="btn-primary"
+                  >
+                    {acting ? t("removing") : t("removeFromList")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModal(null)}
+                    className="btn-secondary"
+                  >
+                    {tc("cancel")}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="section-heading">{t("deleteTitle")}</h2>
+                <p className="mt-3 text-sm text-muted leading-relaxed">{t("deleteCopy")}</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleDeletePermanently}
+                    disabled={acting}
+                    className="rounded-md bg-red-800 px-4 py-2 text-sm font-medium text-white hover:bg-red-900 disabled:opacity-50"
+                  >
+                    {acting ? t("deleting") : t("deletePermanently")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModal(null)}
+                    className="btn-secondary"
+                  >
+                    {tc("cancel")}
                   </button>
                 </div>
               </>

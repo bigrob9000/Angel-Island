@@ -88,6 +88,26 @@ Stores theme (Ethereal / Soft / Dusk / Dark), calm mode, and reading options on 
 
 ---
 
+## 040 — Collab archive grants (run after 039)
+
+Run the full file: `supabase/migrations/040_collaboration_archive_grants.sql`
+
+Grants table permissions so **Remove from list** and **Delete permanently** work from the app.
+
+**Try it:** End a collab → **Remove from list** should succeed without a permission error.
+
+---
+
+## 039 — Collab archive and permanent delete (run after 038)
+
+Run the full file: `supabase/migrations/039_collaboration_archive.sql`
+
+Lets you hide ended collaborations from your **Past** list, restore them later, or permanently delete an ended workspace for everyone.
+
+**Try it:** End a collab → open it from **Past** → **Remove from list** → it moves to **Hidden from your list**. **Delete permanently** removes the workspace for both people.
+
+---
+
 ## 038 — Collab maybe revisit (run after 037)
 
 Run the full file: `supabase/migrations/038_collab_maybe_revisit.sql`
@@ -315,6 +335,9 @@ If either line errors with **already member of publication**, that table is alre
 | 026 | Permanent delete for ended conversations (both participants) |
 | 027 | Conversation read state synced across devices (unread badges) |
 | 028 | Collaboration read state synced across devices (Activity badges) |
+| 037 | Collab alignment handshake (`pending_alignment` before workspace opens) |
+| 038 | Collab maybe revisit (`maybe_revisit_at` on collab invites) |
+| 039 | Per-user collab archive + permanent delete for ended workspaces |
 | 034 | `content_translations` cache (See translation on room posts) |
 | 035 | Profile room: mantra, background presets, custom upload |
 | 036 | Appearance preferences synced across devices |

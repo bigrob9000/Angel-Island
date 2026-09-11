@@ -5,10 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import {
+  collaborationFocusLine,
   collaborationsSetupError,
   loadCollaborationPreviews,
   type CollaborationPreview,
 } from "@/lib/collaborations";
+import { restoreCollaborationToList } from "@/lib/collaboration-archive";
 import { loadPendingGroupCollabInvitesForUser, loadPendingGroupMemberInvitesForUser } from "@/lib/group-collaborations";
 import { EmptyState } from "@/components/EmptyState";
 import { CollaborationPreviewLink } from "@/components/CollaborationPreviewLink";
@@ -34,9 +36,12 @@ export default function CollaborationsPage() {
   const [memberInvites, setMemberInvites] = useState<
     Awaited<ReturnType<typeof loadPendingGroupMemberInvitesForUser>>["invites"]
   >([]);
+  const [archivedPreviews, setArchivedPreviews] = useState<CollaborationPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableMissing, setTableMissing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [actingId, setActingId] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
   const { collaborations: trackedCollabs, refresh: refreshCollabInbox } = useCollab();
 
   const unreadById = useMemo(() => {
@@ -46,6 +51,16 @@ export default function CollaborationsPage() {
     });
     return map;
   }, [trackedCollabs]);
+
+  function selectFilter(next: Filter) {
+    setFilter(next);
+    if (next !== "active") {
+      setGroupReceived([]);
+      setGroupSent([]);
+      setMemberInvites([]);
+      setGroupInviteError(null);
+    }
+  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -64,18 +79,106 @@ export default function CollaborationsPage() {
         setLoading(false);
         return;
       }
-      const result = await loadCollaborationPreviews(user.id, filter);
-      const groupInvites = await loadPendingGroupCollabInvitesForUser(user.id);
-      const memberInviteResult = await loadPendingGroupMemberInvitesForUser(user.id);
-      setPreviews(result.previews);
-      setGroupReceived(groupInvites.received);
-      setGroupSent(groupInvites.sent);
-      setGroupInviteError(groupInvites.error ?? null);
-      setMemberInvites(memberInviteResult.invites);
-      setTableMissing(result.tableMissing || groupInvites.tableMissing || memberInviteResult.tableMissing);
+
+      const previewResult = await loadCollaborationPreviews(user.id, filter);
+      setPreviews(previewResult.previews);
+      let missing = previewResult.tableMissing;
+
+      if (filter === "past") {
+        const archivedResult = await loadCollaborationPreviews(user.id, "past", {
+          archivedOnly: true,
+        });
+        setArchivedPreviews(archivedResult.previews);
+      } else {
+        setArchivedPreviews([]);
+      }
+
+      if (filter === "active") {
+        const [groupInvites, memberInviteResult] = await Promise.all([
+          loadPendingGroupCollabInvitesForUser(user.id),
+          loadPendingGroupMemberInvitesForUser(user.id),
+        ]);
+        setGroupReceived(groupInvites.received);
+        setGroupSent(groupInvites.sent);
+        setGroupInviteError(groupInvites.error ?? null);
+        setMemberInvites(memberInviteResult.invites);
+        missing =
+          missing || groupInvites.tableMissing || memberInviteResult.tableMissing;
+      }
+
+      setTableMissing(missing);
       setLoading(false);
     });
   }, [filter, refreshKey]);
+
+  async function restoreCollaboration(collaborationId: string) {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    setActingId(collaborationId);
+    setRestoreError(null);
+    const { error } = await restoreCollaborationToList(user.id, collaborationId);
+    setActingId(null);
+
+    if (error) {
+      setRestoreError(error);
+      return;
+    }
+
+    setArchivedPreviews((prev) => prev.filter((preview) => preview.id !== collaborationId));
+    setRefreshKey((key) => key + 1);
+    void refreshCollabInbox();
+  }
+
+  function refreshList() {
+    setRefreshKey((key) => key + 1);
+    void refreshCollabInbox();
+  }
+
+  function renderPreviewList(showClosedActions: boolean) {
+    if (loading) {
+      return <p className="text-muted">{tc("loading")}</p>;
+    }
+
+    if (previews.length === 0) {
+      if (filter === "active") {
+        return (
+          <EmptyState
+            title={t("emptyActive")}
+            description={t("emptyActiveDescription")}
+          >
+            <Link href="/messages" className="btn-secondary">
+              {t("checkMessages")}
+            </Link>
+            <Link href="/explore" className="btn-secondary">
+              {t("explorePeople")}
+            </Link>
+          </EmptyState>
+        );
+      }
+
+      return <EmptyState title={t("emptyOther")} />;
+    }
+
+    return (
+      <ul className="space-y-3">
+        {previews.map((preview) => (
+          <li key={preview.id}>
+            <CollaborationPreviewLink
+              preview={preview}
+              showActions={filter !== "past"}
+              showClosedActions={showClosedActions}
+              unread={Boolean(unreadById[preview.id])}
+              onUpdated={refreshList}
+            />
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -99,7 +202,7 @@ export default function CollaborationsPage() {
               type="button"
               role="tab"
               aria-selected={filter === id}
-              onClick={() => setFilter(id)}
+              onClick={() => selectFilter(id)}
               className={`nav-pill relative text-sm ${
                 filter === id
                   ? "nav-pill-active text-foreground"
@@ -123,7 +226,7 @@ export default function CollaborationsPage() {
         </p>
       )}
 
-      {groupInviteError && !tableMissing && (
+      {groupInviteError && !tableMissing && filter === "active" && (
         <p className="text-sm text-red-600" role="alert">
           {groupInviteError}
         </p>
@@ -133,51 +236,73 @@ export default function CollaborationsPage() {
         <p className="text-sm text-muted">{collaborationsSetupError()}</p>
       )}
 
-      <GroupMemberInvitesSection
-        invites={memberInvites}
-        onResponded={() => setRefreshKey((key) => key + 1)}
-      />
+      {filter === "active" && (
+        <div className="space-y-8">
+          <GroupMemberInvitesSection
+            invites={memberInvites}
+            onResponded={refreshList}
+          />
 
-      <GroupCollabInvitesSection
-        received={groupReceived}
-        sent={groupSent}
-        onResponded={() => setRefreshKey((key) => key + 1)}
-      />
+          <GroupCollabInvitesSection
+            received={groupReceived}
+            sent={groupSent}
+            onResponded={refreshList}
+          />
 
-      {loading ? (
-        <p className="text-muted">{tc("loading")}</p>
-      ) : previews.length === 0 ? (
-        filter === "active" ? (
-          <EmptyState
-            title={t("emptyActive")}
-            description={t("emptyActiveDescription")}
-          >
-            <Link href="/messages" className="btn-secondary">
-              {t("checkMessages")}
-            </Link>
-            <Link href="/explore" className="btn-secondary">
-              {t("explorePeople")}
-            </Link>
-          </EmptyState>
-        ) : (
-          <EmptyState title={t("emptyOther")} />
-        )
-      ) : (
-        <ul className="space-y-3">
-          {previews.map((preview) => (
-            <li key={preview.id}>
-              <CollaborationPreviewLink
-                preview={preview}
-                showActions={filter !== "past"}
-                unread={Boolean(unreadById[preview.id])}
-                onUpdated={() => {
-                  setRefreshKey((key) => key + 1);
-                  void refreshCollabInbox();
-                }}
-              />
-            </li>
-          ))}
-        </ul>
+          {renderPreviewList(false)}
+        </div>
+      )}
+
+      {filter === "paused" && renderPreviewList(false)}
+
+      {filter === "past" && (
+        <div className="space-y-8">
+          {renderPreviewList(true)}
+
+          {archivedPreviews.length > 0 && (
+            <section>
+              <h2 className="section-heading">{t("hidden")}</h2>
+              <p className="section-copy">{t("hiddenCopy")}</p>
+              {restoreError && (
+                <p className="mt-3 text-sm text-red-600" role="alert">
+                  {restoreError}
+                </p>
+              )}
+              <ul className="mt-4 space-y-2">
+                {archivedPreviews.map((preview) => {
+                  const name = preview.isGroup
+                    ? t("groupTitle")
+                    : preview.other?.first_name ?? preview.other?.username ?? t("defaultMusicianName");
+                  const focusLine = collaborationFocusLine(preview);
+                  return (
+                    <li
+                      key={preview.id}
+                      className="surface flex flex-wrap items-start justify-between gap-4 px-4 py-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={`/collaborations/${preview.id}`}
+                          className="font-medium text-foreground hover:underline"
+                        >
+                          {name}
+                        </Link>
+                        <p className="mt-1 truncate text-sm text-muted">{focusLine}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => restoreCollaboration(preview.id)}
+                        disabled={actingId === preview.id}
+                        className="btn-secondary btn-sm shrink-0"
+                      >
+                        {actingId === preview.id ? tc("restoring") : t("restoreToList")}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+        </div>
       )}
     </div>
   );
