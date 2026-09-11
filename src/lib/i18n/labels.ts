@@ -82,6 +82,7 @@ export function inviteResponseLabel(
 }
 
 export function collaborationStatusLabel(status: string, t: TranslateFn): string {
+  if (status === "pending_alignment") return t("pendingAlignment");
   if (status === "paused") return t("paused");
   if (status === "ended") return t("closed");
   return t("active");

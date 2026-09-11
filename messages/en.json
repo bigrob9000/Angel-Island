@@ -440,7 +440,7 @@
     "receivedInvitesCopy": "Accept to start a conversation. No obligation.",
     "noPendingChatInvites": "No pending chat invites.",
     "notAFit": "Not a fit",
-    "receivedCollabInvitesCopy": "Respond below. If you're interested, you'll open a shared collaboration space.",
+    "receivedCollabInvitesCopy": "Respond below. If you're interested, you'll confirm the collab details together before the workspace opens.",
     "aboutLabel": "About: {about}",
     "theirRole": "Their role: {role}",
     "yourRole": "Your role: {role}",
@@ -453,6 +453,8 @@
     "collabInviteLabel": "Collab invite",
     "cancelInvite": "Cancel invite",
     "openCollaborationSpace": "Open collaboration space",
+    "confirmCollaboration": "Confirm collaboration",
+    "viewAlignmentProgress": "View alignment progress",
     "conversationsCopy": "Chats you started or accepted.",
     "noConversationsYet": "No conversations yet. Accept an invite to start one.",
     "hiddenCopy": "Closed conversations you removed. Restore any time — the other person still has access.",
@@ -579,7 +581,16 @@
     "groupChatEmpty": "No group messages yet — say hello when you're ready.",
     "groupChatPaused": "Group chat is paused while this collaboration is on hold.",
     "groupChatPlaceholder": "Message the group…",
-    "groupChatYou": "You"
+    "groupChatYou": "You",
+    "alignmentTitle": "Confirm you're aligned",
+    "alignmentCopy": "Before notes and chat open, both of you confirm this matches what you want to explore — pace, focus, and intent.",
+    "alignmentWith": "With",
+    "alignmentConfirm": "Yes, this matches what I want",
+    "alignmentConfirming": "Confirming…",
+    "alignmentInviterPrompt": "They confirmed this matches what they want. Does it match for you too?",
+    "alignmentWaitingInvitee": "Waiting for them to confirm this matches what they want.",
+    "alignmentWaitingInviter": "You confirmed — waiting for them to confirm too.",
+    "alignmentComplete": "You're both aligned. Notes, links, and chat are open."
   },
   "profile": {
     "title": "Profile",
@@ -756,6 +767,7 @@
   },
   "status": {
     "active": "Active",
+    "pendingAlignment": "Confirming",
     "paused": "Paused",
     "closed": "Closed"
   },

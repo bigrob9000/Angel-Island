@@ -39,9 +39,14 @@ export function collaborationsSetupError(): string {
 }
 
 export function collaborationStatusLabel(status: CollaborationStatus): string {
+  if (status === "pending_alignment") return "Confirming intent";
   if (status === "paused") return "Paused";
   if (status === "ended") return "Closed";
   return "Active";
+}
+
+export function isCollabInviteFullyAligned(invite: CollabInvite): boolean {
+  return Boolean(invite.inviter_aligned_at && invite.invitee_aligned_at);
 }
 
 export function collaborationFocusLine(preview: CollaborationPreview): string {
@@ -113,7 +118,8 @@ export async function findCollaborationIdByInvite(
 
 export async function createCollaborationWorkspace(
   collabInviteId: string,
-  chatInviteId: string | null
+  chatInviteId: string | null,
+  status: CollaborationStatus = "pending_alignment"
 ): Promise<{ id?: string; error?: string; tableMissing?: boolean }> {
   const supabase = createClient();
   const { data, error } = await supabase
@@ -121,7 +127,7 @@ export async function createCollaborationWorkspace(
     .insert({
       collab_invite_id: collabInviteId,
       chat_invite_id: chatInviteId,
-      status: "active",
+      status,
     })
     .select("id")
     .single();
@@ -177,7 +183,7 @@ export async function loadCollaborationPreviews(
   const inviteById = Object.fromEntries(interestedInvites.map((invite) => [invite.id, invite]));
   const statuses =
     filter === "active"
-      ? new Set<CollaborationStatus>(["active"])
+      ? new Set<CollaborationStatus>(["active", "pending_alignment"])
       : filter === "paused"
         ? new Set<CollaborationStatus>(["paused"])
         : new Set<CollaborationStatus>(["ended"]);
@@ -585,4 +591,146 @@ export async function deleteCollaborationEntry(entryId: string): Promise<{ error
   const supabase = createClient();
   const { error } = await supabase.from("collaboration_entries").delete().eq("id", entryId);
   return error ? { error: error.message } : {};
+}
+
+function collabChatContext(invite: CollabInvite): string {
+  let context = `About: ${invite.about}`;
+  if (invite.role) context += ` · Role: ${invite.role}`;
+  if (invite.pace) context += ` · Pace: ${COLLAB_PACE_LABELS[invite.pace]}`;
+  return context;
+}
+
+async function activateCollaborationAfterAlignment(
+  invite: CollabInvite,
+  collaborationId: string
+): Promise<{ error?: string; tableMissing?: boolean }> {
+  const supabase = createClient();
+
+  let chatInviteId = null as string | null;
+  const { data: existingCollab } = await supabase
+    .from("collaborations")
+    .select("chat_invite_id")
+    .eq("id", collaborationId)
+    .maybeSingle();
+
+  chatInviteId = existingCollab?.chat_invite_id ?? null;
+
+  if (!chatInviteId) {
+    const { data: newChat, error: chatError } = await supabase
+      .from("chat_invites")
+      .insert({
+        sender_id: invite.receiver_id,
+        receiver_id: invite.sender_id,
+        status: "accepted",
+        optional_message: collabChatContext(invite),
+      })
+      .select("id")
+      .single();
+
+    if (chatError) {
+      return { error: chatError.message };
+    }
+    chatInviteId = newChat?.id ?? null;
+  }
+
+  const { error } = await supabase
+    .from("collaborations")
+    .update({
+      status: "active",
+      chat_invite_id: chatInviteId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", collaborationId);
+
+  if (error) {
+    if (isCollabWorkspaceMissing(error.message, error.code)) {
+      return { tableMissing: true, error: collaborationsSetupError() };
+    }
+    return { error: error.message };
+  }
+
+  return {};
+}
+
+export async function confirmCollabAlignment(
+  collabInviteId: string,
+  userId: string,
+  inviteMeta: Pick<CollabInvite, "about" | "role" | "pace">
+): Promise<{ detail?: CollaborationDetail; error?: string; tableMissing?: boolean }> {
+  const supabase = createClient();
+  const now = new Date().toISOString();
+
+  const { data: inviteRow, error: loadError } = await supabase
+    .from("collab_invites")
+    .select("*")
+    .eq("id", collabInviteId)
+    .maybeSingle();
+
+  if (loadError || !inviteRow) {
+    return { error: loadError?.message ?? "Collab invite not found." };
+  }
+
+  const invite = inviteRow as CollabInvite;
+  if (invite.status !== "interested") {
+    return { error: "This invite is no longer open for alignment." };
+  }
+  if (invite.sender_id !== userId && invite.receiver_id !== userId) {
+    return { error: "You don't have access to this collaboration." };
+  }
+
+  const isInviter = invite.sender_id === userId;
+  const patch: Record<string, string> = {};
+  if (isInviter && !invite.inviter_aligned_at) {
+    patch.inviter_aligned_at = now;
+  }
+  if (!isInviter && !invite.invitee_aligned_at) {
+    patch.invitee_aligned_at = now;
+  }
+
+  if (Object.keys(patch).length > 0) {
+    const { error: updateError } = await supabase
+      .from("collab_invites")
+      .update(patch)
+      .eq("id", collabInviteId);
+
+    if (updateError) {
+      if (updateError.message.includes("inviter_aligned_at")) {
+        return {
+          tableMissing: true,
+          error:
+            "Collab alignment isn't set up yet. Run migration 037_collab_alignment.sql in Supabase.",
+        };
+      }
+      return { error: updateError.message };
+    }
+  }
+
+  const alignedInvite: CollabInvite = {
+    ...invite,
+    ...inviteMeta,
+    inviter_aligned_at: invite.inviter_aligned_at ?? patch.inviter_aligned_at ?? null,
+    invitee_aligned_at: invite.invitee_aligned_at ?? patch.invitee_aligned_at ?? null,
+  };
+
+  const collaborationId = await findCollaborationIdByInvite(collabInviteId);
+  if (!collaborationId) {
+    return { error: "Collaboration workspace not found." };
+  }
+
+  if (isCollabInviteFullyAligned(alignedInvite)) {
+    const activation = await activateCollaborationAfterAlignment(alignedInvite, collaborationId);
+    if (activation.error) {
+      return activation;
+    }
+  }
+
+  const result = await loadCollaborationDetail(collaborationId, userId);
+  if (result.tableMissing) {
+    return { tableMissing: true, error: collaborationsSetupError() };
+  }
+  if (!result.detail) {
+    return { error: "Collaboration workspace not found." };
+  }
+
+  return { detail: result.detail };
 }

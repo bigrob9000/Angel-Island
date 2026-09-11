@@ -137,7 +137,7 @@ export interface Message {
 export type CollabPace = "low-pressure" | "structured" | "flexible";
 export type CollabInviteStatus = "pending" | "interested" | "maybe" | "not_fit" | "cancelled";
 
-export type CollaborationStatus = "active" | "paused" | "ended";
+export type CollaborationStatus = "pending_alignment" | "active" | "paused" | "ended";
 export type CollaborationEntryType = "note" | "reference" | "step";
 
 export interface Collaboration {
@@ -231,6 +231,8 @@ export interface CollabInvite {
   role: string | null;
   pace: CollabPace | null;
   status: CollabInviteStatus;
+  inviter_aligned_at: string | null;
+  invitee_aligned_at: string | null;
   created_at: string;
 }
 

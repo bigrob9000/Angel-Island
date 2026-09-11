@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
-import type { ChatInvite, Profile, CollabInvite } from "@/lib/types";
+import type { ChatInvite, Profile, CollabInvite, CollaborationStatus } from "@/lib/types";
 import { ConversationPreviewLink } from "@/components/ConversationPreviewLink";
 import { ProfileAttribution } from "@/components/ProfileAttribution";
 import { EmptyState } from "@/components/EmptyState";
 import { useInbox } from "@/components/InboxProvider";
-import { createCollaborationWorkspace, findCollaborationIdByInvite } from "@/lib/collaborations";
+import { createCollaborationWorkspace } from "@/lib/collaborations";
 import { notifyCollabResponse } from "@/lib/notifications/client";
 import { loadBlockedUserIds } from "@/lib/blocks";
 import { PROFILE_ATTRIBUTION_FIELDS } from "@/lib/profile";
@@ -38,7 +38,9 @@ export default function MessagesPage() {
   const [receivedInvites, setReceivedInvites] = useState<(ChatInvite & { sender?: Profile })[]>([]);
   const [sentInvites, setSentInvites] = useState<(ChatInvite & { receiver?: Profile })[]>([]);
   const [receivedCollabInvites, setReceivedCollabInvites] = useState<(CollabInvite & { sender?: Profile })[]>([]);
-  const [sentCollabInvites, setSentCollabInvites] = useState<(CollabInvite & { receiver?: Profile; workspaceId?: string | null })[]>([]);
+  const [sentCollabInvites, setSentCollabInvites] = useState<
+    (CollabInvite & { receiver?: Profile; workspaceId?: string | null; workspaceStatus?: CollaborationStatus | null })[]
+  >([]);
   const [groupReceived, setGroupReceived] = useState<GroupCollabInviteWithMeta[]>([]);
   const [groupSent, setGroupSent] = useState<GroupCollabInviteWithMeta[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -129,11 +131,22 @@ export default function MessagesPage() {
             const byId: Record<string, Profile> = {};
             (pRes.data ?? []).forEach((row) => { byId[row.id] = row as Profile; });
             const withWorkspace = await Promise.all(
-              collabsSent.map(async (c) => ({
-                ...c,
-                receiver: byId[c.receiver_id],
-                workspaceId: c.status === "interested" ? await findCollaborationIdByInvite(c.id) : null,
-              }))
+              collabsSent.map(async (c) => {
+                if (c.status !== "interested") {
+                  return { ...c, receiver: byId[c.receiver_id], workspaceId: null, workspaceStatus: null };
+                }
+                const { data: workspace } = await supabase
+                  .from("collaborations")
+                  .select("id, status")
+                  .eq("collab_invite_id", c.id)
+                  .maybeSingle();
+                return {
+                  ...c,
+                  receiver: byId[c.receiver_id],
+                  workspaceId: workspace?.id ?? null,
+                  workspaceStatus: (workspace?.status as CollaborationStatus | undefined) ?? null,
+                };
+              })
             );
             setSentCollabInvites(withWorkspace);
           });
@@ -225,36 +238,23 @@ export default function MessagesPage() {
     setActingId(collabId);
 
     const collab = receivedCollabInvites.find((c) => c.id === collabId);
-    await supabase.from("collab_invites").update({ status: response }).eq("id", collabId);
+    const now = new Date().toISOString();
+    await supabase
+      .from("collab_invites")
+      .update({
+        status: response,
+        ...(response === "interested" ? { invitee_aligned_at: now } : {}),
+      })
+      .eq("id", collabId);
 
     setReceivedCollabInvites((prev) => prev.filter((c) => c.id !== collabId));
     setActingId(null);
     notifyCollabResponse(collabId);
 
     if (response === "interested" && collab) {
-      let context = t("collabContextAbout", { about: collab.about });
-      if (collab.role) {
-        context += t("collabContextRolePart", { role: translateProfileOption(collab.role, tProfileOptions) });
-      }
-      if (collab.pace) {
-        context += t("collabContextPacePart", { pace: translatePace(collab.pace, tPace) });
-      }
-      const { data: newChat } = await supabase
-        .from("chat_invites")
-        .insert({
-          sender_id: user.id,
-          receiver_id: collab.sender_id,
-          status: "accepted",
-          optional_message: context,
-        })
-        .select("id")
-        .single();
-
-      const workspace = await createCollaborationWorkspace(collabId, newChat?.id ?? null);
+      const workspace = await createCollaborationWorkspace(collabId, null);
       if (workspace.id) {
         router.push(`/collaborations/${workspace.id}`);
-      } else if (newChat) {
-        router.push(`/messages/${newChat.id}`);
       }
     }
   }
@@ -413,12 +413,28 @@ export default function MessagesPage() {
                   </p>
                 )}
                 {c.status === "interested" && c.workspaceId ? (
-                  <Link
-                    href={`/collaborations/${c.workspaceId}`}
-                    className="mt-2 inline-block text-sm text-foreground underline hover:no-underline"
-                  >
-                    {t("openCollaborationSpace")}
-                  </Link>
+                  c.workspaceStatus === "pending_alignment" && c.invitee_aligned_at && !c.inviter_aligned_at ? (
+                    <Link
+                      href={`/collaborations/${c.workspaceId}`}
+                      className="mt-2 inline-block text-sm font-medium text-foreground underline hover:no-underline"
+                    >
+                      {t("confirmCollaboration")}
+                    </Link>
+                  ) : c.workspaceStatus === "pending_alignment" ? (
+                    <Link
+                      href={`/collaborations/${c.workspaceId}`}
+                      className="mt-2 inline-block text-sm text-foreground underline hover:no-underline"
+                    >
+                      {t("viewAlignmentProgress")}
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/collaborations/${c.workspaceId}`}
+                      className="mt-2 inline-block text-sm text-foreground underline hover:no-underline"
+                    >
+                      {t("openCollaborationSpace")}
+                    </Link>
+                  )
                 ) : (
                   <p className="mt-2 text-xs text-muted italic">{inviteResponseLabel("waiting", tInvite)}</p>
                 )}

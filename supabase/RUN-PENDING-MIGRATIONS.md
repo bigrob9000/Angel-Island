@@ -88,6 +88,16 @@ Stores theme (Ethereal / Soft / Dusk / Dark), calm mode, and reading options on 
 
 ---
 
+## 037 — Collab alignment handshake (run after 036)
+
+Run the full file: `supabase/migrations/037_collab_alignment.sql`
+
+After someone responds **Interested** to a 1:1 collab invite, both people confirm intent and pace before the workspace and chat fully open.
+
+**Try it:** Send a collab invite → have them tap **Interested** → you both see a confirmation step on the workspace → once both confirm, notes and chat unlock.
+
+---
+
 ## Collab invites — run this now
 
 **File:** `supabase/migrations/003_collab_invites.sql`

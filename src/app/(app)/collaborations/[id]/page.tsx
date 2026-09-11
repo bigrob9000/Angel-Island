@@ -26,6 +26,7 @@ import {
   inviteGroupCollabMember,
 } from "@/lib/group-collaborations";
 import { GroupCollabChat } from "@/components/GroupCollabChat";
+import { CollabAlignmentPanel } from "@/components/CollabAlignmentPanel";
 import { NavCloudBackdrop } from "@/components/NavCloudBackdrop";
 import {
   subscribeToCollaboration,
@@ -71,6 +72,7 @@ export default function CollaborationWorkspacePage() {
   const [isCreator, setIsCreator] = useState(false);
 
   const isActive = detail?.status === "active";
+  const isPendingAlignment = detail?.status === "pending_alignment";
   const isGroup = detail?.isGroup ?? false;
 
   const workspaceTabs = useMemo(() => {
@@ -159,9 +161,9 @@ export default function CollaborationWorkspacePage() {
   }, [collaborationId, userId, loading]);
 
   useEffect(() => {
-    if (!detail || !userId) return;
+    if (!detail || !userId || detail.status === "pending_alignment") return;
     markCollabRead(detail.id, detail.lastActivityAt);
-  }, [detail?.id, detail?.lastActivityAt, userId, markCollabRead]);
+  }, [detail?.id, detail?.lastActivityAt, detail?.status, userId, markCollabRead]);
 
   const tabEntries = useMemo(() => {
     if (!detail || tab === "chat") return [];
@@ -322,6 +324,7 @@ export default function CollaborationWorkspacePage() {
                 : `with ${otherName}`}
             </p>
           </div>
+          {!isPendingAlignment && (
           <div className="relative">
             <button
               type="button"
@@ -379,8 +382,20 @@ export default function CollaborationWorkspacePage() {
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
+
+      {isPendingAlignment && detail.invite && userId && (
+        <CollabAlignmentPanel
+          detail={detail}
+          userId={userId}
+          onActivated={(updated) => {
+            setDetail(updated);
+            void refreshCollabInbox();
+          }}
+        />
+      )}
 
       <UserSafetyActions
         currentUserId={userId}
@@ -505,7 +520,7 @@ export default function CollaborationWorkspacePage() {
         </Link>
       )}
 
-      {detail.isGroup && isCreator && isActive && (detail.members?.length ?? 0) < GROUP_COLLAB_MAX_MEMBERS - 1 && (
+      {!isPendingAlignment && detail.isGroup && isCreator && isActive && (detail.members?.length ?? 0) < GROUP_COLLAB_MAX_MEMBERS - 1 && (
         <div className="surface p-4 space-y-2">
           <p className="text-sm font-medium text-foreground">Invite someone else</p>
           <p className="text-xs text-muted">
@@ -541,6 +556,7 @@ export default function CollaborationWorkspacePage() {
         </div>
       )}
 
+      {!isPendingAlignment && (
       <div>
         <div className="flex flex-wrap gap-2 overflow-visible pb-2">
           {workspaceTabs.map(({ id, label }) => (
@@ -685,6 +701,7 @@ export default function CollaborationWorkspacePage() {
           )}
         </div>
       </div>
+      )}
 
       {actionError && (
         <p className="text-sm text-red-600" role="alert">
