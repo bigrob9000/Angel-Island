@@ -786,6 +786,11 @@ html.reduce-motion .room-enter {
   padding-inline: 0.58rem;
 }
 
+/* Match Start group button left edge to Active tab oval (nav-cloud -1rem bleed) */
+.collaborations-start-btn {
+  margin-left: -1rem;
+}
+
 /* Profile "room" — full-page MySpace-style background + mantra */
 html.profile-room-active .bg-ethereal {
   background: transparent;

@@ -85,7 +85,7 @@ export default function CollaborationsPage() {
       </div>
 
       <div className="space-y-3">
-        <Link href="/collaborations/group/new" className="btn-primary w-fit">
+        <Link href="/collaborations/group/new" className="btn-primary collaborations-start-btn w-fit">
           {t("startGroup")}
         </Link>
         <div
