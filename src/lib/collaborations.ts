@@ -702,9 +702,29 @@ function collabChatContext(invite: CollabInvite): string {
   return context;
 }
 
+async function findAcceptedChatInviteBetweenUsers(
+  userA: string,
+  userB: string,
+): Promise<string | null> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("chat_invites")
+    .select("id")
+    .eq("status", "accepted")
+    .or(
+      `and(sender_id.eq.${userA},receiver_id.eq.${userB}),and(sender_id.eq.${userB},receiver_id.eq.${userA})`,
+    )
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return data?.id ?? null;
+}
+
 async function activateCollaborationAfterAlignment(
   invite: CollabInvite,
-  collaborationId: string
+  collaborationId: string,
+  userId: string,
 ): Promise<{ error?: string; tableMissing?: boolean }> {
   const supabase = createClient();
 
@@ -718,11 +738,16 @@ async function activateCollaborationAfterAlignment(
   chatInviteId = existingCollab?.chat_invite_id ?? null;
 
   if (!chatInviteId) {
+    chatInviteId = await findAcceptedChatInviteBetweenUsers(invite.sender_id, invite.receiver_id);
+  }
+
+  if (!chatInviteId) {
+    const otherId = invite.sender_id === userId ? invite.receiver_id : invite.sender_id;
     const { data: newChat, error: chatError } = await supabase
       .from("chat_invites")
       .insert({
-        sender_id: invite.receiver_id,
-        receiver_id: invite.sender_id,
+        sender_id: userId,
+        receiver_id: otherId,
         status: "accepted",
         optional_message: collabChatContext(invite),
       })
@@ -820,7 +845,11 @@ export async function confirmCollabAlignment(
   }
 
   if (isCollabInviteFullyAligned(alignedInvite)) {
-    const activation = await activateCollaborationAfterAlignment(alignedInvite, collaborationId);
+    const activation = await activateCollaborationAfterAlignment(
+      alignedInvite,
+      collaborationId,
+      userId,
+    );
     if (activation.error) {
       return activation;
     }
