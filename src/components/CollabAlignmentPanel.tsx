@@ -85,8 +85,15 @@ export function CollabAlignmentPanel({ detail, userId, onActivated }: Props) {
         )}
       </div>
 
-      {fullyAligned ? (
+      {fullyAligned && detail.status === "active" ? (
         <p className="text-sm text-foreground">{t("alignmentComplete")}</p>
+      ) : fullyAligned ? (
+        <div className="space-y-3">
+          <p className="text-sm text-muted">{t("alignmentReadyToOpen")}</p>
+          <button type="button" onClick={handleConfirm} disabled={acting} className="btn-primary">
+            {acting ? t("alignmentOpening") : t("alignmentOpenWorkspace")}
+          </button>
+        </div>
       ) : isInviter ? (
         <div className="space-y-3">
           {waitingOnInviter ? (

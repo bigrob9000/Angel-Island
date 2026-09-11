@@ -14,6 +14,7 @@ import {
   collaborationQuietLine,
   collaborationsSetupError,
   deleteCollaborationEntry,
+  ensureCollaborationActivated,
   loadCollaborationDetail,
   toggleCollaborationStep,
   updateCollaborationStatus,
@@ -109,7 +110,17 @@ export default function CollaborationWorkspacePage() {
       });
 
       const result = await loadCollaborationDetail(collaborationId, user.id);
-      setDetail(result.detail);
+      let loadedDetail = result.detail;
+      if (loadedDetail?.status === "pending_alignment") {
+        const activated = await ensureCollaborationActivated(loadedDetail, user.id);
+        if (activated.error) {
+          setActionError(activated.error);
+        }
+        if (activated.detail) {
+          loadedDetail = activated.detail;
+        }
+      }
+      setDetail(loadedDetail);
       setTableMissing(result.tableMissing);
       setLoadError(result.loadError ?? null);
       if (result.detail?.isGroup) {

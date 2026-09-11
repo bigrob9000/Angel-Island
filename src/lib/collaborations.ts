@@ -801,6 +801,33 @@ async function activateCollaborationAfterAlignment(
   return {};
 }
 
+export async function ensureCollaborationActivated(
+  detail: CollaborationDetail,
+  userId: string,
+): Promise<{ detail?: CollaborationDetail; error?: string; tableMissing?: boolean }> {
+  if (detail.status !== "pending_alignment" || detail.isGroup || !detail.invite) {
+    return { detail };
+  }
+  if (!isCollabInviteFullyAligned(detail.invite)) {
+    return { detail };
+  }
+
+  const activation = await activateCollaborationAfterAlignment(detail.invite, detail.id, userId);
+  if (activation.error) {
+    return activation;
+  }
+
+  const result = await loadCollaborationDetail(detail.id, userId);
+  if (result.tableMissing) {
+    return { tableMissing: true, error: collaborationsSetupError() };
+  }
+  if (!result.detail) {
+    return { error: "Collaboration workspace not found." };
+  }
+
+  return { detail: result.detail };
+}
+
 export async function confirmCollabAlignment(
   collabInviteId: string,
   userId: string,
@@ -866,17 +893,6 @@ export async function confirmCollabAlignment(
     return { error: "Collaboration workspace not found." };
   }
 
-  if (isCollabInviteFullyAligned(alignedInvite)) {
-    const activation = await activateCollaborationAfterAlignment(
-      alignedInvite,
-      collaborationId,
-      userId,
-    );
-    if (activation.error) {
-      return activation;
-    }
-  }
-
   const result = await loadCollaborationDetail(collaborationId, userId);
   if (result.tableMissing) {
     return { tableMissing: true, error: collaborationsSetupError() };
@@ -885,5 +901,14 @@ export async function confirmCollabAlignment(
     return { error: "Collaboration workspace not found." };
   }
 
-  return { detail: result.detail };
+  const withAlignedInvite: CollaborationDetail = {
+    ...result.detail,
+    invite: alignedInvite,
+  };
+
+  if (isCollabInviteFullyAligned(alignedInvite)) {
+    return ensureCollaborationActivated(withAlignedInvite, userId);
+  }
+
+  return { detail: withAlignedInvite };
 }
