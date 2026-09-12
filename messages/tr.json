@@ -54,7 +54,7 @@
     "unreadConversationPlural": "{count} okunmamış sohbet"
   },
   "landing": {
-    "tagline": "Müziğe gerçekten önem veren müzisyenler ve yaratıcılar için bir yer. Clout yok. Baskı yok. Sadece bağlantı, iş birliği ve sohbet.",
+    "tagline": "Müziğe gerçekten önem veren müzisyenler ve yaratıcılar için bir yer. Statü oyunu yok. Baskı yok. Sadece bağlantı, iş birliği ve sohbet.",
     "invitedHint": "Davet edildiniz — aşağıyı acele etmeden okuyun, hazır olduğunuzda girin.",
     "invitedSignIn": "Zaten hesabınız var mı? Giriş yapın",
     "inviteQuestion": "Birisi sizi davet etti mi?",
@@ -92,7 +92,7 @@
     "signUpIntro": "Google ile hesap oluşturun veya e-posta ve şifre kullanın.",
     "inviteOnlyTitle": "Şimdilik yalnızca davetle",
     "inviteOnlyBody": "Yeni hesaplar davet bağlantısı gerektirir. Mevcut üyeler aşağıdan giriş yapabilir.",
-    "invitedBetaBody": "Clout yok, soğuk DM yok — sadece müzisyenler birbirini bulur ve kendi hızında iş birliği yapar.",
+    "invitedBetaBody": "Statü oyunu yok, soğuk DM yok — sadece müzisyenler birbirini bulur ve kendi hızında iş birliği yapar.",
     "agreeTerms": "{terms} ve {privacy} kabul ediyorum",
     "continueGoogle": "Google ile devam et",
     "redirecting": "Yönlendiriliyor…",
@@ -291,7 +291,7 @@
     "filterOpenTo": "Açık olduğu",
     "filterRole": "Rol",
     "filterGenre": "Tür",
-    "subtitle": "Musicians on Angel Island right now. Suggested order uses overlap with your profile — not popularity or clout.",
+    "subtitle": "Musicians on Angel Island right now. Suggested order uses overlap with your profile — not popularity or status games.",
     "fromProfile": "From your profile",
     "searchLabel": "Search this list",
     "searchPlaceholder": "Name, username, location, or keywords",

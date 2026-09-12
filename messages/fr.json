@@ -54,7 +54,7 @@
     "unreadConversationPlural": "{count} conversations non lues"
   },
   "landing": {
-    "tagline": "Un lieu pour les musiciens et les créatifs qui tiennent à la musique. Pas de clout. Pas de pression. Juste des connexions, des collaborations et des conversations.",
+    "tagline": "Un lieu pour les musiciens et les créatifs qui tiennent à la musique. Pas de jeu de statut. Pas de pression. Juste des connexions, des collaborations et des conversations.",
     "invitedHint": "Vous êtes invité·e — prenez le temps de lire ci-dessous, puis entrez quand vous êtes prêt·e.",
     "invitedSignIn": "Vous avez déjà un compte ? Connectez-vous",
     "inviteQuestion": "Quelqu'un vous a invité ?",
@@ -92,7 +92,7 @@
     "signUpIntro": "Créez un compte avec Google, ou utilisez e-mail et mot de passe.",
     "inviteOnlyTitle": "Sur invitation, pour l'instant",
     "inviteOnlyBody": "Les nouveaux comptes nécessitent un lien d'invitation. Les membres existants peuvent se connecter ci-dessous.",
-    "invitedBetaBody": "Pas de clout, pas de messages froids — juste des musiciens qui se trouvent et collaborent à leur rythme.",
+    "invitedBetaBody": "Pas de jeu de statut, pas de messages froids — juste des musiciens qui se trouvent et collaborent à leur rythme.",
     "agreeTerms": "J'accepte les {terms} et la {privacy}",
     "continueGoogle": "Continuer avec Google",
     "redirecting": "Redirection…",
@@ -291,7 +291,7 @@
     "filterOpenTo": "Ouvert à",
     "filterRole": "Rôle",
     "filterGenre": "Genre",
-    "subtitle": "Musicien·ne·s sur Angel Island en ce moment. L'ordre suggéré repose sur le chevauchement avec votre profil — pas la popularité ni le clout.",
+    "subtitle": "Musicien·ne·s sur Angel Island en ce moment. L'ordre suggéré repose sur le chevauchement avec votre profil — pas la popularité ni le jeu de statut.",
     "fromProfile": "Depuis votre profil",
     "searchLabel": "Rechercher dans cette liste",
     "searchPlaceholder": "Nom, nom d'utilisateur, localisation ou mots-clés",

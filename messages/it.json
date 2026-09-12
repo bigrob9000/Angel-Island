@@ -54,7 +54,7 @@
     "unreadConversationPlural": "{count} conversazioni non lette"
   },
   "landing": {
-    "tagline": "Un posto per musicisti e creativi a cui importa la musica. Niente clout. Niente pressione. Solo connessione, collaborazione e conversazione.",
+    "tagline": "Un posto per musicisti e creativi a cui importa la musica. Niente giochi di status. Niente pressione. Solo connessione, collaborazione e conversazione.",
     "invitedHint": "Sei invitato — prenditi il tempo di leggere qui sotto, poi entra quando sei pronto.",
     "invitedSignIn": "Hai già un account? Accedi",
     "inviteQuestion": "Qualcuno ti ha invitato?",
@@ -92,7 +92,7 @@
     "signUpIntro": "Crea un account con Google oppure usa email e password.",
     "inviteOnlyTitle": "Solo su invito, per ora",
     "inviteOnlyBody": "I nuovi account richiedono un link d'invito. I membri esistenti possono accedere qui sotto.",
-    "invitedBetaBody": "Niente clout, niente DM freddi — solo musicisti che si trovano e collaborano al proprio ritmo.",
+    "invitedBetaBody": "Niente giochi di status, niente DM freddi — solo musicisti che si trovano e collaborano al proprio ritmo.",
     "agreeTerms": "Accetto i {terms} e la {privacy}",
     "continueGoogle": "Continua con Google",
     "redirecting": "Reindirizzamento…",
@@ -291,7 +291,7 @@
     "filterOpenTo": "Aperto a",
     "filterRole": "Ruolo",
     "filterGenre": "Genere",
-    "subtitle": "Musicians on Angel Island right now. Suggested order uses overlap with your profile — not popularity or clout.",
+    "subtitle": "Musicians on Angel Island right now. Suggested order uses overlap with your profile — not popularity or status games.",
     "fromProfile": "From your profile",
     "searchLabel": "Search this list",
     "searchPlaceholder": "Name, username, location, or keywords",

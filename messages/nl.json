@@ -54,7 +54,7 @@
     "unreadConversationPlural": "{count} ongelezen gesprekken"
   },
   "landing": {
-    "tagline": "Een plek voor muzikanten en creatieven die om muziek geven. Geen clout. Geen druk. Alleen verbinding, samenwerking en gesprek.",
+    "tagline": "Een plek voor muzikanten en creatieven die om muziek geven. Geen statusspel. Geen druk. Alleen verbinding, samenwerking en gesprek.",
     "invitedHint": "Je bent uitgenodigd — neem de tijd om hieronder te lezen en stap binnen wanneer je er klaar voor bent.",
     "invitedSignIn": "Heb je al een account? Inloggen",
     "inviteQuestion": "Heeft iemand je uitgenodigd?",
@@ -92,7 +92,7 @@
     "signUpIntro": "Maak een account met Google, of gebruik e-mail en wachtwoord.",
     "inviteOnlyTitle": "Alleen op uitnodiging, voor nu",
     "inviteOnlyBody": "Nieuwe accounts hebben een uitnodigingslink nodig. Bestaande leden kunnen hieronder inloggen.",
-    "invitedBetaBody": "Geen clout, geen kille DM's — alleen muzikanten die elkaar vinden en in hun eigen tempo samenwerken.",
+    "invitedBetaBody": "Geen statusspel, geen kille DM's — alleen muzikanten die elkaar vinden en in hun eigen tempo samenwerken.",
     "agreeTerms": "Ik ga akkoord met de {terms} en het {privacy}",
     "continueGoogle": "Doorgaan met Google",
     "redirecting": "Doorverwijzen…",
@@ -291,7 +291,7 @@
     "filterOpenTo": "Open voor",
     "filterRole": "Rol",
     "filterGenre": "Genre",
-    "subtitle": "Musicians on Angel Island right now. Suggested order uses overlap with your profile — not popularity or clout.",
+    "subtitle": "Musicians on Angel Island right now. Suggested order uses overlap with your profile — not popularity or status games.",
     "fromProfile": "From your profile",
     "searchLabel": "Search this list",
     "searchPlaceholder": "Name, username, location, or keywords",

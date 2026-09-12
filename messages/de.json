@@ -54,7 +54,7 @@
     "unreadConversationPlural": "{count} ungelesene Unterhaltungen"
   },
   "landing": {
-    "tagline": "Ein Ort für Musiker und Kreative, denen Musik wichtig ist. Kein Clout. Kein Druck. Nur Verbindung, Zusammenarbeit und Gespräche.",
+    "tagline": "Ein Ort für Musiker und Kreative, denen Musik wichtig ist. Kein Statusspiel. Kein Druck. Nur Verbindung, Zusammenarbeit und Gespräche.",
     "invitedHint": "Du bist eingeladen — nimm dir Zeit, unten zu lesen, und tritt ein, wenn du bereit bist.",
     "invitedSignIn": "Du hast schon ein Konto? Anmelden",
     "inviteQuestion": "Hat dich jemand eingeladen?",
@@ -92,7 +92,7 @@
     "signUpIntro": "Erstelle ein Konto mit Google oder nutze E-Mail und Passwort.",
     "inviteOnlyTitle": "Vorerst nur auf Einladung",
     "inviteOnlyBody": "Neue Konten brauchen einen Einladungslink. Bestehende Mitglieder können sich unten anmelden.",
-    "invitedBetaBody": "Kein Clout, keine kalten DMs — nur Musiker, die einander finden und in ihrem eigenen Tempo zusammenarbeiten.",
+    "invitedBetaBody": "Kein Statusspiel, keine kalten DMs — nur Musiker, die einander finden und in ihrem eigenen Tempo zusammenarbeiten.",
     "agreeTerms": "Ich stimme den {terms} und der {privacy} zu",
     "continueGoogle": "Mit Google fortfahren",
     "redirecting": "Weiterleitung…",
@@ -291,7 +291,7 @@
     "filterOpenTo": "Offen für",
     "filterRole": "Rolle",
     "filterGenre": "Genre",
-    "subtitle": "Musiker auf Angel Island gerade jetzt. Die vorgeschlagene Reihenfolge nutzt Überschneidungen mit deinem Profil — nicht Popularität oder Clout.",
+    "subtitle": "Musiker auf Angel Island gerade jetzt. Die vorgeschlagene Reihenfolge nutzt Überschneidungen mit deinem Profil — nicht Popularität oder Statusspiel.",
     "fromProfile": "Aus deinem Profil",
     "searchLabel": "Diese Liste durchsuchen",
     "searchPlaceholder": "Name, Benutzername, Ort oder Stichwörter",

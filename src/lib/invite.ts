@@ -19,7 +19,7 @@ export function getInviteSignUpPath(): string {
   return INVITE_SIGN_UP_PATH;
 }
 
-export const INVITE_MESSAGE_TEMPLATE = `Hey — I'm trying out Angel Island, a calm space for musicians to find each other and collaborate (no clout, no pressure). Would you join me and tell me what you think?
+export const INVITE_MESSAGE_TEMPLATE = `Hey — I'm trying out Angel Island, a calm space for musicians to find each other and collaborate (no pressure, no performance). Would you join me and tell me what you think?
 
 `;
 

@@ -1,7 +1,7 @@
 export const SITE_NAME = "Angel Island";
 
 export const SITE_DESCRIPTION =
-  "A calm, consent-first platform for musicians to find each other, collaborate, and talk about music — without pressure, clout, or performance.";
+  "A calm, consent-first platform for musicians to find each other, collaborate, and talk about music — without pressure or performance.";
 
 export const SITE_TAGLINE = "A place for musicians and creatives";
 
