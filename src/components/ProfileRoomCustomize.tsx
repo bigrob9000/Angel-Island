@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { Profile } from "@/lib/types";
 import {
@@ -41,9 +41,16 @@ export function ProfileRoomCustomize({ userId, username, profile, onChange }: Pr
   const [mantra, setMantra] = useState(profile.profile_mantra ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mantraSaved, setMantraSaved] = useState(false);
 
   const activePreset = resolveProfileBackgroundPreset(profile.profile_background_preset);
   const hasCustom = Boolean(profile.profile_background_url?.trim());
+  const savedMantra = (profile.profile_mantra ?? "").trim();
+  const mantraDirty = mantra.trim() !== savedMantra;
+
+  useEffect(() => {
+    setMantra(profile.profile_mantra ?? "");
+  }, [profile.profile_mantra]);
 
   async function handlePreset(preset: ProfileBackgroundPreset) {
     setError(null);
@@ -60,11 +67,12 @@ export function ProfileRoomCustomize({ userId, username, profile, onChange }: Pr
     });
   }
 
-  async function handleMantraBlur() {
+  async function handleMantraSave() {
     const trimmed = mantra.trim();
-    if (trimmed === (profile.profile_mantra ?? "").trim()) return;
+    if (trimmed === savedMantra) return;
 
     setError(null);
+    setMantraSaved(false);
     setBusy(true);
     const { error: saveError } = await saveProfileRoomFields(userId, {
       profile_mantra: trimmed || null,
@@ -75,6 +83,7 @@ export function ProfileRoomCustomize({ userId, username, profile, onChange }: Pr
       return;
     }
     onChange({ profile_mantra: trimmed || null });
+    setMantraSaved(true);
   }
 
   async function handleFile(file: File) {
@@ -125,20 +134,46 @@ export function ProfileRoomCustomize({ userId, username, profile, onChange }: Pr
         </p>
       </div>
 
-      <label className="block space-y-2">
-        <span className="text-sm font-medium text-foreground">{t("mantraLabel")}</span>
+      <div className="space-y-2">
+        <label htmlFor="profile-mantra" className="block text-sm font-medium text-foreground">
+          {t("mantraLabel")}
+        </label>
         <input
+          id="profile-mantra"
           type="text"
           value={mantra}
           maxLength={120}
           disabled={busy}
-          onChange={(e) => setMantra(e.target.value)}
-          onBlur={() => void handleMantraBlur()}
+          onChange={(e) => {
+            setMantra(e.target.value);
+            setMantraSaved(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              void handleMantraSave();
+            }
+          }}
           placeholder={t("mantraPlaceholder")}
           className="block w-full rounded-md border border-foreground/20 bg-white px-3 py-2 text-foreground placeholder:text-muted focus:border-foreground/40 focus:outline-none"
         />
-        <span className="text-xs text-muted">{t("mantraHint")}</span>
-      </label>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <button
+            type="button"
+            disabled={busy || !mantraDirty}
+            onClick={() => void handleMantraSave()}
+            className="rounded-md border border-foreground/30 px-3 py-1.5 text-sm font-medium text-foreground hover:bg-foreground/5 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {busy ? t("working") : t("saveMantra")}
+          </button>
+          {mantraSaved && (
+            <span className="text-sm text-accent" role="status">
+              {t("mantraSaved")}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-muted">{t("mantraHint")}</p>
+      </div>
 
       <div className="space-y-3">
         <p className="text-sm font-medium text-foreground">{t("presetsLabel")}</p>
