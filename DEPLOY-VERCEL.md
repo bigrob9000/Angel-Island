@@ -10,11 +10,22 @@ Your Next.js app lives in this **`web`** folder. Vercel needs that as the projec
 
 ### 1. Supabase migrations
 
-Run migrations **001 → 028** in order in **Supabase Dashboard → SQL Editor**.
+Run migrations **001 → 044** in order in **Supabase Dashboard → SQL Editor**.
 
-Use **`supabase/RUN-PENDING-MIGRATIONS.md`** as the checklist — it lists every file, what it enables, and how to verify.
+Use **`supabase/RUN-PENDING-MIGRATIONS.md`** as the checklist — it lists every file, what it enables, and how to verify. Latest file: **`044_push_subscriptions_update.sql`**.
 
-If you're already live, only run migrations you haven't applied yet (check **Table Editor** / feature smoke tests).
+If you're already live, only run migrations you haven't applied yet — use the **Already run?** table in the checklist and feature smoke tests below.
+
+Notable later migrations:
+
+| Migration | Enables |
+|-----------|---------|
+| **024** | Public profile links (`/people/username`) |
+| **027–028** | Unread badges synced across devices |
+| **035** | Profile **Your room** (mantra + background upload) |
+| **037** | Collab alignment handshake before workspace opens |
+| **039–040** | Archive / delete ended collab workspaces |
+| **044** | Collab browser push toggle (upsert on push subscriptions) |
 
 ### 2. Environment variables
 
@@ -36,8 +47,11 @@ If you're already live, only run migrations you haven't applied yet (check **Tab
 | Variable | Purpose |
 |----------|---------|
 | `NEXT_PUBLIC_INVITE_ONLY` | Defaults to on — set `false` only when opening public sign-up |
-| Resend / email vars | `NOTIFICATIONS-SETUP.md` |
-| VAPID keys | `PUSH-SETUP.md` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side notifications, translations cache — `NOTIFICATIONS-SETUP.md` |
+| Resend / email vars | Email notifications — `NOTIFICATIONS-SETUP.md` |
+| VAPID keys | Browser push — `PUSH-SETUP.md` |
+| `DEEPL_AUTH_KEY` | Room post “See translation” — migration **034** |
+| `NEXT_PUBLIC_FEEDBACK_EMAIL` | Beta feedback mailto target (defaults to site feedback address) |
 
 Add vars in **Vercel → Project → Settings → Environment Variables**, then redeploy.
 
@@ -53,7 +67,7 @@ Pushes to **`main`** auto-deploy if the repo is connected.
 4. Add environment variables above
 5. Deploy
 
-Local push (if git config works on your machine):
+Local push:
 
 ```powershell
 cd "C:\Users\bigro\Projects\angel-island\web"
@@ -103,10 +117,12 @@ Google sign-in: **`supabase/GOOGLE-AUTH.md`** (publish OAuth consent screen for 
 2. Sign in (email + Google if configured)  
 3. Onboarding → Home  
 4. Explore → profile → invite to chat → accept → DM  
-5. Collab invite → **Interested** → workspace note  
+5. Collab invite → alignment → **Interested** → workspace note  
 6. End a chat → **Remove from list** → **Restore** from Messages  
-7. Unread badges clear on one device and stay cleared on another (migrations **027** + **028**)  
-8. Public profile link in incognito (`/people/username`) if migration **024** is applied  
+7. Unread badges clear on one device and stay cleared on another (**027** + **028**)  
+8. Public profile in incognito (`/people/username`) — mantra + background if **035** applied  
+9. Profile → **Your room** → save mantra, pick preset or upload background  
+10. Settings → browser push + email toggles; second account sends a message (**018**, **021**, **044** + VAPID)  
 
 ---
 
@@ -118,6 +134,8 @@ Google sign-in: **`supabase/GOOGLE-AUTH.md`** (publish OAuth consent screen for 
 | Sign-in works locally but not on Vercel | Update Supabase **Site URL** and **Redirect URLs** |
 | Feature says “run migration …” | Apply that SQL file from `supabase/migrations/` (see `RUN-PENDING-MIGRATIONS.md`) |
 | Google blocked for invitees | Publish OAuth app — `supabase/GOOGLE-AUTH.md` |
+| Collab push toggle fails | Run **018**, **021**, and **044** in Supabase |
+| Profile room save/upload fails | Run **035** in Supabase |
 | Old version after push | Check Vercel **Deployments** tab; confirm push reached `main` |
 | PWA shows old logo | Hard refresh or wait for service worker cache bump |
 
