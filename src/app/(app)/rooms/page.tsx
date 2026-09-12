@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { Room } from "@/lib/types";
-import { RoomCloudShape } from "@/components/RoomCloudShape";
+import { RoomCloudShape, ROOM_CLOUD_LABEL_OFFSETS } from "@/components/RoomCloudShape";
 import { orderRoomsWithListenFirst } from "@/lib/room-order";
 
 import type { TranslateFn } from "@/lib/i18n/labels";
@@ -129,6 +129,12 @@ export default function RoomsPage() {
               key={room.id}
               href={`/rooms/${room.slug}`}
               className={`room-cloud ${ROOM_POSITION_CLASSES[i]}`}
+              style={
+                {
+                  "--cloud-label-x": `${ROOM_CLOUD_LABEL_OFFSETS[i]?.x ?? 0}px`,
+                  "--cloud-label-y": `${ROOM_CLOUD_LABEL_OFFSETS[i]?.y ?? 0}px`,
+                } as React.CSSProperties
+              }
             >
               <RoomCloudShape variant={i} />
               <div className="room-cloud-label">

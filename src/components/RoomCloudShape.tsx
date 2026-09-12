@@ -57,6 +57,36 @@ const CLOUD_VARIANTS: Puff[][] = [
   ],
 ];
 
+export const ROOM_CLOUD_BOX = { width: 280, height: 168 } as const;
+
+function labelOffsetForPuffs(puffs: Puff[], boxW: number, boxH: number) {
+  const body = puffs.filter((puff) => puff.kind === "body");
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  for (const puff of body) {
+    minX = Math.min(minX, puff.left);
+    maxX = Math.max(maxX, puff.left + puff.w);
+    minY = Math.min(minY, puff.top);
+    maxY = Math.max(maxY, puff.top + puff.h);
+  }
+
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+
+  return {
+    x: Math.round(cx - boxW / 2),
+    y: Math.round(cy - boxH / 2),
+  };
+}
+
+/** Shift labels from box center to each cloud silhouette's visual center. */
+export const ROOM_CLOUD_LABEL_OFFSETS = CLOUD_VARIANTS.map((puffs) =>
+  labelOffsetForPuffs(puffs, ROOM_CLOUD_BOX.width, ROOM_CLOUD_BOX.height),
+);
+
 type Props = {
   variant: number;
 };

@@ -318,6 +318,13 @@ body {
     height: 158px;
   }
 
+  .room-cloud-label span {
+    transform: translate(
+      calc(var(--cloud-label-x, 0px) * 260 / 280),
+      calc(var(--cloud-label-y, 0px) * 158 / 168)
+    );
+  }
+
   /* Nudge left column only — Collaborate & Jam were slightly off-screen */
   .room-cloud-pos-0,
   .room-cloud-pos-2 {
@@ -399,6 +406,7 @@ body {
 }
 
 .room-cloud-label span {
+  transform: translate(var(--cloud-label-x, 0px), var(--cloud-label-y, 0px));
   max-width: 100%;
   font-family: var(--font-lora), Georgia, serif;
   font-size: 0.95rem;
