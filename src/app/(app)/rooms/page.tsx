@@ -30,6 +30,11 @@ const ROOM_POSITION_CLASSES = [
   "room-cloud-pos-4",
 ] as const;
 
+function roomCloudPositionClass(room: Room, index: number): string {
+  if (room.slug === "learn") return "room-cloud-pos-learn";
+  return ROOM_POSITION_CLASSES[index] ?? ROOM_POSITION_CLASSES[0];
+}
+
 export default function RoomsPage() {
   const t = useTranslations("rooms");
   const tc = useTranslations("common");
@@ -128,7 +133,7 @@ export default function RoomsPage() {
             <Link
               key={room.id}
               href={`/rooms/${room.slug}`}
-              className={`room-cloud ${ROOM_POSITION_CLASSES[i]}`}
+              className={`room-cloud ${roomCloudPositionClass(room, i)}`}
               style={
                 {
                   "--cloud-label-x": `${ROOM_CLOUD_LABEL_OFFSETS[i]?.x ?? 0}px`,

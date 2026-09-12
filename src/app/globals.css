@@ -296,6 +296,12 @@ body {
   top: 92%;
 }
 
+/* Learn — centered, lifted above the bottom edge */
+.room-cloud-pos-learn {
+  left: 50%;
+  top: 76%;
+}
+
 @media (max-width: 639px) {
   .rooms-web {
     /* Use full viewport width so clouds aren’t clipped by main padding */
@@ -331,9 +337,12 @@ body {
     left: 28%;
   }
 
-  /* Listen & Share — keep bottom cloud in view without scrolling */
   .room-cloud-pos-4 {
     top: 78%;
+  }
+
+  .room-cloud-pos-learn {
+    top: 64%;
   }
 }
 
