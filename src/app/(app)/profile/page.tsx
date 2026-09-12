@@ -96,6 +96,11 @@ export default function ProfilePage() {
       <ProfileListenShares shares={listenShares} isOwn showPrompt />
 
       <div className="flex flex-wrap gap-3 pb-8">
+        {profile.username?.trim() ? (
+          <Link href={`/people/${encodeURIComponent(profile.username.trim())}`} className="btn-secondary">
+            {t("room.viewPublicProfile")}
+          </Link>
+        ) : null}
         <Link href="/profile/edit" className="btn-secondary">
           Edit profile
         </Link>

@@ -106,14 +106,23 @@ export function ProfileRoomCustomize({ userId, username, profile, onChange }: Pr
       <div>
         <h2 className="section-heading">{t("title")}</h2>
         <p className="mt-1 text-sm text-muted leading-relaxed">{t("copy")}</p>
-        {username?.trim() && (
-          <Link
-            href={`/people/${username.trim()}`}
-            className="mt-2 inline-block text-sm text-foreground underline underline-offset-2 hover:no-underline"
-          >
-            {t("viewPublicProfile")}
-          </Link>
-        )}
+        <p className="mt-3">
+          {username?.trim() ? (
+            <Link
+              href={`/people/${encodeURIComponent(username.trim())}`}
+              className="text-sm text-foreground underline underline-offset-2 hover:no-underline"
+            >
+              {t("viewPublicProfile")}
+            </Link>
+          ) : (
+            <Link
+              href="/profile/edit?step=0"
+              className="text-sm text-muted underline underline-offset-2 hover:text-foreground hover:no-underline"
+            >
+              {t("viewPublicProfileNeedsUsername")}
+            </Link>
+          )}
+        </p>
       </div>
 
       <label className="block space-y-2">
