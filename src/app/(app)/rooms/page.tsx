@@ -30,9 +30,18 @@ const ROOM_POSITION_CLASSES = [
   "room-cloud-pos-4",
 ] as const;
 
+const ROOM_POSITION_BY_SLUG: Record<string, string> = {
+  introductions: "room-cloud-pos-introductions",
+  jam: "room-cloud-pos-jam",
+  learn: "room-cloud-pos-learn",
+};
+
 function roomCloudPositionClass(room: Room, index: number): string {
-  if (room.slug === "learn") return "room-cloud-pos-learn";
-  return ROOM_POSITION_CLASSES[index] ?? ROOM_POSITION_CLASSES[0];
+  return (
+    ROOM_POSITION_BY_SLUG[room.slug] ??
+    ROOM_POSITION_CLASSES[index] ??
+    ROOM_POSITION_CLASSES[0]
+  );
 }
 
 export default function RoomsPage() {

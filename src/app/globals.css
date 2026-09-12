@@ -291,6 +291,17 @@ body {
   top: 50%;
 }
 
+/* Introductions & Jam — middle row, nudged up slightly */
+.room-cloud-pos-introductions {
+  left: 20%;
+  top: 44%;
+}
+
+.room-cloud-pos-jam {
+  left: 80%;
+  top: 44%;
+}
+
 .room-cloud-pos-4 {
   left: 50%;
   top: 92%;
@@ -331,10 +342,16 @@ body {
     );
   }
 
-  /* Nudge left column only — Collaborate & Jam were slightly off-screen */
+  /* Nudge left column only — top-left clouds were slightly off-screen */
   .room-cloud-pos-0,
-  .room-cloud-pos-2 {
+  .room-cloud-pos-2,
+  .room-cloud-pos-introductions {
     left: 28%;
+  }
+
+  .room-cloud-pos-introductions,
+  .room-cloud-pos-jam {
+    top: 42%;
   }
 
   .room-cloud-pos-4 {
