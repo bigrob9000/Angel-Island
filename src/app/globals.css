@@ -386,21 +386,19 @@ body {
   z-index: 2;
 }
 
-/* Label wrapper: fills cloud so 50% = cloud center */
+/* Label wrapper: dead center of the cloud hit area */
 .room-cloud-label {
   position: absolute;
   inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
   z-index: 1;
   box-sizing: border-box;
 }
 
-/* Span: centered, then nudged up and left to align with cloud */
 .room-cloud-label span {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(calc(-50% - 12px), calc(-50% - 28px));
   max-width: 100%;
   font-family: var(--font-lora), Georgia, serif;
   font-size: 0.95rem;
