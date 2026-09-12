@@ -26,6 +26,10 @@
   --room-cloud: rgba(255, 254, 252, 0.95);
   --room-cloud-shadow: rgba(220, 225, 235, 0.2);
   --room-cloud-glow: rgba(255, 248, 240, 0.15);
+  --room-puff-highlight: #ffffff;
+  --room-puff-mid: #f3f7fc;
+  --room-puff-edge: #c8d4e4;
+  --room-puff-shadow: rgba(148, 162, 186, 0.55);
   --room-cloud-label: #2a2a2a;
   /* Logo badge — matches recolored asset mat + sage ring */
   --logo-mat: #ebe4da;
@@ -251,10 +255,10 @@ body {
   left: 0;
   top: 0;
   display: block;
-  width: 260px;
-  height: 160px;
-  margin-left: -130px;
-  margin-top: -80px;
+  width: 280px;
+  height: 168px;
+  margin-left: -140px;
+  margin-top: -84px;
   padding: 0;
   text-decoration: none;
   transition: transform 0.2s ease;
@@ -303,15 +307,15 @@ body {
   }
 
   .room-cloud {
-    width: 245px;
-    height: 152px;
-    margin-left: -122.5px;
-    margin-top: -76px;
+    width: 260px;
+    height: 158px;
+    margin-left: -130px;
+    margin-top: -79px;
   }
 
   .room-cloud-shape {
-    width: 245px;
-    height: 152px;
+    width: 260px;
+    height: 158px;
   }
 
   /* Nudge left column only — Collaborate & Jam were slightly off-screen */
@@ -326,27 +330,60 @@ body {
   }
 }
 
-/* Cloud shape: blob layer only */
+/* Cloud shape: layered puffs (shadow → body → highlight) */
 .room-cloud-shape {
   position: absolute;
   left: 0;
   top: 0;
-  width: 260px;
-  height: 160px;
+  width: 280px;
+  height: 168px;
   pointer-events: none;
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.06)) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.04));
+  filter: drop-shadow(0 6px 14px rgba(120, 135, 160, 0.16))
+    drop-shadow(0 2px 6px rgba(100, 115, 140, 0.1));
 }
 
 .room-cloud-blob {
   position: absolute;
   border-radius: 50%;
-  background: var(--room-cloud);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+}
+
+.room-cloud-blob--shadow {
+  background: radial-gradient(
+    ellipse 100% 80% at 50% 40%,
+    var(--room-puff-shadow) 0%,
+    rgba(148, 162, 186, 0.22) 55%,
+    transparent 100%
+  );
+  filter: blur(14px);
+  opacity: 0.85;
+  z-index: 0;
+}
+
+.room-cloud-blob--body {
+  background: radial-gradient(
+    ellipse 85% 75% at 38% 30%,
+    var(--room-puff-highlight) 0%,
+    var(--room-puff-mid) 38%,
+    var(--room-puff-edge) 100%
+  );
+  filter: blur(7px);
   box-shadow:
-    0 -2px 14px var(--room-cloud-glow),
-    0 2px 12px rgba(180, 185, 200, 0.35),
-    0 4px 20px rgba(160, 168, 190, 0.2);
-  filter: blur(5px);
+    inset 0 -8px 16px rgba(160, 175, 198, 0.12),
+    0 -1px 0 rgba(255, 255, 255, 0.7);
+  z-index: 1;
+}
+
+.room-cloud-blob--highlight {
+  background: radial-gradient(
+    ellipse 90% 80% at 45% 40%,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.35) 55%,
+    transparent 100%
+  );
+  filter: blur(3px);
+  opacity: 0.9;
+  z-index: 2;
 }
 
 /* Label wrapper: fills cloud so 50% = cloud center */
@@ -363,7 +400,7 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(calc(-50% - 18px), calc(-50% - 24px));
+  transform: translate(calc(-50% - 12px), calc(-50% - 28px));
   max-width: 100%;
   font-family: var(--font-lora), Georgia, serif;
   font-size: 0.95rem;
@@ -475,7 +512,11 @@ html.calm-mode .room-cloud-blob,
 html.calm-mode .btn-cloud-blob {
   filter: none;
   box-shadow: none;
-  border-color: rgba(0, 0, 0, 0.04);
+}
+
+html.calm-mode .room-cloud-blob--body {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: var(--room-cloud);
 }
 
 html.calm-mode .room-cloud-shape {

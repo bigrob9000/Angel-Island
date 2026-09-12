@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase";
 import type { Room } from "@/lib/types";
+import { RoomCloudShape } from "@/components/RoomCloudShape";
 import { orderRoomsWithListenFirst } from "@/lib/room-order";
 
 import type { TranslateFn } from "@/lib/i18n/labels";
@@ -129,12 +130,7 @@ export default function RoomsPage() {
               href={`/rooms/${room.slug}`}
               className={`room-cloud ${ROOM_POSITION_CLASSES[i]}`}
             >
-              <div className="room-cloud-shape" aria-hidden>
-                <div className="room-cloud-blob" style={{ width: 110, height: 70, top: 18, left: 32 }} />
-                <div className="room-cloud-blob" style={{ width: 88, height: 58, top: 30, left: 84 }} />
-                <div className="room-cloud-blob" style={{ width: 78, height: 54, top: 26, left: 110 }} />
-                <div className="room-cloud-blob" style={{ width: 65, height: 44, top: 44, left: 62 }} />
-              </div>
+              <RoomCloudShape variant={i} />
               <div className="room-cloud-label">
                 <span>{translateRoomName(room, t)}</span>
               </div>
