@@ -11,21 +11,11 @@ export type ProfileCompletenessItem = {
 
 export type ProfileCompletenessProfile = Pick<
   Profile,
-  | "first_name"
-  | "username"
-  | "avatar_url"
-  | "about"
-  | "genres_make"
-  | "roles"
-  | "here_for"
-  | "profile_mantra"
-  | "profile_background_preset"
-  | "profile_background_url"
->;
+  "first_name" | "username" | "avatar_url" | "about" | "genres_make" | "roles" | "here_for"
+> &
+  Partial<Pick<Profile, "profile_mantra" | "profile_background_preset" | "profile_background_url">>;
 
-function isProfileRoomPersonalized(
-  profile: Pick<Profile, "profile_mantra" | "profile_background_preset" | "profile_background_url">,
-): boolean {
+function isProfileRoomPersonalized(profile: ProfileCompletenessProfile): boolean {
   return Boolean(
     profile.profile_mantra?.trim() ||
       profile.profile_background_url?.trim() ||
