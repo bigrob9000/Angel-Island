@@ -31,14 +31,12 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
     return (
       <section className="surface p-5">
         <h2 className="section-heading">{t("nudgeBasics")}</h2>
-        <p className="mt-1 text-sm text-muted">
-          Add your name and username so you show up in Explore and people can find your profile.
-        </p>
+        <p className="mt-1 text-sm text-muted">{t("nudgeBasicsCopy")}</p>
         <Link
           href="/profile/edit?step=0"
           className="mt-3 inline-block text-sm text-foreground underline underline-offset-2 hover:no-underline"
         >
-          Add name and username
+          {t("nudgeBasicsLink")}
         </Link>
       </section>
     );
@@ -53,8 +51,8 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
           <h2 className="section-heading">{t("nudgeOptional")}</h2>
           <p className="mt-1 text-sm text-muted">
             {remaining === 1
-              ? "One optional detail left — only if you want to share it."
-              : `${remaining} optional details left — add what feels comfortable.`}
+              ? t("nudgeOptionalOneRemaining")
+              : t("nudgeOptionalManyRemaining", { remaining })}
           </p>
           <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-accent/15">
             <div
@@ -63,7 +61,10 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
             />
           </div>
           <p className="mt-2 text-xs text-muted">
-            {optional.completeCount} of {optional.items.length} done
+            {t("nudgeOptionalProgress", {
+              complete: optional.completeCount,
+              total: optional.items.length,
+            })}
           </p>
         </div>
         <button
@@ -71,7 +72,7 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
           onClick={dismiss}
           className="shrink-0 text-sm text-muted hover:text-foreground"
         >
-          Dismiss
+          {t("nudgeDismiss")}
         </button>
       </div>
       <ul className="mt-3 space-y-2">
@@ -90,7 +91,7 @@ export function ProfileCompletenessNudge({ profile, showBasicsWarning = true }: 
         href="/profile/edit"
         className="mt-4 inline-block text-sm text-muted hover:text-foreground"
       >
-        Edit full profile →
+        {t("nudgeEditFullProfile")}
       </Link>
     </section>
   );

@@ -150,17 +150,17 @@ export default function CollaborationsPage() {
             title={t("emptyActive")}
             description={t("emptyActiveDescription")}
           >
-            <Link href="/messages" className="btn-secondary">
-              {t("checkMessages")}
-            </Link>
             <Link href="/explore" className="btn-secondary">
               {t("explorePeople")}
+            </Link>
+            <Link href="/messages" className="btn-secondary">
+              {t("checkMessages")}
             </Link>
           </EmptyState>
         );
       }
 
-      return <EmptyState title={t("emptyOther")} />;
+      return <EmptyState title={t("emptyOther")} description={t("emptyOtherDescription")} />;
     }
 
     return (

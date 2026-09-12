@@ -139,7 +139,11 @@ export default function HomePage() {
     <div className="space-y-10">
       <SearchBar />
 
-      <p className="page-lead">{t("welcome", { name: welcomeName })}</p>
+      <p className="page-lead">
+        {showGettingStarted
+          ? t("welcomeFirst", { name: welcomeName })
+          : t("welcome", { name: welcomeName })}
+      </p>
 
       <GettingStartedGuide
         show={showGettingStarted}
@@ -274,8 +278,8 @@ export default function HomePage() {
             <Link href="/explore" className="btn-secondary">
               {t("explorePeople")}
             </Link>
-            <Link href="/collaborations" className="btn-secondary">
-              {t("viewCollabs")}
+            <Link href="/rooms" className="btn-secondary">
+              {t("visitRooms")}
             </Link>
           </EmptyState>
         ) : (

@@ -97,6 +97,7 @@ export default function ExplorePage() {
       <div>
         <h1 className="font-serif text-2xl font-medium text-foreground">{t("title")}</h1>
         <p className="mt-2 text-sm text-muted">{t("subtitle")}</p>
+        <p className="mt-1 text-sm text-muted">{t("inviteConsentLine")}</p>
       </div>
 
       {viewerProfile && quickFilters.length > 0 && !hasActiveDiscoveryFilters(filters) && (
@@ -163,6 +164,18 @@ export default function ExplorePage() {
 
       {loading ? (
         <p className="text-muted">{tc("loading")}</p>
+      ) : viewerProfile && !isDiscoverableProfile(viewerProfile) ? (
+        <EmptyState
+          title={t("emptyNotDiscoverable")}
+          description={t("emptyNotDiscoverableDescription")}
+        >
+          <Link
+            href="/profile/edit?step=0"
+            className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+          >
+            {t("editProfile")}
+          </Link>
+        </EmptyState>
       ) : shown.length === 0 ? (
         <EmptyState
           title={profiles.length === 0 ? t("emptyAlone") : t("emptyNoMatch")}
@@ -175,12 +188,20 @@ export default function ExplorePage() {
           }
         >
           {profiles.length === 0 ? (
-            <Link
-              href="/rooms/introductions"
-              className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
-            >
-              {t("visitIntroductions")}
-            </Link>
+            <>
+              <Link
+                href="/rooms/introductions"
+                className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+              >
+                {t("visitIntroductions")}
+              </Link>
+              <Link
+                href="/rooms"
+                className="rounded-md border border-foreground/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-foreground/5"
+              >
+                {t("exploreRooms")}
+              </Link>
+            </>
           ) : (
             <button
               type="button"

@@ -331,7 +331,7 @@ export default function MessagesPage() {
         <p className="section-copy">{t("subtitle")}</p>
       </div>
 
-      {isEmptyInbox && (
+      {isEmptyInbox ? (
         <EmptyState
           title={t("empty")}
           description={t("emptyDescription")}
@@ -343,8 +343,8 @@ export default function MessagesPage() {
             {t("visitRoom")}
           </Link>
         </EmptyState>
-      )}
-
+      ) : (
+        <>
       <section>
         <h2 className="section-heading">{t("receivedInvites")}</h2>
         <p className="section-copy">{t("receivedInvitesCopy")}</p>
@@ -562,6 +562,8 @@ export default function MessagesPage() {
           </ul>
         )}
       </section>
+        </>
+      )}
 
       {archivedConversations.length > 0 && (
         <section>
