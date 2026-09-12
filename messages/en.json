@@ -670,6 +670,7 @@
     "room": {
       "title": "Your room",
       "copy": "Make this space yours — your background fills the whole page, with a line that feels like home.",
+      "viewPublicProfile": "See how others see your profile →",
       "mantraLabel": "Mantra or tagline",
       "mantraPlaceholder": "A line, lyric, or intention…",
       "mantraHint": "Optional — up to 120 characters.",
@@ -687,6 +688,11 @@
         "warm": "Warm sand",
         "lavender": "Lavender",
         "night": "Night"
+      },
+      "errors": {
+        "fileType": "Use a JPG, PNG, or WebP image.",
+        "fileSize": "Image must be 3 MB or smaller.",
+        "migration": "Profile room isn't set up yet. Run migration 035_profile_room.sql in Supabase (see supabase/RUN-PENDING-MIGRATIONS.md)."
       }
     }
   },

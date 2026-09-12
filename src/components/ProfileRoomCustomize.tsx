@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { Profile } from "@/lib/types";
 import {
   PROFILE_BACKGROUND_PRESETS,
   type ProfileBackgroundPreset,
+  applyProfileBackgroundPreset,
   removeProfileBackground,
   resolveProfileBackgroundPreset,
   saveProfileRoomFields,
@@ -14,6 +16,7 @@ import {
 
 type Props = {
   userId: string;
+  username?: string | null;
   profile: Pick<
     Profile,
     "profile_mantra" | "profile_background_preset" | "profile_background_url"
@@ -25,7 +28,14 @@ type Props = {
   ) => void;
 };
 
-export function ProfileRoomCustomize({ userId, profile, onChange }: Props) {
+function localizeRoomError(code: string, t: ReturnType<typeof useTranslations<"profile.room">>): string {
+  if (code === "fileType") return t("errors.fileType");
+  if (code === "fileSize") return t("errors.fileSize");
+  if (code === "migration") return t("errors.migration");
+  return code;
+}
+
+export function ProfileRoomCustomize({ userId, username, profile, onChange }: Props) {
   const t = useTranslations("profile.room");
   const inputRef = useRef<HTMLInputElement>(null);
   const [mantra, setMantra] = useState(profile.profile_mantra ?? "");
@@ -38,15 +48,16 @@ export function ProfileRoomCustomize({ userId, profile, onChange }: Props) {
   async function handlePreset(preset: ProfileBackgroundPreset) {
     setError(null);
     setBusy(true);
-    const { error: saveError } = await saveProfileRoomFields(userId, {
-      profile_background_preset: preset,
-    });
+    const { error: saveError } = await applyProfileBackgroundPreset(userId, preset, hasCustom);
     setBusy(false);
     if (saveError) {
-      setError(saveError);
+      setError(localizeRoomError(saveError, t));
       return;
     }
-    onChange({ profile_background_preset: preset });
+    onChange({
+      profile_background_preset: preset,
+      ...(hasCustom ? { profile_background_url: null } : {}),
+    });
   }
 
   async function handleMantraBlur() {
@@ -60,7 +71,7 @@ export function ProfileRoomCustomize({ userId, profile, onChange }: Props) {
     });
     setBusy(false);
     if (saveError) {
-      setError(saveError);
+      setError(localizeRoomError(saveError, t));
       return;
     }
     onChange({ profile_mantra: trimmed || null });
@@ -72,7 +83,7 @@ export function ProfileRoomCustomize({ userId, profile, onChange }: Props) {
     const { backgroundUrl, error: uploadError } = await uploadProfileBackground(userId, file);
     setBusy(false);
     if (uploadError) {
-      setError(uploadError);
+      setError(localizeRoomError(uploadError, t));
       return;
     }
     onChange({ profile_background_url: backgroundUrl });
@@ -84,17 +95,25 @@ export function ProfileRoomCustomize({ userId, profile, onChange }: Props) {
     const { error: removeError } = await removeProfileBackground(userId);
     setBusy(false);
     if (removeError) {
-      setError(removeError);
+      setError(localizeRoomError(removeError, t));
       return;
     }
     onChange({ profile_background_url: null });
   }
 
   return (
-    <section className="surface p-5 space-y-5">
+    <section id="your-room" className="surface p-5 space-y-5 scroll-mt-6">
       <div>
         <h2 className="section-heading">{t("title")}</h2>
         <p className="mt-1 text-sm text-muted leading-relaxed">{t("copy")}</p>
+        {username?.trim() && (
+          <Link
+            href={`/people/${username.trim()}`}
+            className="mt-2 inline-block text-sm text-foreground underline underline-offset-2 hover:no-underline"
+          >
+            {t("viewPublicProfile")}
+          </Link>
+        )}
       </div>
 
       <label className="block space-y-2">

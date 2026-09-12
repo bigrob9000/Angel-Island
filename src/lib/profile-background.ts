@@ -27,12 +27,23 @@ export function resolveProfileBackgroundPreset(value: string | null | undefined)
 
 export function validateProfileBackgroundFile(file: File): string | null {
   if (!ALLOWED_TYPES.has(file.type)) {
-    return "Use a JPG, PNG, or WebP image.";
+    return "fileType";
   }
   if (file.size > MAX_BYTES) {
-    return "Image must be 3 MB or smaller.";
+    return "fileSize";
   }
   return null;
+}
+
+export function formatProfileRoomError(message: string): string {
+  if (
+    message.includes("profile_mantra") ||
+    message.includes("profile_background") ||
+    message.includes("profile-backgrounds")
+  ) {
+    return "migration";
+  }
+  return message;
 }
 
 function backgroundObjectPath(userId: string, ext: string): string {
@@ -61,7 +72,7 @@ export async function uploadProfileBackground(
     .upload(path, file, { upsert: true, contentType: file.type });
 
   if (uploadError) {
-    return { backgroundUrl: null, error: uploadError.message };
+    return { backgroundUrl: null, error: formatProfileRoomError(uploadError.message) };
   }
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
@@ -76,7 +87,7 @@ export async function uploadProfileBackground(
     .eq("id", userId);
 
   if (profileError) {
-    return { backgroundUrl: null, error: profileError.message };
+    return { backgroundUrl: null, error: formatProfileRoomError(profileError.message) };
   }
 
   return { backgroundUrl, error: null };
@@ -97,7 +108,20 @@ export async function removeProfileBackground(userId: string): Promise<{ error: 
     })
     .eq("id", userId);
 
-  return { error: error?.message ?? null };
+  return { error: error ? formatProfileRoomError(error.message) : null };
+}
+
+export async function applyProfileBackgroundPreset(
+  userId: string,
+  preset: ProfileBackgroundPreset,
+  hasCustom: boolean,
+): Promise<{ error: string | null }> {
+  if (hasCustom) {
+    const { error: removeError } = await removeProfileBackground(userId);
+    if (removeError) return { error: removeError };
+  }
+
+  return saveProfileRoomFields(userId, { profile_background_preset: preset });
 }
 
 export async function saveProfileRoomFields(
@@ -122,5 +146,5 @@ export async function saveProfileRoomFields(
   }
 
   const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
-  return { error: error?.message ?? null };
+  return { error: error ? formatProfileRoomError(error.message) : null };
 }

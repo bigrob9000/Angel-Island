@@ -11,8 +11,27 @@ export type ProfileCompletenessItem = {
 
 export type ProfileCompletenessProfile = Pick<
   Profile,
-  "first_name" | "username" | "avatar_url" | "about" | "genres_make" | "roles" | "here_for"
+  | "first_name"
+  | "username"
+  | "avatar_url"
+  | "about"
+  | "genres_make"
+  | "roles"
+  | "here_for"
+  | "profile_mantra"
+  | "profile_background_preset"
+  | "profile_background_url"
 >;
+
+function isProfileRoomPersonalized(
+  profile: Pick<Profile, "profile_mantra" | "profile_background_preset" | "profile_background_url">,
+): boolean {
+  return Boolean(
+    profile.profile_mantra?.trim() ||
+      profile.profile_background_url?.trim() ||
+      profile.profile_background_preset,
+  );
+}
 
 export function isDiscoverableProfileComplete(
   profile: Pick<Profile, "first_name" | "username">,
@@ -68,6 +87,13 @@ export function getProfileCompleteness(profile: ProfileCompletenessProfile): {
       shortLabel: "Genres you make",
       href: "/profile/edit?step=5",
       done: profile.genres_make.length > 0,
+    },
+    {
+      id: "room",
+      label: "Personalize your room",
+      shortLabel: "Your room",
+      href: "/profile#your-room",
+      done: isProfileRoomPersonalized(profile),
     },
   ];
 

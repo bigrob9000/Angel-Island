@@ -35,7 +35,11 @@ export function ProfileRoomShell({ profile, children }: Props) {
         <div className="profile-room-scrim profile-room-page-scrim" />
       </div>
       <div className="profile-room-content space-y-8">
-        {mantra && <p className="profile-room-mantra">&ldquo;{mantra}&rdquo;</p>}
+        {mantra && (
+          <p className={`profile-room-mantra${isNight ? " profile-room-mantra-night" : ""}`}>
+            &ldquo;{mantra}&rdquo;
+          </p>
+        )}
         {children}
       </div>
     </>

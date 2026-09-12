@@ -80,19 +80,20 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {userId && (
+        <ProfileRoomCustomize
+          userId={userId}
+          username={profile.username}
+          profile={profile}
+          onChange={(patch) => setProfile((prev) => (prev ? { ...prev, ...patch } : prev))}
+        />
+      )}
+
       <div className="surface p-5">
         <ProfileDisplay profile={profile} />
       </div>
 
       <ProfileListenShares shares={listenShares} isOwn showPrompt />
-
-      {userId && (
-        <ProfileRoomCustomize
-          userId={userId}
-          profile={profile}
-          onChange={(patch) => setProfile((prev) => (prev ? { ...prev, ...patch } : prev))}
-        />
-      )}
 
       <div className="flex flex-wrap gap-3 pb-8">
         <Link href="/profile/edit" className="btn-secondary">

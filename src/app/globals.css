@@ -937,6 +937,11 @@ html.profile-room-active .bg-ethereal {
   padding: 0 0.5rem;
 }
 
+.profile-room-mantra-night {
+  color: #f5f0e8;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
 .profile-room-preset-btn {
   position: relative;
   display: block;
